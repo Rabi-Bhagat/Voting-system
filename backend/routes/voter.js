@@ -43,14 +43,14 @@ router.put("/:voter_id", async (req, res) => {
   }
 });
 
-// Get candidates for voter's constituency (ballot)
+// Get all candidates (ballot)
 router.get("/ballot/:voterId", async (req, res) => {
     try {
         const voter = await Voter.findOne({ voter_id: req.params.voterId });
         if (!voter) return res.status(404).json({ error: "Voter not found." });
 
         const candidates = await Candidate.aggregate([
-          { $match: { constituency: voter.constituency } },
+          { $match: { candidate_id: { $ne: "NOTA" } } }, // Exclude NOTA from initial list
           {
             $lookup: {
               from: "parties",
@@ -92,14 +92,12 @@ router.post("/vote", async (req, res) => {
     if (candidate_id !== "NOTA") {
       const candidate = await Candidate.findOne({ candidate_id });
       if (!candidate) return res.status(404).json({ error: "Candidate not found." });
-      if (candidate.constituency !== voter.constituency) {
-        return res.status(400).json({ error: "Invalid constituency." });
-      }
 
       candidate.votes = (candidate.votes || 0) + 1;
       await candidate.save();
     } else {
-      const notaEntry = await Candidate.findOne({ candidate_id: "NOTA", constituency: voter.constituency });
+      // Handle NOTA vote
+      const notaEntry = await Candidate.findOne({ candidate_id: "NOTA" });
       if (notaEntry) {
         notaEntry.votes = (notaEntry.votes || 0) + 1;
         await notaEntry.save();
@@ -107,7 +105,6 @@ router.post("/vote", async (req, res) => {
         await Candidate.create({
           candidate_id: "NOTA",
           name: "None of the Above",
-          constituency: voter.constituency,
           votes: 1,
           party_id: null
         });

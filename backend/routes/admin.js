@@ -214,7 +214,7 @@ router.get("/election-status", async (req, res) => {
 router.post("/add-voter", async (req, res) => {
   const { voter_id, first_name, last_name, password, address, phone, constituency } = req.body;
 
-  if (!voter_id || !first_name || !last_name || !password || !constituency) {
+  if (!voter_id || !first_name || !last_name || !password) {
     return res.status(400).json({ error: "Required fields missing" });
   }
 
@@ -232,7 +232,7 @@ router.post("/add-voter", async (req, res) => {
       password,
       address,
       phone,
-      constituency,
+      constituency: constituency || null,
     });
 
     await newVoter.save();
@@ -248,27 +248,22 @@ router.post("/add-voter", async (req, res) => {
 router.post("/add-candidate", async (req, res) => {
   const { candidate_id, name, party_id, constituency } = req.body;
 
-  if (!candidate_id || !name || !party_id || !constituency) {
-    return res.status(400).json({ error: "All fields are required" });
+  if (!candidate_id || !name || !party_id) {
+    return res.status(400).json({ error: "Candidate ID, name, and party ID are required" });
   }
 
   try {
-    const existing = await Candidate.findOne({
-      candidate_id,
-      name,
-      party_id,
-      constituency,
-    });
+    const existing = await Candidate.findOne({ candidate_id });
 
     if (existing) {
-      return res.status(409).json({ error: "Candidate with same details already exists" });
+      return res.status(409).json({ error: "Candidate ID already exists" });
     }
 
     const newCandidate = new Candidate({
       candidate_id,
       name,
       party_id,
-      constituency,
+      constituency: constituency || null,
       votes: 0
     });
 

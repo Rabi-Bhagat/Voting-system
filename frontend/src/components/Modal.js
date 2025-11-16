@@ -34,8 +34,8 @@ function Modal({ type, onClose, onSubmit, onChange, formData, loading, modalErro
   }, [type]);
 
   const requiredFields = {
-    voter: ["voter_id", "first_name", "last_name", "password", "constituency"],
-    candidate: ["candidate_id", "name", "party_id", "constituency"],
+    voter: ["voter_id", "first_name", "last_name", "password"],
+    candidate: ["candidate_id", "name", "party_id"],
     party: ["party_id", "name", "password"],
     constituency: ["constituency_id", "name", "password"]
   };

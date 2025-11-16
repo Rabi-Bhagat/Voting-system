@@ -24,17 +24,7 @@ const VoterSchema = new mongoose.Schema({
   password: String,
   address: String,
   phone: String,
-  constituency: {
-    type: String,
-    required: true,
-    validate: {
-      validator: async function (value) {
-        const exists = await Constituency.exists({ constituency_id: value });
-        return exists !== null;
-      },
-      message: "Constituency ID does not exist."
-    }
-  },
+  constituency: String, // Optional, no validation
   has_voted: { type: Boolean, default: false },
   voted_candidate_id: { type: String, default: null },
 });

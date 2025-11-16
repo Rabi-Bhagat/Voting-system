@@ -19,17 +19,7 @@ const CandidateSchema = new mongoose.Schema({
       message: "Party ID does not exist."
     }
   },
-  constituency: {
-    type: String,
-    required: true,
-    validate: {
-      validator: async function (value) {
-        const exists = await Constituency.exists({ constituency_id: value });
-        return exists !== null;
-      },
-      message: "Constituency ID does not exist."
-    }
-  },
+  constituency: String, // Optional, no validation
   votes: {
     type: Number,
     default: 0
