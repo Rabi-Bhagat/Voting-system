@@ -1,41 +1,25 @@
 // src/components/Modal.js
 import React, { useState, useEffect } from "react";
-import axios from "axios";
 import "../styles/modal.css";
 
-const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000";
-
 function Modal({ type, onClose, onSubmit, onChange, formData, loading, modalError }) {
-  const [constituencies, setConstituencies] = useState([]);
   const [parties, setParties] = useState([]);
 
   useEffect(() => {
-    // Fetch constituencies for voter and candidate forms
-    if (type === "voter" || type === "candidate") {
-      axios.get(`${API_BASE}/constituency`)
-        .then(res => setConstituencies(res.data))
-        .catch(err => console.error("Error fetching constituencies:", err));
-    }
-
     // Fetch parties for candidate form
     if (type === "candidate") {
-      axios.get(`${API_BASE}/test-voters`)
-        .then(res => {
-          // Extract parties from the response or fetch from a parties endpoint
-          // For now, we'll use hardcoded parties
-          setParties([
-            { party_id: "P001", name: "Democratic Party" },
-            { party_id: "P002", name: "Republican Front" },
-            { party_id: "P003", name: "Green Alliance" }
-          ]);
-        })
-        .catch(err => console.error("Error fetching parties:", err));
+      // Hardcoded parties for now
+      setParties([
+        { party_id: "P001", name: "Democratic Party" },
+        { party_id: "P002", name: "Republican Front" },
+        { party_id: "P003", name: "Green Alliance" }
+      ]);
     }
   }, [type]);
 
   const requiredFields = {
     voter: ["voter_id", "first_name", "last_name", "password"],
-    candidate: ["candidate_id", "name", "party_id"],
+    candidate: ["candidate_id", "name", "password", "party_id", "age", "education", "experience", "background"],
     party: ["party_id", "name", "password"],
     constituency: ["constituency_id", "name", "password"]
   };
@@ -43,28 +27,6 @@ function Modal({ type, onClose, onSubmit, onChange, formData, loading, modalErro
   const fields = requiredFields[type] || [];
 
   const renderField = (field) => {
-    // Render dropdown for constituency
-    if (field === "constituency" && (type === "voter" || type === "candidate")) {
-      return (
-        <select
-          key={field}
-          name={field}
-          value={formData[field] || ""}
-          onChange={onChange}
-          className="modal-input"
-          disabled={loading}
-          required
-        >
-          <option value="">Select Constituency</option>
-          {constituencies.map(constituency => (
-            <option key={constituency.constituency_id} value={constituency.constituency_id}>
-              {constituency.name} ({constituency.constituency_id})
-            </option>
-          ))}
-        </select>
-      );
-    }
-
     // Render dropdown for party
     if (field === "party_id" && type === "candidate") {
       return (
@@ -87,6 +49,40 @@ function Modal({ type, onClose, onSubmit, onChange, formData, loading, modalErro
       );
     }
 
+    // Render textarea for background field
+    if (field === "background" || field === "education" || field === "experience") {
+      return (
+        <textarea
+          key={field}
+          name={field}
+          placeholder={field.replace(/_/g, " ").toUpperCase()}
+          value={formData[field] || ""}
+          onChange={onChange}
+          className="modal-input"
+          disabled={loading}
+          rows="3"
+        />
+      );
+    }
+
+    // Render number input for age
+    if (field === "age") {
+      return (
+        <input
+          key={field}
+          type="number"
+          name={field}
+          placeholder="Age"
+          value={formData[field] || ""}
+          onChange={onChange}
+          className="modal-input"
+          disabled={loading}
+          min="18"
+          max="100"
+        />
+      );
+    }
+
     // Render regular input for other fields
     return (
       <input
@@ -98,7 +94,7 @@ function Modal({ type, onClose, onSubmit, onChange, formData, loading, modalErro
         onChange={onChange}
         className="modal-input"
         disabled={loading}
-        required
+        required={!["age", "education", "experience", "background"].includes(field)}
       />
     );
   };

@@ -4,10 +4,10 @@ const mongoose = require("mongoose");
 
 router.post("/login", async (req, res) => {
   try {
-    const { voter_id, first_name, last_name, party_id, constituency_id, password, role } = req.body || {};
+    const { voter_id, first_name, last_name, party_id, constituency_id, candidate_id, password, role } = req.body || {};
     const resolvedRole = (role || "voter").toString().toLowerCase();
 
-    console.log("DEBUG /auth/login body:", { voter_id, party_id, constituency_id, role: resolvedRole });
+    console.log("DEBUG /auth/login body:", { voter_id, party_id, constituency_id, candidate_id, role: resolvedRole });
 
     if (!password) {
       return res.status(400).json({ error: "Password required" });
@@ -27,18 +27,18 @@ router.post("/login", async (req, res) => {
         last_name: last_name
       });
       redirect = "/voter_dashboard";
+    } else if (resolvedRole === "candidate") {
+      if (!candidate_id) {
+        return res.status(400).json({ error: "Candidate ID required" });
+      }
+      user = await db.collection("candidates").findOne({ candidate_id: candidate_id });
+      redirect = "/candidate_dashboard";
     } else if (resolvedRole === "party") {
       if (!party_id) {
         return res.status(400).json({ error: "Party ID required" });
       }
       user = await db.collection("parties").findOne({ party_id: party_id });
       redirect = "/party";
-    } else if (resolvedRole === "constituency" || resolvedRole === "const") {
-      if (!constituency_id) {
-        return res.status(400).json({ error: "Constituency ID required" });
-      }
-      user = await db.collection("constituencies").findOne({ constituency_id: constituency_id });
-      redirect = "/constituency_admin";
     } else if (resolvedRole === "admin") {
       // Simple admin check - password is "admin123"
       if (password === "admin123") {
@@ -69,8 +69,8 @@ router.post("/login", async (req, res) => {
     delete safeUser.password;
 
     const responseKey = resolvedRole === "voter" ? "voter" : 
-                       resolvedRole === "party" ? "party" : 
-                       "constituency";
+                       resolvedRole === "candidate" ? "candidate" :
+                       "party";
 
     return res.json({ 
       success: true, 

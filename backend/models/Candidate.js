@@ -5,6 +5,7 @@ const Constituency = require("./Constituency");
 const CandidateSchema = new mongoose.Schema({
   candidate_id: { type: String, required: true, unique: true },
   name: String,
+  password: String, // For candidate login
   party_id: {
     type: String,
     required: function () {
@@ -20,6 +21,11 @@ const CandidateSchema = new mongoose.Schema({
     }
   },
   constituency: String, // Optional, no validation
+  background: { type: String, default: "" }, // Candidate background/bio
+  education: { type: String, default: "" },
+  experience: { type: String, default: "" },
+  age: { type: Number, default: null },
+  approved: { type: Boolean, default: false }, // Admin approval
   votes: {
     type: Number,
     default: 0

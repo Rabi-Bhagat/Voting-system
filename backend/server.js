@@ -23,16 +23,18 @@ app.use(express.json());
 const voterRoutes = require("./routes/voter");
 const authRoutes = require("./routes/auth");
 const partyRoutes = require("./routes/party");
-const constituencyRoutes = require("./routes/constituency");
+
 const candidateRoutes = require("./routes/candidateRoutes");
+const candidateProfileRoutes = require("./routes/candidate");
 const adminRoutes = require("./routes/admin");
 
 // Mount routes
 app.use("/voter", voterRoutes);
 app.use("/auth", authRoutes);
 app.use("/party", partyRoutes);
-app.use("/constituency", constituencyRoutes);
+
 app.use("/candidates", candidateRoutes);
+app.use("/candidate", candidateProfileRoutes);
 app.use("/admin", adminRoutes);
 
 // Root auth route (your repo used this previously)

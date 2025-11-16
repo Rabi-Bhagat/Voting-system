@@ -22,14 +22,15 @@ function Login() {
       setError("Please fill all required fields");
       return;
     }
+    if (role === "candidate" && (!formData.candidate_id || !formData.password)) {
+      setError("Please fill all required fields");
+      return;
+    }
     if (role === "party" && (!formData.party_id || !formData.password)) {
       setError("Please fill all required fields");
       return;
     }
-    if (role === "constituency" && (!formData.constituency_id || !formData.password)) {
-      setError("Please fill all required fields");
-      return;
-    }
+
     if (role === "admin" && !formData.password) {
       setError("Please enter admin password");
       return;
@@ -41,10 +42,10 @@ function Login() {
       if (res.data.success) {
         if (role === "voter" && res.data.voter) {
           localStorage.setItem("voterInfo", JSON.stringify(res.data.voter));
+        } else if (role === "candidate" && res.data.candidate) {
+          localStorage.setItem("candidateInfo", JSON.stringify(res.data.candidate));
         } else if (role === "party" && res.data.party) {
           localStorage.setItem("partyInfo", JSON.stringify(res.data.party));
-        } else if (role === "constituency" && res.data.constituency) {
-          localStorage.setItem("constituencyInfo", JSON.stringify(res.data.constituency));
         } else if (role === "admin" && res.data.admin) {
           localStorage.setItem("adminInfo", JSON.stringify(res.data.admin));
         }
@@ -66,7 +67,7 @@ function Login() {
         {role !== "admin" && (
           <div className="role-container">
             <ul className="nav nav-pills mb-3">
-              {["voter", "party", "constituency"].map(r => (
+              {["voter", "candidate", "party"].map(r => (
                 <li className="nav-item" key={r}>
                   <button
                     className={`nav-link ${role === r ? "active" : ""}`}
@@ -118,6 +119,19 @@ function Login() {
               </>
             )}
 
+            {role === "candidate" && (
+              <>
+                <label className="input-label">Candidate ID</label>
+                <input 
+                  name="candidate_id" 
+                  placeholder="Enter Candidate ID" 
+                  required 
+                  onChange={handleChange}
+                  value={formData.candidate_id || ""}
+                />
+              </>
+            )}
+
             {role === "party" && (
               <>
                 <label className="input-label">Party ID</label>
@@ -131,18 +145,7 @@ function Login() {
               </>
             )}
 
-            {role === "constituency" && (
-              <>
-                <label className="input-label">Constituency ID</label>
-                <input 
-                  name="constituency_id" 
-                  placeholder="Enter Constituency ID" 
-                  required 
-                  onChange={handleChange}
-                  value={formData.constituency_id || ""}
-                />
-              </>
-            )}
+
 
             {role === "admin" && (
               <>

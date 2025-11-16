@@ -246,10 +246,10 @@ router.post("/add-voter", async (req, res) => {
 
 
 router.post("/add-candidate", async (req, res) => {
-  const { candidate_id, name, party_id, constituency } = req.body;
+  const { candidate_id, name, password, party_id, constituency, background, education, experience, age } = req.body;
 
-  if (!candidate_id || !name || !party_id) {
-    return res.status(400).json({ error: "Candidate ID, name, and party ID are required" });
+  if (!candidate_id || !name || !party_id || !password) {
+    return res.status(400).json({ error: "Candidate ID, name, party ID, and password are required" });
   }
 
   try {
@@ -262,17 +262,84 @@ router.post("/add-candidate", async (req, res) => {
     const newCandidate = new Candidate({
       candidate_id,
       name,
+      password,
       party_id,
       constituency: constituency || null,
+      background: background || "",
+      education: education || "",
+      experience: experience || "",
+      age: age || null,
+      approved: false, // Needs admin approval
       votes: 0
     });
 
     await newCandidate.save();
 
-    res.status(201).json({ success: true, message: "Candidate added successfully" });
+    res.status(201).json({ success: true, message: "Candidate added successfully. Awaiting approval." });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: err.message || "Failed to add candidate" });
+  }
+});
+
+// Approve candidate
+router.post("/approve-candidate", async (req, res) => {
+  const { candidate_id } = req.body;
+
+  if (!candidate_id) {
+    return res.status(400).json({ error: "Candidate ID required" });
+  }
+
+  try {
+    const candidate = await Candidate.findOne({ candidate_id });
+
+    if (!candidate) {
+      return res.status(404).json({ error: "Candidate not found" });
+    }
+
+    candidate.approved = true;
+    await candidate.save();
+
+    res.json({ success: true, message: "Candidate approved successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to approve candidate" });
+  }
+});
+
+// Reject/Remove candidate approval
+router.post("/reject-candidate", async (req, res) => {
+  const { candidate_id } = req.body;
+
+  if (!candidate_id) {
+    return res.status(400).json({ error: "Candidate ID required" });
+  }
+
+  try {
+    const candidate = await Candidate.findOne({ candidate_id });
+
+    if (!candidate) {
+      return res.status(404).json({ error: "Candidate not found" });
+    }
+
+    candidate.approved = false;
+    await candidate.save();
+
+    res.json({ success: true, message: "Candidate approval removed" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to reject candidate" });
+  }
+});
+
+// Get all candidates for admin approval
+router.get("/candidates-pending", async (req, res) => {
+  try {
+    const candidates = await Candidate.find({}).populate('party_id');
+    res.json(candidates);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch candidates" });
   }
 });
 
@@ -297,28 +364,5 @@ router.post("/add-party", async (req, res) => {
     res.status(500).json({ error: "Failed to add party" });
   }
 });
-
-router.post("/add-constituency", async (req, res) => {
-  const { constituency_id, name, password } = req.body;
-
-  if (!constituency_id || !name || !password) {
-    return res.status(400).json({ error: "All fields are required" });
-  }
-
-  try {
-    const existing = await Constituency.findOne({ constituency_id, name, password });
-
-    if (existing) {
-      return res.status(409).json({ error: "Constituency with same details already exists" });
-    }
-
-    await Constituency.create({ constituency_id, name, password });
-    res.status(201).json({ success: true, message: "Constituency added successfully" });
-  } catch (err) {
-    res.status(500).json({ error: "Failed to add constituency" });
-  }
-});
-
-
 
 module.exports = router;

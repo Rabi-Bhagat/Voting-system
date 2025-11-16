@@ -1,0 +1,94 @@
+body {
+    background: radial-gradient(circle at center, #898c98, #203457, #3e4e66) !important;
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: #fff;
+    font-size: 1.2rem;
+}
+
+.candidate-profile-card {
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 30px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+.profile-header {
+    text-align: center;
+    border-bottom: 3px solid #007bff;
+    padding-bottom: 20px;
+    margin-bottom: 30px;
+}
+
+.profile-header h1 {
+    color: #333;
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.party-name {
+    color: #007bff;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.profile-section {
+    margin-bottom: 25px;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #007bff;
+}
+
+.profile-section h3 {
+    color: #333;
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+}
+
+.profile-section p {
+    color: #555;
+    font-size: 1.1rem;
+    line-height: 1.6;
+    margin: 5px 0;
+}
+
+.vote-count {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #28a745;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .candidate-profile-card {
+        padding: 20px;
+    }
+
+    .profile-header h1 {
+        font-size: 2rem;
+    }
+
+    .party-name {
+        font-size: 1.1rem;
+    }
+
+    .profile-section h3 {
+        font-size: 1.1rem;
+    }
+
+    .profile-section p {
+        font-size: 1rem;
+    }
+}

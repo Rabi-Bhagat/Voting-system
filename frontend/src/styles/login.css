@@ -53,8 +53,14 @@ body {
 }
 
 .login-card .nav-item {
-  width: 33%;
+  flex: 1;
   text-align: center;
+}
+
+.nav-pills {
+  display: flex;
+  justify-content: space-between;
+  gap: 5px;
 }
 
 .nav-pills .nav-link {
@@ -62,6 +68,9 @@ body {
   color: #c3c7cf;
   border-radius: 30px;
   transition: background-color 0.3s ease;
+  padding: 10px 15px;
+  font-size: 0.95rem;
+  white-space: nowrap;
 }
 
 .nav-pills .nav-link:hover,
@@ -149,7 +158,11 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin-right: 7%;
+  width: 100%;
+}
+
+.role-container .nav {
+  width: 100%;
 }
 
 .text-center {
@@ -262,6 +275,22 @@ body {
   }
 
   .help-text {
+    font-size: 0.8rem;
+  }
+
+  .nav-pills .nav-link {
+    padding: 8px 10px;
+    font-size: 0.85rem;
+  }
+
+  .role-container {
+    margin: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-pills .nav-link {
+    padding: 8px 8px;
     font-size: 0.8rem;
   }
 }

@@ -1,0 +1,75 @@
+body {
+    background: radial-gradient(circle at center, #898c98, #203457, #3e4e66) !important;
+    color: white;
+}
+
+.container {
+    margin-top: 20px;
+}
+
+.navbar {
+    padding: 15px;
+}
+
+.navbar-title {
+    color: rgb(209, 210, 218);
+    font-family: Georgia, serif;
+    font-size: 32px;
+    font-weight: 600;
+}
+
+.welcome-title {
+    color: rgb(255, 255, 255);
+    font-family: Georgia, serif;
+    font-size: 40px;
+    font-weight: 900;
+    text-align: center;
+}
+
+.profile-container {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    color: #333;
+}
+
+.profile-container h3 {
+    color: #007bff;
+    margin-bottom: 15px;
+}
+
+.profile-container p {
+    font-size: 16px;
+    margin: 8px 0;
+}
+
+.loading {
+    text-align: center;
+    padding: 2rem;
+    color: #fff;
+    font-size: 1.2rem;
+}
+
+.table-responsive {
+    margin-top: 20px;
+}
+
+.text-white {
+    color: white !important;
+    font-family: Georgia, serif;
+}
+
+@media (max-width: 768px) {
+    .navbar-title {
+        font-size: 20px;
+    }
+
+    .welcome-title {
+        font-size: 28px;
+    }
+
+    .profile-container {
+        padding: 15px;
+    }
+}

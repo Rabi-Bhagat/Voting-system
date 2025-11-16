@@ -75,10 +75,9 @@ function AdminPage() {
     };
 
     const requiredFields = {
-      voter: ["voter_id", "first_name", "last_name", "password", "constituency"],
-      candidate: ["candidate_id", "name", "party_id", "constituency"],
-      party: ["party_id", "name", "password"],
-      constituency: ["constituency_id", "name", "password"]
+      voter: ["voter_id", "first_name", "last_name", "password"],
+      candidate: ["candidate_id", "name", "password", "party_id", "age", "education", "experience", "background"],
+      party: ["party_id", "name", "password"]
     };
 
     const missingFields = requiredFields[modalType].filter(
@@ -115,7 +114,6 @@ function AdminPage() {
         <button onClick={() => handleModalOpen("voter")} className="admin-button">Add Voter</button>
         <button onClick={() => handleModalOpen("party")} className="admin-button">Add Party</button>
         <button onClick={() => handleModalOpen("candidate")} className="admin-button">Add Candidate</button>
-        <button onClick={() => handleModalOpen("constituency")} className="admin-button">Add Constituency</button>
         <button onClick={handleLogout} className="logout-button">Logout</button>
       </div>
 

@@ -5,10 +5,12 @@ import Login from "./Login";
 import AdminPage from "./pages/AdminPage";
 import VoterDashboard from "./pages/VoterDashboard";
 import PartyPage from "./pages/PartyPage";
-import ConstituencyAdmin from "./pages/ConstituencyAdmin";
+
 import EditProfile from "./pages/EditProfile";
 import BallotPaper from "./pages/BallotPaper";
 import ResultsPage from "./pages/ResultsPage";
+import CandidateDashboard from "./pages/CandidateDashboard";
+import CandidateProfile from "./pages/CandidateProfile";
 
 function App() {
   return (
@@ -17,10 +19,12 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/voter_dashboard" element={<VoterDashboard />} />
+        <Route path="/candidate_dashboard" element={<CandidateDashboard />} />
+        <Route path="/candidate-profile/:candidate_id" element={<CandidateProfile />} />
         <Route path="/edit-profile" element={<EditProfile />} />
         <Route path="/vote" element={<BallotPaper />} />
         <Route path="/party" element={<PartyPage />} />
-        <Route path="/constituency_admin" element={<ConstituencyAdmin />} />
+
         <Route path="/results" element={<ResultsPage />} />
       </Routes>
     </Router>

@@ -75,18 +75,26 @@ const BallotPaper = () => {
               <Card.Body>
                 <Card.Title>{candidate.name}</Card.Title>
                 <Card.Text>Party: {candidate.party_name}</Card.Text>
+                <Button 
+                  variant="info" 
+                  size="sm" 
+                  className="mb-2 w-100"
+                  onClick={() => navigate(`/candidate-profile/${candidate.candidate_id}`)}
+                >
+                  View Profile
+                </Button>
                 {voter?.has_voted ? (
                   voter.voted_candidate_id === candidate.candidate_id ? (
-                    <Button variant="success" disabled>
+                    <Button variant="success" disabled className="w-100">
                       You voted for this candidate
                     </Button>
                   ) : (
-                    <Button variant="secondary" disabled>
+                    <Button variant="secondary" disabled className="w-100">
                       Vote
                     </Button>
                   )
                 ) : (
-                  <Button onClick={() => handleVote(candidate.candidate_id)}>
+                  <Button onClick={() => handleVote(candidate.candidate_id)} className="w-100">
                     Vote
                   </Button>
                 )}
