@@ -1,0 +1,76 @@
+/* src/styles/modal.css */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal-box {
+  background-color: rgb(99, 139, 159);
+  padding: 2rem;
+  border-radius: 10px;
+  width: 400px;
+  max-width: 90%;
+  color: rgb(2, 18, 52);
+  font-family: Georgia, serif;
+}
+
+.modal-input {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 15px;
+}
+
+.modal-submit-button,
+.modal-cancel-button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+}
+
+.modal-submit-button {
+  background-color: #28a745;
+  color: white;
+}
+
+.modal-submit-button:hover {
+  background-color: #486f51;
+  color: rgb(255, 255, 255);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.modal-cancel-button {
+  background-color: #dc3545;
+  color: white;
+}
+
+.modal-cancel-button:hover {
+  background-color: #a0555c;
+  color: white;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.modal-error-message {
+  color: rgb(75, 0, 0);
+  margin: 10px 0;
+  font-weight: bold;
+  text-align: center;
+}

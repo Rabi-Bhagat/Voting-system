@@ -1,0 +1,63 @@
+.navbar-title {
+    color: rgb(209, 210, 218);
+    font-family: Georgia, serif;
+    font-size: 32px;
+    font-weight: 600;
+    margin: 0;
+    padding: 0;
+    line-height: 1.2;
+}
+
+.rounded-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.welcome-title {
+    color: rgb(255, 255, 255);
+    font-family: Georgia, serif;
+    font-size: 40px;
+    font-weight: 900;
+    margin: 0;
+    padding: 0;
+    line-height: 1.2;
+    text-align: center; /* optional */
+}
+
+.sub-head {
+    font-family: Georgia, 'Times New Roman', Times, serif;
+}
+
+@media (max-width: 768px) {
+    .navbar-title {
+        font-size: 20px;
+        text-align: center;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .profile-container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .profile-container img {
+        margin-bottom: 1rem;
+    }
+
+    .profile-details {
+        align-items: center;
+    }
+
+    .profile-details p {
+        font-size: 14px;
+    }
+
+    .btn-edit-profile, .btn-success {
+        width: 100%;
+        padding: 12px;
+    }
+}

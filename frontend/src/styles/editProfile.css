@@ -1,0 +1,109 @@
+body {
+  color: #333;
+}
+
+.edit-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 40px;
+  min-height: 100vh;
+  background: radial-gradient(circle at center, #898c98, #203457, #3e4e66) !important;
+  font-family: Georgia, serif;
+}
+
+.edit-card {
+  background-color: #18203f;
+  box-shadow: 0 15px 30px rgba(70, 68, 68, 0.1);
+  color: white;
+  border-radius: 12px;
+  border-color: #18203f;
+  border-style: solid;
+  padding: 2rem;
+  width: 100%;
+  max-width: 600px;
+  margin-bottom: 5%;
+}
+
+/* Input fields */
+.edit-card input {
+  background-color: #cfd2d5;
+  border: 1px solid #555;
+  color: rgb(0, 0, 0);
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 15px;
+}
+
+.edit-card input:focus {
+  border-color: #00bcd4;
+  outline: none;
+  box-shadow: 0 0 5px rgba(0, 188, 212, 0.5);
+}
+
+.edit-card label {
+  color: white;
+  font-weight: 500;
+}
+
+/* Message / alert */
+.alert-info {
+  background-color: #2e4053;
+  color: #d1ecf1;
+  border: 1px solid #117a8b;
+}
+
+.custom-save-button,
+.custom-back-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  min-width: 140px; /* Ensures consistent button width */
+  height: 45px;     /* Ensures same height */
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+/* Green Save Button */
+.custom-save-button {
+  background-color: #28a745;
+  color: white;
+}
+
+.custom-save-button:hover {
+  background-color: #1e7e34;
+}
+
+/* Blue Go Back Button */
+.custom-back-button {
+  background-color: #007bff;
+  color: white;
+}
+
+.custom-back-button:hover {
+  background-color: #0056b3;
+}
+
+.edit-head {
+  font-family: 'Georgia', Arial, sans-serif;
+  font-weight: 600;
+  font-size: 1.8rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .edit-card {
+    padding: 1.5rem;
+  }
+
+  .button-group {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .button-group button {
+    width: 100%;
+  }
+}

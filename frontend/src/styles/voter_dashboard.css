@@ -1,0 +1,173 @@
+/* General page layout */
+body {
+    background-color: #f4f7fa;
+    color: white;
+}
+
+.container {
+    margin-top: 20px;
+}
+
+/* Navbar styling */
+.navbar {
+    padding: 15px;
+}
+
+.navbar-brand {
+    color: white;
+    font-size: 50px;
+}
+
+.navbar-brand:hover {
+    color: #ffd700;
+}
+
+.navbar form button {
+    background-color: #dc3545;
+    border: none;
+}
+
+/* Profile section layout */
+.profile-container {
+    display: flex;
+    align-items: center;
+    margin-top: 2rem;
+    justify-content: flex-start;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.profile-container img {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    margin-right: 2rem;
+    /* object-fit: cover; */
+}
+
+.profile-details {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.profile-details p {
+    font-size: 16px;
+    margin: 8px 0;
+    color: #333;
+}
+
+.profile-details strong {
+    font-weight: bold;
+    color: #007bff;
+}
+
+.btn-danger {
+    background-color: #dc3545;
+    color: white;
+    font-size: 16px;
+    padding: 10px 20px;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-danger:hover {
+    background-color: #c82333;
+}
+/* Edit profile button styling */
+.btn-edit-profile {
+    margin-top: 1rem;
+    background-color: #007bff;
+    color: white;
+    font-size: 16px;
+    border-radius: 5px;
+    padding: 8px 15px;
+    transition: background-color 0.3s ease;
+}
+
+.btn-edit-profile:hover {
+    background-color: #0056b3;
+}
+
+.center-button {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.btn-success {
+  background-color: #1fab40 !important;
+  color: white !important;
+  font-size: 16px !important;
+  font-weight: 500 !important;
+  padding: 10px 18px !important;
+  border-radius: 5px !important;
+  transition: background-color 0.3s ease !important;
+}
+
+.btn-success:hover {
+  background-color: #1e8b36 !important;
+}
+
+.text-center {
+    text-align: center;
+    color: white;
+    font-family: Georgia, serif;
+}
+
+/* Navbar title styling */
+.navbar-title {
+    color: rgb(209, 210, 218);
+    font-family: Georgia, serif;
+    font-size: 32px;
+    font-weight: 600;
+    margin: 0;
+    padding: 0;
+    line-height: 1.2;
+}
+
+.welcome-title {
+    color: rgb(255, 255, 255);
+    font-family: Georgia, serif;
+    font-size: 40px;
+    font-weight: 900;
+    margin: 0;
+    padding: 0;
+    line-height: 1.2;
+    text-align: center; /* optional */
+}
+
+
+@media (max-width: 768px) {
+    .navbar-title {
+        font-size: 20px;
+        text-align: center;
+    }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .profile-container {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .profile-container img {
+        margin-bottom: 1rem;
+    }
+
+    .profile-details {
+        align-items: center;
+    }
+
+    .profile-details p {
+        font-size: 14px;
+    }
+
+    .btn-edit-profile, .btn-success {
+        width: 100%;
+        padding: 12px;
+    }
+}

@@ -1,0 +1,136 @@
+/* -------------------------
+   General Page Styles
+-------------------------- */
+body {
+  background-color: #121212;
+}
+
+.container {
+  padding-top: 30px;
+  padding-bottom: 30px;
+}
+
+h2 {
+  color: rgb(255, 255, 255);
+  font-weight: bold;
+}
+
+/* -------------------------
+   Card Styling
+-------------------------- */
+.card {
+  background-color: #1f2a38;
+  color: white;
+  border: 1px solid #33475b;
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.edit-head {
+  font-family: Georgia, 'Times New Roman', Times, serif;
+  font-size: 40px;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+}
+
+.card-title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  font-family: 'Times New Roman', Times, serif;
+  color: #ffd700;
+}
+
+.card-text {
+  color: #a09e9e;
+  font-size: 1rem;
+  font-family: 'Times New Roman', Times, serif;
+}
+
+/* -------------------------
+   Button Styling
+-------------------------- */
+button.btn {
+  font-size: 1rem;
+  font-family: 'Georgia', Times, serif;
+  font-weight: 500;
+  padding: 10px 20px;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+/* Save (Success) Button */
+button.btn-success {
+  background-color: #1fab40;
+  border: none;
+}
+
+button.btn-success:hover {
+  background-color: #177a32;
+}
+
+/* Disabled / Unselected Vote Button */
+button.btn-secondary {
+  background-color: #6c757d;
+  border: none;
+}
+
+button.btn-secondary:hover {
+  background-color: #5a6268;
+}
+
+/* NOTA (Warning) Button */
+button.btn-warning {
+  background-color: #ffc107;
+  border: none;
+  color: #000;
+}
+
+button.btn-warning:hover {
+  background-color: #e0a800;
+}
+
+/* Info Message Alert */
+.alert-info {
+  background-color: #343a40;
+  color: #f8f9fa;
+  border-color: #1d2124;
+}
+
+/* -------------------------
+   Back Button (Blue)
+-------------------------- */
+.btn-outline-primary {
+  color: #000000 !important;
+  background-color: #0b7cf4 !important;
+  border: none !important;
+  font-weight: 500;
+  padding: 10px 20px;
+  border-radius: 8px;
+  transition: background-color 0.3s ease;
+}
+
+.btn-outline-primary:hover {
+  background-color: #0069d9 !important;
+  color: #ffffff !important;
+}
+
+/* -------------------------
+   Responsive Styles
+-------------------------- */
+@media (max-width: 768px) {
+  .card-title {
+    font-size: 1.2rem;
+  }
+
+  .card-text {
+    font-size: 0.9rem;
+  }
+
+  button.btn {
+    width: 100%;
+  }
+}
