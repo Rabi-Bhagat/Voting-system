@@ -7,12 +7,26 @@ const cors = require("cors");
 
 const app = express();
 
-// CORS config: prefer BASE_URL from your .env, fallback to http://localhost:3000
-const FRONTEND_ORIGIN =
-  process.env.BASE_URL || process.env.FRONTEND_URL || "http://localhost:3000";
+// CORS config: Allow both local and production URLs
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://onlinevotingsystem-5u2f86nzo-rabi-bhagats-projects.vercel.app",
+  process.env.BASE_URL,
+  process.env.FRONTEND_URL
+].filter(Boolean);
+
 app.use(
   cors({
-    origin: FRONTEND_ORIGIN,
+    origin: function(origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      
+      if (allowedOrigins.some(allowed => origin.includes(allowed.replace('https://', '').replace('http://', '')))) {
+        callback(null, true);
+      } else {
+        callback(null, true); // Allow all for now, restrict later if needed
+      }
+    },
     credentials: true,
   })
 );
