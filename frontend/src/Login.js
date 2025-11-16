@@ -17,8 +17,25 @@ function Login() {
     e.preventDefault();
     setError("");
 
+    // Validate required fields based on role
+    if (role === "voter" && (!formData.voter_id || !formData.first_name || !formData.last_name || !formData.password)) {
+      setError("Please fill all required fields");
+      return;
+    }
+    if (role === "party" && (!formData.party_id || !formData.password)) {
+      setError("Please fill all required fields");
+      return;
+    }
+    if (role === "constituency" && (!formData.constituency_id || !formData.password)) {
+      setError("Please fill all required fields");
+      return;
+    }
+    if (role === "admin" && !formData.password) {
+      setError("Please enter admin password");
+      return;
+    }
+
     try {
-      // const res = await axios.post("http://localhost:5000/login", { ...formData, role });
       const res = await axios.post(`${API_BASE}/login`, { ...formData, role }); 
 
       if (res.data.success) {
@@ -42,7 +59,7 @@ function Login() {
   return (
     <div className="container">
       <div className="login-card">
-        <h1 className="text-center mb-4">VOTING SYSTEM</h1>
+        <h1 className="text-center mb-4">ONLINE VOTING SYSTEM</h1>
         <h4 className="text-center mb-4">SIGN IN TO CONTINUE</h4>
 
         {/* Role Switcher */}
@@ -72,41 +89,86 @@ function Login() {
           <form onSubmit={handleSubmit}>
             {role === "voter" && (
               <>
-                <input name="voter_id" placeholder="Voter ID" required onChange={handleChange} />
-                <input name="first_name" placeholder="First Name" required onChange={handleChange} />
-                <input name="last_name" placeholder="Last Name" required onChange={handleChange} />
+                <label className="input-label">Voter ID</label>
+                <input 
+                  name="voter_id" 
+                  placeholder="Enter your Voter ID" 
+                  required 
+                  onChange={handleChange}
+                  value={formData.voter_id || ""}
+                />
+                
+                <label className="input-label">First Name</label>
+                <input 
+                  name="first_name" 
+                  placeholder="Enter your first name" 
+                  required 
+                  onChange={handleChange}
+                  value={formData.first_name || ""}
+                />
+                
+                <label className="input-label">Last Name</label>
+                <input 
+                  name="last_name" 
+                  placeholder="Enter your last name" 
+                  required 
+                  onChange={handleChange}
+                  value={formData.last_name || ""}
+                />
               </>
             )}
 
             {role === "party" && (
-              <input name="party_id" placeholder="Party ID" required onChange={handleChange} />
+              <>
+                <label className="input-label">Party ID</label>
+                <input 
+                  name="party_id" 
+                  placeholder="Enter Party ID" 
+                  required 
+                  onChange={handleChange}
+                  value={formData.party_id || ""}
+                />
+              </>
             )}
 
             {role === "constituency" && (
-              <input name="constituency_id" placeholder="Constituency ID" required onChange={handleChange} />
+              <>
+                <label className="input-label">Constituency ID</label>
+                <input 
+                  name="constituency_id" 
+                  placeholder="Enter Constituency ID" 
+                  required 
+                  onChange={handleChange}
+                  value={formData.constituency_id || ""}
+                />
+              </>
             )}
 
             {role === "admin" && (
-              <p className="text-muted text-center mb-2">Enter Admin Password</p>
+              <>
+                <p className="admin-info">🔐 Admin Access</p>
+              </>
             )}
 
+            <label className="input-label">Password</label>
             <input
-              className='admin-password1'
+              className='password-input'
               name="password"
               type="password"
-              placeholder="Password"
+              placeholder="Enter your password"
               required
               onChange={handleChange}
+              value={formData.password || ""}
             />
 
             <button
               type="submit"
-              className="btn btn-primary mr-70 w-20 mt-2 px-3 py-2 text-sm w-50 mx-auto d-block"
+              className="btn btn-primary login-button"
             >
-              Login
+              {role === "admin" ? "Login as Admin" : `Login as ${role.charAt(0).toUpperCase() + role.slice(1)}`}
             </button>
 
-            {error && <div className="alert alert-danger mt-3">{error}</div>}
+            {error && <div className="alert alert-danger mt-3">❌ {error}</div>}
           </form>
         </div>
 
@@ -123,12 +185,12 @@ function Login() {
                   }}
                   className="btn"
                 >
-                  Admin Login
+                  🔐 Admin Login
                 </button>
               </div>
               <div className="view-results-btn">
                 <button onClick={() => window.location.href = "/results"} className="btn">
-                  View Results
+                  📊 View Results
                 </button>
               </div>
             </>
@@ -142,7 +204,7 @@ function Login() {
                 }}
                 className="btn btn-secondary"
               >
-                Back to User Login
+                ← Back to User Login
               </button>
             </div>
           )}

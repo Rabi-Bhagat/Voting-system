@@ -2,57 +2,82 @@ const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
 
-// Adjust to your exported router structure. This snippet is the handler only.
 router.post("/login", async (req, res) => {
   try {
-    const { voter_id, password, role } = req.body || {};
+    const { voter_id, first_name, last_name, party_id, constituency_id, password, role } = req.body || {};
     const resolvedRole = (role || "voter").toString().toLowerCase();
 
-    console.log("DEBUG /auth/login body:", { voter_id, role: resolvedRole });
+    console.log("DEBUG /auth/login body:", { voter_id, party_id, constituency_id, role: resolvedRole });
 
-    if (!voter_id || !password) {
-      return res.status(400).json({ error: "voter_id and password required" });
+    if (!password) {
+      return res.status(400).json({ error: "Password required" });
     }
 
     const db = mongoose.connection.db;
     let user = null;
+    let redirect = "/";
 
     if (resolvedRole === "voter") {
-      user = await db.collection("voters").findOne({ voter_id: voter_id });
+      if (!voter_id || !first_name || !last_name) {
+        return res.status(400).json({ error: "Voter ID, first name, and last name required" });
+      }
+      user = await db.collection("voters").findOne({ 
+        voter_id: voter_id,
+        first_name: first_name,
+        last_name: last_name
+      });
+      redirect = "/voter_dashboard";
     } else if (resolvedRole === "party") {
-      user = await db.collection("parties").findOne({ party_id: voter_id });
+      if (!party_id) {
+        return res.status(400).json({ error: "Party ID required" });
+      }
+      user = await db.collection("parties").findOne({ party_id: party_id });
+      redirect = "/party";
     } else if (resolvedRole === "constituency" || resolvedRole === "const") {
-      user = await db
-        .collection("constituencies")
-        .findOne({ constituency_id: voter_id });
+      if (!constituency_id) {
+        return res.status(400).json({ error: "Constituency ID required" });
+      }
+      user = await db.collection("constituencies").findOne({ constituency_id: constituency_id });
+      redirect = "/constituency_admin";
     } else if (resolvedRole === "admin") {
-      // If admin stored in collection 'admin' or in some config, change accordingly
-      user =
-        (await db.collection("admins").findOne({ admin_id: voter_id })) ||
-        (await db.collection("admins").findOne({ username: voter_id }));
+      // Simple admin check - password is "admin123"
+      if (password === "admin123") {
+        return res.json({ 
+          success: true, 
+          role: "admin", 
+          admin: { username: "admin" },
+          redirect: "/admin"
+        });
+      } else {
+        return res.status(401).json({ error: "Invalid admin credentials" });
+      }
     } else {
       return res.status(400).json({ error: "Invalid role" });
     }
 
     if (!user) {
-      console.log("DEBUG login: user not found for", resolvedRole, voter_id);
+      console.log("DEBUG login: user not found for", resolvedRole);
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    // Plain-text compare (matches your seeded data). If you use hashed passwords, replace with bcrypt.compare.
     if (user.password && user.password !== password) {
-      console.log("DEBUG login: password mismatch for", voter_id);
+      console.log("DEBUG login: password mismatch");
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    // Remove sensitive fields before returning
     const safeUser = { ...user };
     delete safeUser.password;
-    // Optionally delete tokens or other sensitive fields
-    delete safeUser.token;
 
-    // Success: return something your frontend expects (adjust shape if needed)
-    return res.json({ success: true, role: resolvedRole, user: safeUser });
+    const responseKey = resolvedRole === "voter" ? "voter" : 
+                       resolvedRole === "party" ? "party" : 
+                       "constituency";
+
+    return res.json({ 
+      success: true, 
+      role: resolvedRole, 
+      [responseKey]: safeUser,
+      redirect: redirect
+    });
   } catch (err) {
     console.error("Auth error:", err);
     return res.status(500).json({ error: "Server error" });

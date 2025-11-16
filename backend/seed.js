@@ -7,7 +7,7 @@ const voters = [
     voter_id: "V001",
     first_name: "John",
     last_name: "Doe",
-    password: "pass001",
+    password: "password123",
     address: "mangalore",
     phone: "9876543210",
     constituency: "C001",
@@ -228,23 +228,62 @@ const constituencies = [
 
 async function seed() {
   try {
+    console.log("🔄 Connecting to MongoDB...");
     await mongoose.connect(process.env.MONGO_URI);
+    console.log("✅ Connected to MongoDB");
+    
     const db = mongoose.connection.db;
 
+    console.log("🗑️  Clearing existing data...");
     await db.collection("voters").deleteMany({});
     await db.collection("parties").deleteMany({});
     await db.collection("candidates").deleteMany({});
     await db.collection("constituencies").deleteMany({});
+    await db.collection("electionstatuses").deleteMany({});
+    console.log("✅ Existing data cleared");
 
-    await db.collection("voters").insertMany(voters);
-    await db.collection("parties").insertMany(parties);
-    await db.collection("candidates").insertMany(candidates);
-    await db.collection("constituencies").insertMany(constituencies);
+    console.log("📝 Inserting new data...");
+    const votersResult = await db.collection("voters").insertMany(voters);
+    console.log(`✅ Inserted ${votersResult.insertedCount} voters`);
+    
+    const partiesResult = await db.collection("parties").insertMany(parties);
+    console.log(`✅ Inserted ${partiesResult.insertedCount} parties`);
+    
+    const candidatesResult = await db.collection("candidates").insertMany(candidates);
+    console.log(`✅ Inserted ${candidatesResult.insertedCount} candidates`);
+    
+    const constituenciesResult = await db.collection("constituencies").insertMany(constituencies);
+    console.log(`✅ Inserted ${constituenciesResult.insertedCount} constituencies`);
 
-    console.log("Seeding complete");
+    await db.collection("electionstatuses").insertOne({
+      conducted: false,
+      resultsPublished: false
+    });
+    console.log("✅ Initialized election status");
+
+    console.log("\n🎉 DATABASE SEEDED SUCCESSFULLY!");
+    console.log("\n📋 LOGIN CREDENTIALS:");
+    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
+    console.log("👤 VOTER LOGIN:");
+    console.log("   Voter ID: V001");
+    console.log("   First Name: John");
+    console.log("   Last Name: Doe");
+    console.log("   Password: password123");
+    console.log("\n🏛️  PARTY LOGIN:");
+    console.log("   Party ID: P001");
+    console.log("   Password: party001");
+    console.log("\n🏢 CONSTITUENCY LOGIN:");
+    console.log("   Constituency ID: C001");
+    console.log("   Password: const001");
+    console.log("\n👨‍💼 ADMIN LOGIN:");
+    console.log("   Password: admin123");
+    console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
+    
+    await mongoose.disconnect();
+    console.log("✅ Disconnected from MongoDB\n");
     process.exit(0);
   } catch (err) {
-    console.error("Seeding failed:", err);
+    console.error("❌ Seeding failed:", err);
     process.exit(1);
   }
 }

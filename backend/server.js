@@ -104,14 +104,17 @@ if (mongoUri) {
 // Connect to Mongo and then start server
 const PORT = process.env.PORT || 5000;
 mongoose
-  .connect(mongoUri, { useNewUrlParser: true, useUnifiedTopology: true })
+  .connect(mongoUri)
   .then(() => {
-    console.log("MongoDB connected");
-    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+    console.log("MongoDB connected successfully");
+    app.listen(PORT, () => {
+      console.log(`✅ Server running on port ${PORT}`);
+      console.log(`✅ API available at http://localhost:${PORT}`);
+    });
   })
   .catch((err) => {
-    console.error("MongoDB connection failed:", err);
-    process.exit(1); // fail fast so you know to fix DB config
+    console.error("❌ MongoDB connection failed:", err);
+    process.exit(1);
   });
 
 // Gracefully handle app termination

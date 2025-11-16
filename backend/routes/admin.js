@@ -3,6 +3,8 @@ const express = require("express");
 const router = express.Router();
 const Candidate = require("../models/Candidate");
 const Voter = require("../models/Voter");
+const Party = require("../models/Party");
+const Constituency = require("../models/Constituency");
 const ElectionStatus = require("../models/ElectionStatus");
 
 // POST /admin/reset-votes
