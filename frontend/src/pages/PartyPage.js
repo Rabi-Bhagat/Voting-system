@@ -44,56 +44,112 @@ function PartyPage() {
   if (!party) return <div>Party not found or error loading data.</div>;
 
   return (
-    <div className="container mt-4">
-      <nav className="navbar navbar-light justify-content-between">
-        <h1 className="navbar-title">Online Voting System</h1>
+    <div className="dashboard-wrapper">
+      <nav className="navbar">
+        <div className="navbar-brand">
+          <span className="brand-icon">🏛️</span>
+          <h1 className="navbar-title">Party Dashboard</h1>
+        </div>
         <button className="btn btn-danger" onClick={handleLogout}>
+          <span className="btn-icon">🚪</span>
           Logout
         </button>
       </nav>
 
-      <h1 className="text-center mt-4">Welcome, {party.name}!</h1>
-
-      <div className="profile-container d-flex mt-4 p-3 bg-white rounded shadow">
-        <img
-          src="https://cdn.jsdelivr.net/npm/bootstrap-icons/icons/person-circle.svg"
-          alt="Profile Icon"
-          style={{ width: 150, height: 150 }}
-        />
-        <div className="ms-5">
-          <p><strong>Party ID:</strong> {party.party_id}</p>
-          <p><strong>Name:</strong> {party.name}</p>
-          {/* <button className="btn btn-primary mt-2" onClick={handleEdit}>
-            Edit Candidates
-          </button> */}
+      <div className="dashboard-container">
+        <div className="welcome-section">
+          <div className="welcome-content">
+            <h1 className="welcome-title">Welcome, {party.name}! 🎉</h1>
+            <p className="welcome-subtitle">Manage your party and view your candidates</p>
+          </div>
         </div>
-      </div>
 
-      {/* Candidate Table */}
-      <div className="mt-5">
-        <h3 className="mb-3 text-white sub-head">Candidates from {party.name}</h3>
-        {party.candidates && party.candidates.length > 0 ? (
-          <table className="table table-bordered table-striped rounded-table">
-            <thead className="table-dark">
-              <tr className="sub-head">
-                <th>Candidate ID</th>
-                <th>Name</th>
-                <th>Constituency</th>
-              </tr>
-            </thead>
-            <tbody>
-              {party.candidates.map((candidate) => (
-                <tr key={candidate.candidate_id}>
-                  <td>{candidate.candidate_id}</td>
-                  <td>{candidate.name}</td>
-                  <td>{candidate.constituency}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <p>No candidates have been registered for this party yet.</p>
-        )}
+        <div className="stats-grid">
+          <div className="stat-card stat-primary">
+            <div className="stat-icon">🎯</div>
+            <div className="stat-content">
+              <div className="stat-value">{party.candidates?.length || 0}</div>
+              <div className="stat-label">Total Candidates</div>
+            </div>
+          </div>
+          <div className="stat-card stat-success">
+            <div className="stat-icon">✅</div>
+            <div className="stat-content">
+              <div className="stat-value">
+                {party.candidates?.filter(c => c.approved).length || 0}
+              </div>
+              <div className="stat-label">Approved</div>
+            </div>
+          </div>
+          <div className="stat-card stat-warning">
+            <div className="stat-icon">⏳</div>
+            <div className="stat-content">
+              <div className="stat-value">
+                {party.candidates?.filter(c => !c.approved).length || 0}
+              </div>
+              <div className="stat-label">Pending</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="profile-card">
+          <div className="card-header">
+            <h2 className="card-title">
+              <span className="title-icon">🏛️</span>
+              Party Information
+            </h2>
+          </div>
+          <div className="profile-body">
+            <div className="party-info-section">
+              <div className="party-logo">
+                {party.name.charAt(0)}
+              </div>
+              <div className="party-details">
+                <h3 className="party-name">{party.name}</h3>
+                <p className="party-id">Party ID: {party.party_id}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="candidates-card">
+          <div className="card-header">
+            <h2 className="card-title">
+              <span className="title-icon">👥</span>
+              Our Candidates ({party.candidates?.length || 0})
+            </h2>
+          </div>
+          <div className="candidates-body">
+            {party.candidates && party.candidates.length > 0 ? (
+              <div className="candidates-grid">
+                {party.candidates.map((candidate) => (
+                  <div key={candidate.candidate_id} className="candidate-card">
+                    <div className="candidate-avatar">
+                      {candidate.name.charAt(0)}
+                    </div>
+                    <div className="candidate-info">
+                      <h4 className="candidate-name">{candidate.name}</h4>
+                      <p className="candidate-id">ID: {candidate.candidate_id}</p>
+                      <p className="candidate-constituency">
+                        <span className="constituency-icon">🏛️</span>
+                        {candidate.constituency}
+                      </p>
+                      <span className={`candidate-status ${candidate.approved ? 'approved' : 'pending'}`}>
+                        {candidate.approved ? "✅ Approved" : "⏳ Pending"}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="empty-state">
+                <div className="empty-icon">📭</div>
+                <p className="empty-text">No candidates registered yet</p>
+                <p className="empty-subtext">Candidates will appear here once they register</p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

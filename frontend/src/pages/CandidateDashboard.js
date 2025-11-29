@@ -8,6 +8,7 @@ const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000";
 function CandidateDashboard() {
   const [candidate, setCandidate] = useState(null);
   const [voters, setVoters] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -15,24 +16,38 @@ function CandidateDashboard() {
     if (stored) {
       const { candidate_id } = JSON.parse(stored);
 
-      // Fetch candidate profile
       axios.get(`${API_BASE}/candidate/${candidate_id}`)
         .then(res => setCandidate(res.data))
         .catch(() => setCandidate(null));
 
-      // Fetch voters list
       axios.get(`${API_BASE}/candidate/voters/list`)
         .then(res => setVoters(res.data))
         .catch(err => console.error("Error fetching voters:", err));
     }
   }, []);
 
-  if (!candidate) return <div className="loading">Loading candidate info...</div>;
+  if (!candidate) return (
+    <div className="loading-screen">
+      <div className="spinner"></div>
+      <p>Loading your dashboard...</p>
+    </div>
+  );
+
+  const votedCount = voters.filter(v => v.has_voted).length;
+  const votingPercentage = voters.length > 0 ? ((votedCount / voters.length) * 100).toFixed(1) : 0;
+
+  const filteredVoters = voters.filter(voter =>
+    voter.voter_id.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    `${voter.first_name} ${voter.last_name}`.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <div className="container mt-4">
-      <nav className="navbar navbar-light justify-content-between">
-        <h1 className="navbar-title">Candidate Dashboard</h1>
+    <div className="dashboard-wrapper">
+      <nav className="navbar">
+        <div className="navbar-brand">
+          <span className="brand-icon">🎯</span>
+          <h1 className="navbar-title">Candidate Dashboard</h1>
+        </div>
         <button
           className="btn btn-danger"
           onClick={() => {
@@ -40,65 +55,182 @@ function CandidateDashboard() {
             navigate("/");
           }}
         >
+          <span className="btn-icon">🚪</span>
           Logout
         </button>
       </nav>
 
-      <h1 className="welcome-title mt-4">Welcome, {candidate.name}!</h1>
+      <div className="dashboard-container">
+        <div className="welcome-section">
+          <div className="welcome-content">
+            <h1 className="welcome-title">Welcome, {candidate.name}! 🎖️</h1>
+            <p className="welcome-subtitle">Track your campaign progress and voter engagement</p>
+          </div>
+        </div>
 
-      {/* Candidate Profile */}
-      <div className="profile-container mt-4 p-3 bg-white rounded shadow">
-        <h3>Your Profile</h3>
-        <p><strong>Candidate ID:</strong> {candidate.candidate_id}</p>
-        <p><strong>Name:</strong> {candidate.name}</p>
-        <p><strong>Party:</strong> {candidate.party_name}</p>
-        <p><strong>Age:</strong> {candidate.age || "Not specified"}</p>
-        <p><strong>Education:</strong> {candidate.education || "Not specified"}</p>
-        <p><strong>Experience:</strong> {candidate.experience || "Not specified"}</p>
-        <p><strong>Background:</strong> {candidate.background || "Not specified"}</p>
-        <p><strong>Status:</strong> {candidate.approved ? "✅ Approved" : "⏳ Pending Approval"}</p>
-        <p><strong>Votes:</strong> {candidate.votes}</p>
-        
-        <button
-          className="btn btn-primary mt-2"
-          onClick={() => navigate("/edit-candidate-profile")}
-        >
-          Edit Profile
-        </button>
-      </div>
+        <div className="stats-grid">
+          <div className="stat-card stat-primary">
+            <div className="stat-icon">🗳️</div>
+            <div className="stat-content">
+              <div className="stat-value">{candidate.votes}</div>
+              <div className="stat-label">Total Votes</div>
+            </div>
+          </div>
+          <div className="stat-card stat-success">
+            <div className="stat-icon">👥</div>
+            <div className="stat-content">
+              <div className="stat-value">{voters.length}</div>
+              <div className="stat-label">Registered Voters</div>
+            </div>
+          </div>
+          <div className="stat-card stat-info">
+            <div className="stat-icon">✅</div>
+            <div className="stat-content">
+              <div className="stat-value">{votedCount}</div>
+              <div className="stat-label">Votes Cast</div>
+            </div>
+          </div>
+          <div className="stat-card stat-warning">
+            <div className="stat-icon">📊</div>
+            <div className="stat-content">
+              <div className="stat-value">{votingPercentage}%</div>
+              <div className="stat-label">Turnout Rate</div>
+            </div>
+          </div>
+        </div>
 
-      {/* Registered Voters List */}
-      <div className="mt-5">
-        <h3 className="text-white">Registered Voters ({voters.length})</h3>
-        <div className="table-responsive">
-          <table className="table table-bordered table-striped mt-3 bg-white">
-            <thead className="table-dark">
-              <tr>
-                <th>#</th>
-                <th>Voter ID</th>
-                <th>Name</th>
-                <th>Phone</th>
-                <th>Has Voted</th>
-              </tr>
-            </thead>
-            <tbody>
-              {voters.length === 0 ? (
-                <tr>
-                  <td colSpan="5" className="text-center">No voters registered yet</td>
-                </tr>
-              ) : (
-                voters.map((voter, index) => (
-                  <tr key={voter.voter_id}>
-                    <td>{index + 1}</td>
-                    <td>{voter.voter_id}</td>
-                    <td>{voter.first_name} {voter.last_name}</td>
-                    <td>{voter.phone || "N/A"}</td>
-                    <td>{voter.has_voted ? "✅ Yes" : "❌ No"}</td>
-                  </tr>
-                ))
+        <div className="profile-card">
+          <div className="card-header">
+            <h2 className="card-title">
+              <span className="title-icon">👤</span>
+              Your Profile
+            </h2>
+          </div>
+          <div className="profile-body">
+            <div className="profile-grid">
+              <div className="profile-main">
+                <div className="avatar-section">
+                  <div className="avatar-wrapper">
+                    <div className="candidate-avatar">
+                      {candidate.name.charAt(0)}
+                    </div>
+                    <div className="avatar-badge">
+                      {candidate.approved ? "✓" : "⏳"}
+                    </div>
+                  </div>
+                  <div className="candidate-info">
+                    <h3 className="candidate-name">{candidate.name}</h3>
+                    <p className="candidate-party">{candidate.party_name}</p>
+                    <span className={`status-badge ${candidate.approved ? 'status-approved' : 'status-pending'}`}>
+                      {candidate.approved ? "✅ Approved" : "⏳ Pending Approval"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="info-grid">
+                <div className="info-card">
+                  <div className="info-icon">🆔</div>
+                  <div className="info-details">
+                    <div className="info-label">Candidate ID</div>
+                    <div className="info-value">{candidate.candidate_id}</div>
+                  </div>
+                </div>
+                <div className="info-card">
+                  <div className="info-icon">🎂</div>
+                  <div className="info-details">
+                    <div className="info-label">Age</div>
+                    <div className="info-value">{candidate.age || "Not specified"}</div>
+                  </div>
+                </div>
+                <div className="info-card">
+                  <div className="info-icon">🎓</div>
+                  <div className="info-details">
+                    <div className="info-label">Education</div>
+                    <div className="info-value">{candidate.education || "Not specified"}</div>
+                  </div>
+                </div>
+                <div className="info-card">
+                  <div className="info-icon">💼</div>
+                  <div className="info-details">
+                    <div className="info-label">Experience</div>
+                    <div className="info-value">{candidate.experience || "Not specified"}</div>
+                  </div>
+                </div>
+              </div>
+
+              {candidate.background && (
+                <div className="background-section">
+                  <h4 className="section-title">📝 Background</h4>
+                  <p className="background-text">{candidate.background}</p>
+                </div>
               )}
-            </tbody>
-          </table>
+
+              <div className="profile-actions">
+                <button
+                  className="btn btn-edit"
+                  onClick={() => navigate("/edit-candidate-profile")}
+                >
+                  <span className="btn-icon">✏️</span>
+                  Edit Profile
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="voters-card">
+          <div className="card-header">
+            <h2 className="card-title">
+              <span className="title-icon">👥</span>
+              Registered Voters ({filteredVoters.length})
+            </h2>
+            <div className="search-box">
+              <span className="search-icon">🔍</span>
+              <input
+                type="text"
+                placeholder="Search voters..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="search-input"
+              />
+            </div>
+          </div>
+          <div className="table-container">
+            {filteredVoters.length === 0 ? (
+              <div className="empty-state">
+                <div className="empty-icon">📭</div>
+                <p className="empty-text">No voters found</p>
+              </div>
+            ) : (
+              <table className="voters-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Voter ID</th>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredVoters.map((voter, index) => (
+                    <tr key={voter.voter_id}>
+                      <td>{index + 1}</td>
+                      <td className="voter-id">{voter.voter_id}</td>
+                      <td className="voter-name">{voter.first_name} {voter.last_name}</td>
+                      <td>{voter.phone || "N/A"}</td>
+                      <td>
+                        <span className={`vote-badge ${voter.has_voted ? 'voted' : 'not-voted'}`}>
+                          {voter.has_voted ? "✅ Voted" : "⏳ Pending"}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -1,6 +1,7 @@
 // seed.js
 require("dotenv").config();
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
 
 const voters = [
   {
@@ -182,6 +183,8 @@ const candidates = [
     name: "Alice Johnson",
     constituency: "C001",
     party_id: "P001",
+    password: "cand001",
+    approved: true,
     votes: 0,
   },
   {
@@ -189,6 +192,8 @@ const candidates = [
     name: "Bob Smith",
     constituency: "C001",
     party_id: "P002",
+    password: "cand002",
+    approved: true,
     votes: 0,
   },
   {
@@ -196,6 +201,8 @@ const candidates = [
     name: "Carol Green",
     constituency: "C001",
     party_id: "P003",
+    password: "cand003",
+    approved: true,
     votes: 0,
   },
   {
@@ -203,6 +210,8 @@ const candidates = [
     name: "David Lee",
     constituency: "C002",
     party_id: "P001",
+    password: "cand004",
+    approved: true,
     votes: 0,
   },
   {
@@ -210,6 +219,8 @@ const candidates = [
     name: "Enola Adams",
     constituency: "C002",
     party_id: "P002",
+    password: "cand005",
+    approved: true,
     votes: 0,
   },
   {
@@ -217,6 +228,8 @@ const candidates = [
     name: "Frank Miller",
     constituency: "C002",
     party_id: "P003",
+    password: "cand006",
+    approved: true,
     votes: 0,
   },
 ];
@@ -242,14 +255,32 @@ async function seed() {
     await db.collection("electionstatuses").deleteMany({});
     console.log("✅ Existing data cleared");
 
+    console.log("📝 Hashing passwords...");
+    // Hash voter passwords
+    const votersWithHashedPasswords = await Promise.all(
+      voters.map(async (voter) => ({
+        ...voter,
+        password: await bcrypt.hash(voter.password, 10)
+      }))
+    );
+    
+    // Hash candidate passwords
+    const candidatesWithHashedPasswords = await Promise.all(
+      candidates.map(async (candidate) => ({
+        ...candidate,
+        password: await bcrypt.hash(candidate.password, 10)
+      }))
+    );
+    console.log("✅ Passwords hashed");
+
     console.log("📝 Inserting new data...");
-    const votersResult = await db.collection("voters").insertMany(voters);
+    const votersResult = await db.collection("voters").insertMany(votersWithHashedPasswords);
     console.log(`✅ Inserted ${votersResult.insertedCount} voters`);
     
     const partiesResult = await db.collection("parties").insertMany(parties);
     console.log(`✅ Inserted ${partiesResult.insertedCount} parties`);
     
-    const candidatesResult = await db.collection("candidates").insertMany(candidates);
+    const candidatesResult = await db.collection("candidates").insertMany(candidatesWithHashedPasswords);
     console.log(`✅ Inserted ${candidatesResult.insertedCount} candidates`);
     
     const constituenciesResult = await db.collection("constituencies").insertMany(constituencies);
@@ -276,7 +307,8 @@ async function seed() {
     console.log("   Constituency ID: C001");
     console.log("   Password: const001");
     console.log("\n👨‍💼 ADMIN LOGIN:");
-    console.log("   Password: admin123");
+    console.log("   Username: admin");
+    console.log("   Password: admin@12345");
     console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
     
     await mongoose.disconnect();

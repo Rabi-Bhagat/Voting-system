@@ -6,12 +6,16 @@
   "scripts": {
     "start": "node server.js",
     "seed": "node seed.js",
+    "test-auth": "node test-auth.js",
+    "debug-login": "node debug-login.js",
+    "test-login": "node test-login-request.js",
     "dev": "nodemon server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "axios": "^1.13.2",
     "bcrypt": "^6.0.0",
     "body-parser": "^2.2.0",
     "cors": "^2.8.5",

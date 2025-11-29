@@ -37,7 +37,15 @@ function Login() {
     }
 
     try {
-      const res = await axios.post(`${API_BASE}/login`, { ...formData, role }); 
+      // Prepare login data
+      const loginData = { ...formData, role };
+      
+      // Ensure username is set for admin login
+      if (role === "admin" && !loginData.username) {
+        loginData.username = "admin";
+      }
+
+      const res = await axios.post(`${API_BASE}/login`, loginData); 
 
       if (res.data.success) {
         if (role === "voter" && res.data.voter) {
@@ -53,6 +61,7 @@ function Login() {
         window.location.href = res.data.redirect;
       }
     } catch (err) {
+      console.error("Login error:", err);
       setError(err.response?.data?.error || "Login failed");
     }
   };
@@ -149,7 +158,20 @@ function Login() {
 
             {role === "admin" && (
               <>
-                <p className="admin-info">🔐 Admin Access</p>
+                <p className="admin-info" style={{ 
+                  background: '#f0f0f0', 
+                  padding: '10px', 
+                  borderRadius: '8px',
+                  marginBottom: '15px',
+                  textAlign: 'center'
+                }}>🔐 Admin Access</p>
+                <label className="input-label">Username</label>
+                <input 
+                  name="username" 
+                  placeholder="Enter admin username (default: admin)" 
+                  onChange={handleChange}
+                  value={formData.username !== undefined ? formData.username : "admin"}
+                />
               </>
             )}
 
@@ -179,6 +201,25 @@ function Login() {
         <div className="button-group mt-3">
           {role !== "admin" ? (
             <>
+              <div className="register-link text-center mb-3">
+                <p style={{ color: '#666', marginBottom: '10px' }}>Don't have an account?</p>
+                <button
+                  onClick={() => window.location.href = "/register"}
+                  className="btn btn-success"
+                  style={{ 
+                    padding: '10px 30px',
+                    background: '#28a745',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontWeight: '600',
+                    marginBottom: '15px'
+                  }}
+                >
+                  📝 Register Here
+                </button>
+              </div>
               <div className="admin-btn">
                 <button
                   onClick={() => {

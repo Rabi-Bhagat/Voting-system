@@ -1,6 +1,7 @@
 //backend/routes/admin.js
 const express = require("express");
 const router = express.Router();
+const bcrypt = require("bcrypt");
 const Candidate = require("../models/Candidate");
 const Voter = require("../models/Voter");
 const Party = require("../models/Party");
@@ -225,11 +226,14 @@ router.post("/add-voter", async (req, res) => {
       return res.status(409).json({ error: "Voter already exists" });
     }
 
+    // Hash password before saving
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const newVoter = new Voter({
       voter_id,
       first_name,
       last_name,
-      password,
+      password: hashedPassword,
       address,
       phone,
       constituency: constituency || null,
@@ -259,17 +263,20 @@ router.post("/add-candidate", async (req, res) => {
       return res.status(409).json({ error: "Candidate ID already exists" });
     }
 
+    // Hash password before saving
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const newCandidate = new Candidate({
       candidate_id,
       name,
-      password,
+      password: hashedPassword,
       party_id,
       constituency: constituency || null,
       background: background || "",
       education: education || "",
       experience: experience || "",
       age: age || null,
-      approved: false, // Needs admin approval
+      approved: true, // Auto-approve when added by admin
       votes: 0
     });
 
@@ -362,6 +369,28 @@ router.post("/add-party", async (req, res) => {
     res.status(201).json({ success: true, message: "Party added successfully" });
   } catch (err) {
     res.status(500).json({ error: "Failed to add party" });
+  }
+});
+
+// Get all constituencies (for registration dropdown)
+router.get("/constituencies", async (req, res) => {
+  try {
+    const constituencies = await Constituency.find({}, { constituency_id: 1, name: 1, _id: 0 });
+    res.json(constituencies);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch constituencies" });
+  }
+});
+
+// Get all parties (for registration dropdown)
+router.get("/parties", async (req, res) => {
+  try {
+    const parties = await Party.find({}, { party_id: 1, name: 1, _id: 0 });
+    res.json(parties);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch parties" });
   }
 });
 

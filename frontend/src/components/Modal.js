@@ -1,25 +1,36 @@
 // src/components/Modal.js
 import React, { useState, useEffect } from "react";
+import axios from "axios";
 import "../styles/modal.css";
+
+const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 function Modal({ type, onClose, onSubmit, onChange, formData, loading, modalError }) {
   const [parties, setParties] = useState([]);
+  const [constituencies, setConstituencies] = useState([]);
 
   useEffect(() => {
-    // Fetch parties for candidate form
+    // Fetch parties and constituencies for candidate form
     if (type === "candidate") {
-      // Hardcoded parties for now
-      setParties([
-        { party_id: "P001", name: "Democratic Party" },
-        { party_id: "P002", name: "Republican Front" },
-        { party_id: "P003", name: "Green Alliance" }
-      ]);
+      const fetchData = async () => {
+        try {
+          const [partiesRes, constRes] = await Promise.all([
+            axios.get(`${API_BASE}/admin/parties`),
+            axios.get(`${API_BASE}/admin/constituencies`)
+          ]);
+          setParties(partiesRes.data || []);
+          setConstituencies(constRes.data || []);
+        } catch (err) {
+          console.error("Failed to fetch data:", err);
+        }
+      };
+      fetchData();
     }
   }, [type]);
 
   const requiredFields = {
-    voter: ["voter_id", "first_name", "last_name", "password"],
-    candidate: ["candidate_id", "name", "password", "party_id", "age", "education", "experience", "background"],
+    voter: ["voter_id", "first_name", "last_name", "password", "phone", "address"],
+    candidate: ["candidate_id", "name", "password", "party_id", "constituency", "age", "education", "experience", "background"],
     party: ["party_id", "name", "password"],
     constituency: ["constituency_id", "name", "password"]
   };
@@ -49,8 +60,30 @@ function Modal({ type, onClose, onSubmit, onChange, formData, loading, modalErro
       );
     }
 
-    // Render textarea for background field
-    if (field === "background" || field === "education" || field === "experience") {
+    // Render dropdown for constituency
+    if (field === "constituency" && type === "candidate") {
+      return (
+        <select
+          key={field}
+          name={field}
+          value={formData[field] || ""}
+          onChange={onChange}
+          className="modal-input"
+          disabled={loading}
+          required
+        >
+          <option value="">Select Constituency</option>
+          {constituencies.map(constituency => (
+            <option key={constituency.constituency_id} value={constituency.constituency_id}>
+              {constituency.name} ({constituency.constituency_id})
+            </option>
+          ))}
+        </select>
+      );
+    }
+
+    // Render textarea for background, education, experience, address
+    if (field === "background" || field === "education" || field === "experience" || field === "address") {
       return (
         <textarea
           key={field}
@@ -61,6 +94,7 @@ function Modal({ type, onClose, onSubmit, onChange, formData, loading, modalErro
           className="modal-input"
           disabled={loading}
           rows="3"
+          required={field === "address" && type === "voter"}
         />
       );
     }
@@ -79,6 +113,23 @@ function Modal({ type, onClose, onSubmit, onChange, formData, loading, modalErro
           disabled={loading}
           min="18"
           max="100"
+        />
+      );
+    }
+
+    // Render phone input
+    if (field === "phone") {
+      return (
+        <input
+          key={field}
+          type="tel"
+          name={field}
+          placeholder="Phone Number"
+          value={formData[field] || ""}
+          onChange={onChange}
+          className="modal-input"
+          disabled={loading}
+          required
         />
       );
     }

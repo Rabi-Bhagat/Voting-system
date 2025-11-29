@@ -2,6 +2,7 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./Login";
+import Register from "./Register";
 import AdminPage from "./pages/AdminPage";
 import VoterDashboard from "./pages/VoterDashboard";
 import PartyPage from "./pages/PartyPage";
@@ -17,6 +18,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/voter_dashboard" element={<VoterDashboard />} />
         <Route path="/candidate_dashboard" element={<CandidateDashboard />} />
