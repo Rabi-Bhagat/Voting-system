@@ -8,6 +8,7 @@ import VoterDashboard from "./pages/VoterDashboard";
 import PartyPage from "./pages/PartyPage";
 
 import EditProfile from "./pages/EditProfile";
+import EditCandidateProfile from "./pages/EditCandidateProfile";
 import BallotPaper from "./pages/BallotPaper";
 import ResultsPage from "./pages/ResultsPage";
 import CandidateDashboard from "./pages/CandidateDashboard";
@@ -24,6 +25,7 @@ function App() {
         <Route path="/candidate_dashboard" element={<CandidateDashboard />} />
         <Route path="/candidate-profile/:candidate_id" element={<CandidateProfile />} />
         <Route path="/edit-profile" element={<EditProfile />} />
+        <Route path="/edit-candidate-profile" element={<EditCandidateProfile />} />
         <Route path="/vote" element={<BallotPaper />} />
         <Route path="/party" element={<PartyPage />} />
 

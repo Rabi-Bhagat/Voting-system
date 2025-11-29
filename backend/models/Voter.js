@@ -27,6 +27,9 @@ const VoterSchema = new mongoose.Schema({
   constituency: String, // Optional, no validation
   has_voted: { type: Boolean, default: false },
   voted_candidate_id: { type: String, default: null },
+  verified: { type: Boolean, default: true }, // Admin can mark as official/verified
+  verified_by: { type: String, default: null }, // Admin username who verified
+  verified_at: { type: Date, default: null }, // When verified
 });
 
 module.exports = mongoose.model("Voter", VoterSchema);

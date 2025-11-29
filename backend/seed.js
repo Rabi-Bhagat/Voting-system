@@ -14,6 +14,7 @@ const voters = [
     constituency: "C001",
     has_voted: false,
     voted_candidate_id: null,
+    verified: true,
   },
   {
     voter_id: "V002",
@@ -25,6 +26,7 @@ const voters = [
     constituency: "C001",
     has_voted: false,
     voted_candidate_id: null,
+    verified: true,
   },
   {
     voter_id: "V003",
@@ -36,6 +38,7 @@ const voters = [
     constituency: "C001",
     has_voted: false,
     voted_candidate_id: null,
+    verified: true,
   },
   {
     voter_id: "V004",
@@ -47,6 +50,7 @@ const voters = [
     constituency: "C002",
     has_voted: false,
     voted_candidate_id: null,
+    verified: true,
   },
   {
     voter_id: "V005",
@@ -58,6 +62,7 @@ const voters = [
     constituency: "C002",
     has_voted: false,
     voted_candidate_id: null,
+    verified: true,
   },
   {
     voter_id: "V006",
@@ -69,6 +74,7 @@ const voters = [
     constituency: "C001",
     has_voted: false,
     voted_candidate_id: null,
+    verified: true,
   },
   {
     voter_id: "V007",
@@ -80,6 +86,7 @@ const voters = [
     constituency: "C001",
     has_voted: false,
     voted_candidate_id: null,
+    verified: true,
   },
   {
     voter_id: "V008",
@@ -91,6 +98,7 @@ const voters = [
     constituency: "C002",
     has_voted: false,
     voted_candidate_id: null,
+    verified: true,
   },
   {
     voter_id: "V009",
@@ -102,6 +110,7 @@ const voters = [
     constituency: "C001",
     has_voted: false,
     voted_candidate_id: null,
+    verified: true,
   },
   {
     voter_id: "V010",
@@ -113,6 +122,7 @@ const voters = [
     constituency: "C002",
     has_voted: false,
     voted_candidate_id: null,
+    verified: true,
   },
   {
     voter_id: "V011",
@@ -124,6 +134,7 @@ const voters = [
     constituency: "C001",
     has_voted: false,
     voted_candidate_id: null,
+    verified: true,
   },
   {
     voter_id: "V012",
@@ -135,6 +146,7 @@ const voters = [
     constituency: "C002",
     has_voted: false,
     voted_candidate_id: null,
+    verified: true,
   },
   {
     voter_id: "V013",
@@ -146,6 +158,7 @@ const voters = [
     constituency: "C001",
     has_voted: false,
     voted_candidate_id: null,
+    verified: true,
   },
   {
     voter_id: "V014",
@@ -157,6 +170,7 @@ const voters = [
     constituency: "C001",
     has_voted: false,
     voted_candidate_id: null,
+    verified: true,
   },
   {
     voter_id: "V015",
@@ -168,13 +182,14 @@ const voters = [
     constituency: "C002",
     has_voted: false,
     voted_candidate_id: null,
+    verified: true,
   },
 ];
 
 const parties = [
-  { party_id: "P001", name: "Democratic Party", password: "party001" },
-  { party_id: "P002", name: "Republican Front", password: "party002" },
-  { party_id: "P003", name: "Green Alliance", password: "party003" },
+  { party_id: "P001", name: "Democratic Party", password: "party001", approved: true },
+  { party_id: "P002", name: "Republican Front", password: "party002", approved: true },
+  { party_id: "P003", name: "Green Alliance", password: "party003", approved: true },
 ];
 
 const candidates = [

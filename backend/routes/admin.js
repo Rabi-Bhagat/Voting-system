@@ -291,7 +291,7 @@ router.post("/add-candidate", async (req, res) => {
 
 // Approve candidate
 router.post("/approve-candidate", async (req, res) => {
-  const { candidate_id } = req.body;
+  const { candidate_id, admin_username } = req.body;
 
   if (!candidate_id) {
     return res.status(400).json({ error: "Candidate ID required" });
@@ -305,6 +305,8 @@ router.post("/approve-candidate", async (req, res) => {
     }
 
     candidate.approved = true;
+    candidate.approved_by = admin_username || "admin";
+    candidate.approved_at = new Date();
     await candidate.save();
 
     res.json({ success: true, message: "Candidate approved successfully" });
@@ -330,6 +332,8 @@ router.post("/reject-candidate", async (req, res) => {
     }
 
     candidate.approved = false;
+    candidate.approved_by = null;
+    candidate.approved_at = null;
     await candidate.save();
 
     res.json({ success: true, message: "Candidate approval removed" });
@@ -391,6 +395,205 @@ router.get("/parties", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to fetch parties" });
+  }
+});
+
+// Get all voters for admin management
+router.get("/voters", async (req, res) => {
+  try {
+    const voters = await Voter.find({}, { password: 0 });
+    res.json(voters);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch voters" });
+  }
+});
+
+// Get all candidates with party info for admin management
+router.get("/candidates", async (req, res) => {
+  try {
+    const candidates = await Candidate.aggregate([
+      {
+        $lookup: {
+          from: "parties",
+          localField: "party_id",
+          foreignField: "party_id",
+          as: "party"
+        }
+      },
+      { $unwind: { path: "$party", preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: "constituencies",
+          localField: "constituency",
+          foreignField: "constituency_id",
+          as: "constituencyInfo"
+        }
+      },
+      { $unwind: { path: "$constituencyInfo", preserveNullAndEmptyArrays: true } },
+      {
+        $project: {
+          candidate_id: 1,
+          name: 1,
+          party_id: 1,
+          party_name: "$party.name",
+          constituency: 1,
+          constituency_name: "$constituencyInfo.name",
+          age: 1,
+          education: 1,
+          experience: 1,
+          background: 1,
+          approved: 1,
+          votes: 1
+        }
+      }
+    ]);
+    res.json(candidates);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch candidates" });
+  }
+});
+
+// Get all parties with full details for admin management
+router.get("/all-parties", async (req, res) => {
+  try {
+    const parties = await Party.find({}, { password: 0 });
+    res.json(parties);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch parties" });
+  }
+});
+
+// Delete voter
+router.delete("/voter/:voter_id", async (req, res) => {
+  try {
+    const result = await Voter.deleteOne({ voter_id: req.params.voter_id });
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: "Voter not found" });
+    }
+    res.json({ success: true, message: "Voter deleted successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to delete voter" });
+  }
+});
+
+// Delete candidate
+router.delete("/candidate/:candidate_id", async (req, res) => {
+  try {
+    const result = await Candidate.deleteOne({ candidate_id: req.params.candidate_id });
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: "Candidate not found" });
+    }
+    res.json({ success: true, message: "Candidate deleted successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to delete candidate" });
+  }
+});
+
+// Delete party
+router.delete("/party/:party_id", async (req, res) => {
+  try {
+    const result = await Party.deleteOne({ party_id: req.params.party_id });
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: "Party not found" });
+    }
+    res.json({ success: true, message: "Party deleted successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to delete party" });
+  }
+});
+
+// Verify/Approve voter
+router.post("/verify-voter", async (req, res) => {
+  const { voter_id, verified, admin_username } = req.body;
+
+  if (!voter_id || verified === undefined) {
+    return res.status(400).json({ error: "Voter ID and verified status required" });
+  }
+
+  try {
+    const voter = await Voter.findOne({ voter_id });
+
+    if (!voter) {
+      return res.status(404).json({ error: "Voter not found" });
+    }
+
+    voter.verified = verified;
+    if (verified) {
+      voter.verified_by = admin_username || "admin";
+      voter.verified_at = new Date();
+    } else {
+      voter.verified_by = null;
+      voter.verified_at = null;
+    }
+    await voter.save();
+
+    res.json({ 
+      success: true, 
+      message: verified ? "Voter verified successfully" : "Voter verification removed" 
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to update voter verification" });
+  }
+});
+
+// Approve party
+router.post("/approve-party", async (req, res) => {
+  const { party_id, admin_username } = req.body;
+
+  if (!party_id) {
+    return res.status(400).json({ error: "Party ID required" });
+  }
+
+  try {
+    const party = await Party.findOne({ party_id });
+
+    if (!party) {
+      return res.status(404).json({ error: "Party not found" });
+    }
+
+    party.approved = true;
+    party.approved_by = admin_username || "admin";
+    party.approved_at = new Date();
+    await party.save();
+
+    res.json({ success: true, message: "Party approved successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to approve party" });
+  }
+});
+
+// Reject party
+router.post("/reject-party", async (req, res) => {
+  const { party_id } = req.body;
+
+  if (!party_id) {
+    return res.status(400).json({ error: "Party ID required" });
+  }
+
+  try {
+    const party = await Party.findOne({ party_id });
+
+    if (!party) {
+      return res.status(404).json({ error: "Party not found" });
+    }
+
+    party.approved = false;
+    party.approved_by = null;
+    party.approved_at = null;
+    await party.save();
+
+    res.json({ success: true, message: "Party approval removed" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to reject party" });
   }
 });
 

@@ -26,6 +26,8 @@ const CandidateSchema = new mongoose.Schema({
   experience: { type: String, default: "" },
   age: { type: Number, default: null },
   approved: { type: Boolean, default: false }, // Admin approval
+  approved_by: { type: String, default: null }, // Admin username who approved
+  approved_at: { type: Date, default: null }, // When approved
   votes: {
     type: Number,
     default: 0

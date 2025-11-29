@@ -424,3 +424,598 @@ body {
     font-size: 14px;
   }
 }
+
+/* Mana
+gement Section */
+.management-section {
+  animation: fadeInUp 0.7s ease-out;
+}
+
+.management-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.management-title {
+  font-size: 32px;
+  font-weight: 800;
+  color: #2d3748;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.btn-back-manage {
+  padding: 12px 28px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.btn-back-manage:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.management-card {
+  background: white;
+  border-radius: 24px;
+  padding: 35px;
+  margin-bottom: 30px;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+}
+
+.section-title {
+  font-size: 24px;
+  font-weight: 700;
+  color: #2d3748;
+  margin-bottom: 25px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.section-icon {
+  font-size: 28px;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.management-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.management-table thead {
+  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+}
+
+.management-table th {
+  padding: 16px 20px;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 700;
+  color: #667eea;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.management-table tbody tr {
+  border-bottom: 1px solid #f7fafc;
+  transition: all 0.3s ease;
+}
+
+.management-table tbody tr:hover {
+  background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+}
+
+.management-table td {
+  padding: 16px 20px;
+  font-size: 15px;
+  color: #4a5568;
+}
+
+.id-cell {
+  font-weight: 700;
+  color: #667eea;
+}
+
+.name-cell {
+  font-weight: 600;
+  color: #2d3748;
+}
+
+.votes-cell {
+  font-weight: 700;
+  color: #38a169;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 6px 14px;
+  border-radius: 50px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.status-badge.approved {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  color: #22543d;
+}
+
+.status-badge.pending {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #744210;
+}
+
+.status-badge.voted {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  color: #22543d;
+}
+
+.status-badge.not-voted {
+  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%);
+  color: #4a5568;
+}
+
+.actions-cell {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.btn-approve,
+.btn-reject,
+.btn-delete {
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-approve {
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  color: white;
+  box-shadow: 0 2px 10px rgba(72, 187, 120, 0.3);
+}
+
+.btn-approve:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(72, 187, 120, 0.4);
+}
+
+.btn-reject {
+  background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+  color: white;
+  box-shadow: 0 2px 10px rgba(237, 137, 54, 0.3);
+}
+
+.btn-reject:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(237, 137, 54, 0.4);
+}
+
+.btn-delete {
+  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+  color: white;
+  box-shadow: 0 2px 10px rgba(255, 107, 107, 0.3);
+}
+
+.btn-delete:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+}
+
+/* Action Manage Card */
+.action-manage .action-icon {
+  color: #805ad5;
+}
+
+.action-manage .btn-action {
+  background: linear-gradient(135deg, #805ad5 0%, #6b46c1 100%);
+  box-shadow: 0 4px 15px rgba(128, 90, 213, 0.3);
+}
+
+.action-manage .btn-action:hover:not(:disabled) {
+  box-shadow: 0 6px 20px rgba(128, 90, 213, 0.4);
+}
+
+/* Responsive Management Section */
+@media (max-width: 768px) {
+  .management-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .management-title {
+    font-size: 26px;
+  }
+
+  .btn-back-manage {
+    width: 100%;
+  }
+
+  .management-card {
+    padding: 25px 20px;
+  }
+
+  .section-title {
+    font-size: 20px;
+  }
+
+  .management-table {
+    font-size: 13px;
+  }
+
+  .management-table th,
+  .management-table td {
+    padding: 12px 10px;
+  }
+
+  .actions-cell {
+    flex-direction: column;
+  }
+
+  .btn-approve,
+  .btn-reject,
+  .btn-delete {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .management-title {
+    font-size: 22px;
+  }
+
+  .section-title {
+    font-size: 18px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .management-table {
+    font-size: 12px;
+  }
+
+  .management-table th,
+  .management-table td {
+    padding: 10px 8px;
+  }
+}
+
+/ * Additional Status Badges */ .status-badge.verified {
+  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  color: #22543d;
+}
+
+.status-badge.unverified {
+  background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%);
+  color: #742a2a;
+}
+
+/* Empty Cell */
+.empty-cell {
+  text-align: center;
+  padding: 40px 20px !important;
+  color: #718096;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* Truncate Cell */
+.truncate-cell {
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: help;
+}
+
+/* Improved Action Buttons */
+.btn-approve,
+.btn-reject,
+.btn-delete {
+  min-width: 90px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+/* Responsive Table Improvements */
+@media (max-width: 1200px) {
+  .management-table {
+    font-size: 13px;
+  }
+
+  .truncate-cell {
+    max-width: 150px;
+  }
+
+  .btn-approve,
+  .btn-reject,
+  .btn-delete {
+    min-width: 80px;
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 992px) {
+
+  .management-table th,
+  .management-table td {
+    padding: 10px 8px;
+  }
+
+  .truncate-cell {
+    max-width: 100px;
+  }
+}
+
+@media (max-width: 768px) {
+  .table-responsive {
+    overflow-x: scroll;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .management-table {
+    min-width: 800px;
+  }
+}
+
+/* Enha
+nced Table Styles for More Data */
+.management-table {
+  min-width: 1200px;
+  font-size: 13px;
+}
+
+.management-table th {
+  white-space: nowrap;
+  padding: 14px 16px;
+}
+
+.management-table td {
+  padding: 14px 16px;
+}
+
+.truncate-cell:hover {
+  background: rgba(102, 126, 234, 0.1);
+  position: relative;
+}
+
+/* Compact Action Buttons */
+.actions-cell .btn-approve,
+.actions-cell .btn-reject,
+.actions-cell .btn-delete {
+  min-width: 40px;
+  padding: 6px 10px;
+  font-size: 16px;
+}
+
+/* Better spacing for wide tables */
+@media (min-width: 1400px) {
+  .management-table {
+    font-size: 14px;
+  }
+
+  .truncate-cell {
+    max-width: 300px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .management-table {
+    min-width: 1400px;
+  }
+}
+
+
+/* Loading State */
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  background: white;
+  border-radius: 24px;
+  box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
+}
+
+.loading-state .spinner {
+  width: 60px;
+  height: 60px;
+  border: 5px solid #e2e8f0;
+  border-top-color: #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 20px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loading-state p {
+  font-size: 18px;
+  color: #4a5568;
+  font-weight: 600;
+}
+
+
+/* Admin and Date Cells */
+.admin-cell {
+  font-weight: 600;
+  color: #805ad5;
+}
+
+.date-cell {
+  font-size: 12px;
+  color: #718096;
+  white-space: nowrap;
+}
+
+/* Enhanced Responsive Tables */
+@media (max-width: 1600px) {
+  .management-table {
+    min-width: 1600px;
+  }
+}
+
+@media (max-width: 1400px) {
+  .management-table {
+    min-width: 1800px;
+    font-size: 12px;
+  }
+
+  .management-table th,
+  .management-table td {
+    padding: 12px 14px;
+  }
+}
+
+@media (max-width: 1200px) {
+  .management-card {
+    padding: 25px 15px;
+  }
+
+  .table-responsive {
+    border-radius: 12px;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.05);
+  }
+}
+
+@media (max-width: 992px) {
+  .management-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .btn-back-manage {
+    width: 100%;
+  }
+
+  .management-table {
+    font-size: 11px;
+  }
+
+  .truncate-cell {
+    max-width: 150px;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 15px 10px;
+  }
+
+  .management-card {
+    padding: 20px 10px;
+    border-radius: 16px;
+  }
+
+  .section-title {
+    font-size: 18px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .management-table {
+    font-size: 10px;
+  }
+
+  .management-table th,
+  .management-table td {
+    padding: 10px 8px;
+  }
+
+  .status-badge {
+    font-size: 10px;
+    padding: 4px 10px;
+  }
+
+  .actions-cell .btn-approve,
+  .actions-cell .btn-reject,
+  .actions-cell .btn-delete {
+    min-width: 32px;
+    padding: 5px 8px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 576px) {
+  .management-title {
+    font-size: 20px;
+  }
+
+  .section-title {
+    font-size: 16px;
+  }
+
+  .table-responsive {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+
+  /* Add scroll indicator */
+  .table-responsive::after {
+    content: '← Scroll to see more →';
+    display: block;
+    text-align: center;
+    padding: 10px;
+    color: #667eea;
+    font-size: 12px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #f7fafc 0%, #edf2f7 100%);
+    border-radius: 0 0 12px 12px;
+  }
+}
+
+/* Print Styles */
+@media print {
+
+  .navbar,
+  .welcome-section,
+  .actions-grid,
+  .management-header button,
+  .actions-cell {
+    display: none !important;
+  }
+
+  .management-card {
+    page-break-inside: avoid;
+    box-shadow: none;
+    border: 1px solid #e2e8f0;
+  }
+
+  .management-table {
+    font-size: 10px;
+  }
+
+  .status-badge {
+    border: 1px solid currentColor;
+  }
+}

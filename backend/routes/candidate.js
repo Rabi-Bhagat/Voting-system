@@ -56,7 +56,12 @@ router.put("/:candidate_id", async (req, res) => {
     if (education !== undefined) candidate.education = education;
     if (experience !== undefined) candidate.experience = experience;
     if (age !== undefined) candidate.age = age;
-    if (password !== undefined) candidate.password = password;
+    
+    // Hash password if provided
+    if (password !== undefined && password.length > 0) {
+      const bcrypt = require("bcrypt");
+      candidate.password = await bcrypt.hash(password, 10);
+    }
 
     await candidate.save();
 
