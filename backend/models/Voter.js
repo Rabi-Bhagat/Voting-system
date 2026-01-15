@@ -24,6 +24,9 @@ const VoterSchema = new mongoose.Schema({
   password: String,
   address: String,
   phone: String,
+  email: { type: String, default: null },
+  age: { type: Number, default: null },
+  gender: { type: String, enum: ["Male", "Female", "Other"], default: null },
   constituency: {
     type: String,
     required: true,
@@ -37,6 +40,10 @@ const VoterSchema = new mongoose.Schema({
   },
   has_voted: { type: Boolean, default: false },
   voted_candidate_id: { type: String, default: null },
+  vote_timestamp: { type: Date, default: null },
+  is_verified: { type: Boolean, default: false },
+  created_at: { type: Date, default: Date.now },
+  last_login: { type: Date, default: null },
 });
 
 module.exports = mongoose.model("Voter", VoterSchema);

@@ -5,6 +5,11 @@ const Constituency = require("./Constituency");
 const CandidateSchema = new mongoose.Schema({
   candidate_id: { type: String, required: true, unique: true },
   name: String,
+  age: { type: Number, default: null },
+  education: { type: String, default: null },
+  experience: { type: String, default: null },
+  bio: { type: String, default: null },
+  image_url: { type: String, default: null },
   party_id: {
     type: String,
     required: function () {
@@ -12,7 +17,7 @@ const CandidateSchema = new mongoose.Schema({
     },
     validate: {
       validator: async function (value) {
-        if (this.candidate_id === "NOTA") return true; // skip validation for NOTA
+        if (this.candidate_id === "NOTA") return true;
         const exists = await Party.exists({ party_id: value });
         return exists !== null;
       },
@@ -33,7 +38,9 @@ const CandidateSchema = new mongoose.Schema({
   votes: {
     type: Number,
     default: 0
-  }
+  },
+  vote_percentage: { type: Number, default: 0 },
+  created_at: { type: Date, default: Date.now }
 });
 
 module.exports = mongoose.model("Candidate", CandidateSchema);
