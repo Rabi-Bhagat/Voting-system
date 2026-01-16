@@ -15,7 +15,7 @@ router.post("/login", async (req, res) => {
     if (role === "admin") {
       const { password } = req.body;
       if (password === "admin123") {
-        return res.json({ success: true, redirect: "/admin" });
+        return res.json({ success: true, redirect: "/admin", admin: { role: "admin" } });
       }
       return res.status(401).json({ error: "Invalid Admin credentials" });
     }

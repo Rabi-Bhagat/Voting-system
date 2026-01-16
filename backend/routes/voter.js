@@ -4,6 +4,63 @@ const Voter = require("../models/Voter");
 const Candidate = require("../models/Candidate");
 const ElectionStatus = require("../models/ElectionStatus");
 
+// GET /voter/profile/:voter_id - Get voter profile with detailed information
+router.get("/profile/:voter_id", async (req, res) => {
+  try {
+    const voter = await Voter.findOne({ voter_id: req.params.voter_id });
+    if (!voter) {
+      return res.status(404).json({ error: "Voter not found" });
+    }
+
+    const Constituency = require("../models/Constituency");
+    const constituency = await Constituency.findOne({ constituency_id: voter.constituency });
+
+    // Get voting statistics
+    const totalVoters = await Voter.countDocuments({ constituency: voter.constituency });
+    const votedCount = await Voter.countDocuments({ 
+      constituency: voter.constituency, 
+      has_voted: true 
+    });
+
+    // Update last login
+    voter.last_login = new Date();
+    await voter.save();
+
+    res.json({
+      profile: {
+        voter_id: voter.voter_id,
+        name: `${voter.first_name} ${voter.last_name}`,
+        email: voter.email,
+        phone: voter.phone,
+        address: voter.address,
+        age: voter.age,
+        gender: voter.gender,
+        constituency: {
+          id: voter.constituency,
+          name: constituency?.name || "Unknown"
+        },
+        is_verified: voter.is_verified,
+        verification_status: voter.is_verified ? "Verified" : "Pending",
+        created_at: voter.created_at,
+        last_login: voter.last_login
+      },
+      voting_info: {
+        has_voted: voter.has_voted,
+        voted_candidate_id: voter.voted_candidate_id,
+        vote_timestamp: voter.vote_timestamp
+      },
+      constituency_stats: {
+        total_voters: totalVoters,
+        voted_count: votedCount,
+        turnout_percentage: totalVoters > 0 ? ((votedCount / totalVoters) * 100).toFixed(2) : 0
+      }
+    });
+  } catch (err) {
+    console.error("Error fetching voter profile:", err);
+    res.status(500).json({ error: "Server error", details: err.message });
+  }
+});
+
 // Get voter by voter_id
 router.get("/:voter_id", async (req, res) => {
   try {
@@ -12,11 +69,44 @@ router.get("/:voter_id", async (req, res) => {
     const Constituency = require("../models/Constituency");
     if (voter) {
       const constituency = await Constituency.findOne({ constituency_id: voter.constituency });
+      // Update last login
+      voter.last_login = new Date();
+      await voter.save();
       return res.json({ ...voter.toObject(), constituency });
     }
 
     if (!voter) return res.status(404).json({ error: "Voter not found" });
     res.json(voter);
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
+// Get voter voting history
+router.get("/history/:voter_id", async (req, res) => {
+  try {
+    const voter = await Voter.findOne({ voter_id: req.params.voter_id });
+    if (!voter) return res.status(404).json({ error: "Voter not found" });
+
+    if (!voter.has_voted) {
+      return res.json({ 
+        has_voted: false, 
+        message: "You have not voted yet" 
+      });
+    }
+
+    const candidate = await Candidate.findOne({ candidate_id: voter.voted_candidate_id });
+    const party = candidate && candidate.party_id ? 
+      await require("../models/Party").findOne({ party_id: candidate.party_id }) : 
+      null;
+
+    res.json({
+      has_voted: true,
+      voted_candidate: candidate ? candidate.name : "NOTA",
+      voted_party: party ? party.name : "N/A",
+      vote_timestamp: voter.vote_timestamp,
+      constituency: voter.constituency
+    });
   } catch (err) {
     res.status(500).json({ error: "Server error" });
   }
@@ -116,13 +206,17 @@ router.post("/vote", async (req, res) => {
 
     voter.has_voted = true;
     voter.voted_candidate_id = candidate_id;
+    voter.vote_timestamp = new Date();
     await voter.save();
 
     // Mark election as conducted
     await ElectionStatus.deleteMany({});
     await ElectionStatus.create({ conducted: true });
 
-    return res.json({ message: "Vote cast successfully!" });
+    return res.json({ 
+      message: "Vote cast successfully!",
+      timestamp: voter.vote_timestamp
+    });
   } catch (err) {
     console.error("Vote error:", err);
     return res.status(500).json({ error: "Server error while voting." });

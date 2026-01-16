@@ -5,6 +5,8 @@ const Constituency = require("./Constituency");
 const CandidateSchema = new mongoose.Schema({
   candidate_id: { type: String, required: true, unique: true },
   name: String,
+  email: { type: String, default: null, sparse: true },
+  gmail_id: { type: String, default: null, sparse: true },
   age: { type: Number, default: null },
   education: { type: String, default: null },
   experience: { type: String, default: null },
@@ -40,7 +42,10 @@ const CandidateSchema = new mongoose.Schema({
     default: 0
   },
   vote_percentage: { type: Number, default: 0 },
-  created_at: { type: Date, default: Date.now }
+  is_verified: { type: Boolean, default: false },
+  is_active: { type: Boolean, default: true },
+  created_at: { type: Date, default: Date.now },
+  registration_date: { type: Date, default: Date.now }
 });
 
 module.exports = mongoose.model("Candidate", CandidateSchema);
