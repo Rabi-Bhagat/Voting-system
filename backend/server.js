@@ -16,9 +16,30 @@ const app = express();
 const FRONTEND_ORIGIN =
   process.env.BASE_URL || process.env.FRONTEND_URL || "http://localhost:3000";
 
+const allowedOrigins = [
+  FRONTEND_ORIGIN,
+  "http://localhost:3000",
+  "http://localhost:3001",
+  "http://localhost:3002",
+  "http://localhost:3003",
+  "http://127.0.0.1:3000",
+  "http://127.0.0.1:3001",
+  "http://127.0.0.1:3002",
+  "http://127.0.0.1:3003"
+];
+
 app.use(
   cors({
-    origin: FRONTEND_ORIGIN,
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      
+      if (allowedOrigins.indexOf(origin) !== -1 || origin.startsWith('http://localhost:')) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
     credentials: true,
   })
 );
@@ -42,6 +63,11 @@ const passwordRecoveryRoutes = require("./routes/passwordRecovery");
 const adminManagementRoutes = require("./routes/adminManagement");
 const adminDashboardRoutes = require("./routes/adminDashboard");
 
+// New feature routes
+const electionRoutes = require("./routes/election");
+const auditRoutes = require("./routes/audit");
+const notificationRoutes = require("./routes/notification");
+
 // ============================================
 // ROUTE SETUP
 // ============================================
@@ -57,6 +83,12 @@ app.use("/analytics", analyticsRoutes);
 app.use("/password-recovery", passwordRecoveryRoutes);
 app.use("/admin-management", adminManagementRoutes);
 app.use("/admin-dashboard", adminDashboardRoutes);
+
+// New feature routes
+app.use("/election", electionRoutes);
+app.use("/audit", auditRoutes);
+app.use("/notifications", notificationRoutes);
+
 app.use("/", authRoutes);
 
 // ============================================

@@ -4,6 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Login from "./Login";
 import Register from "./Register";
 import AdminPage from "./pages/AdminPage";
+import AdminDashboard from "./pages/AdminDashboard";
 import VoterDashboard from "./pages/VoterDashboard";
 import PartyPage from "./pages/PartyPage";
 import EditProfile from "./pages/EditProfile";
@@ -13,6 +14,7 @@ import ResultsPage from "./pages/ResultsPage";
 import CandidateDashboard from "./pages/CandidateDashboard";
 import CandidateProfile from "./pages/CandidateProfile";
 import ConstituencyAdmin from "./pages/ConstituencyAdmin";
+import VoteReceipt from "./pages/VoteReceipt";
 
 function App() {
   return (
@@ -21,12 +23,15 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/admin" element={<AdminPage />} />
+        <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/voter_dashboard" element={<VoterDashboard />} />
+        <Route path="/voter-dashboard" element={<VoterDashboard />} />
         <Route path="/candidate_dashboard" element={<CandidateDashboard />} />
         <Route path="/candidate-profile/:candidate_id" element={<CandidateProfile />} />
         <Route path="/edit-profile" element={<EditProfile />} />
         <Route path="/edit-candidate-profile" element={<EditCandidateProfile />} />
         <Route path="/vote" element={<BallotPaper />} />
+        <Route path="/vote-receipt" element={<VoteReceipt />} />
         <Route path="/party" element={<PartyPage />} />
         <Route path="/constituency_admin" element={<ConstituencyAdmin />} />
         <Route path="/results" element={<ResultsPage />} />

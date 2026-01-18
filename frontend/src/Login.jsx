@@ -61,6 +61,9 @@ function Login() {
           localStorage.setItem("constituencyInfo", JSON.stringify(res.data.constituency));
         } else if (role === "admin" && res.data.admin) {
           localStorage.setItem("adminInfo", JSON.stringify(res.data.admin));
+          // Redirect admin to the new dashboard
+          window.location.href = "/admin-dashboard";
+          return;
         }
 
         window.location.href = res.data.redirect;

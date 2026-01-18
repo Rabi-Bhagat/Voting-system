@@ -3,6 +3,8 @@ const router = express.Router();
 const Voter = require("../models/Voter");
 const Candidate = require("../models/Candidate");
 const ElectionStatus = require("../models/ElectionStatus");
+const VoteReceipt = require("../models/VoteReceipt");
+const AuditLog = require("../models/AuditLog");
 
 // GET /voter/profile/:voter_id - Get voter profile with detailed information
 router.get("/profile/:voter_id", async (req, res) => {
@@ -167,7 +169,13 @@ router.get("/ballot/:voterId", async (req, res) => {
           }
         ]);
 
-        res.json({ voter, candidates });
+        const Constituency = require("../models/Constituency");
+        const constituencyData = await Constituency.findOne({ constituency_id: voter.constituency });
+        
+        const voterObj = voter.toObject();
+        voterObj.constituency_name = constituencyData ? constituencyData.name : voter.constituency;
+
+        res.json({ voter: voterObj, candidates });
     } catch (err) {
         console.error("Ballot fetch error:", err);
         res.status(500).json({ error: "Failed to fetch ballot data." });
@@ -218,13 +226,79 @@ router.post("/vote", async (req, res) => {
     await ElectionStatus.deleteMany({});
     await ElectionStatus.create({ conducted: true });
 
+    // Generate vote receipt
+    let voteReceipt = null;
+    try {
+      voteReceipt = await VoteReceipt.createReceipt(
+        voter_id,
+        'current',
+        voter.constituency,
+        candidate_id
+      );
+    } catch (receiptError) {
+      console.error('Receipt generation error:', receiptError);
+    }
+
+    // Log the vote action
+    await AuditLog.log({
+      action: 'VOTE_CAST',
+      performed_by: voter_id,
+      user_role: 'voter',
+      target_type: 'vote',
+      target_id: candidate_id,
+      details: { constituency: voter.constituency }
+    });
+
     return res.json({ 
       message: "Vote cast successfully!",
-      timestamp: voter.vote_timestamp
+      timestamp: voter.vote_timestamp,
+      receipt: voteReceipt ? {
+        receipt_id: voteReceipt.receipt_id,
+        verification_code: voteReceipt.verification_code
+      } : null
     });
   } catch (err) {
     console.error("Vote error:", err);
     return res.status(500).json({ error: "Server error while voting." });
+  }
+});
+
+
+// Verify vote receipt
+router.post("/verify-receipt", async (req, res) => {
+  try {
+    const { verification_code } = req.body;
+    
+    if (!verification_code) {
+      return res.status(400).json({ error: "Verification code is required" });
+    }
+    
+    const result = await VoteReceipt.verifyReceipt(verification_code);
+    res.json(result);
+  } catch (err) {
+    console.error("Receipt verification error:", err);
+    res.status(500).json({ error: "Failed to verify receipt" });
+  }
+});
+
+// Get vote receipt by receipt ID
+router.get("/receipt/:receipt_id", async (req, res) => {
+  try {
+    const receipt = await VoteReceipt.getByReceiptId(req.params.receipt_id);
+    
+    if (!receipt) {
+      return res.status(404).json({ error: "Receipt not found" });
+    }
+    
+    res.json({
+      receipt_id: receipt.receipt_id,
+      timestamp: receipt.timestamp,
+      constituency: receipt.constituency,
+      vote_hash: receipt.vote_hash.substring(0, 16) + '...', // Partial for privacy
+      is_verified: receipt.is_verified
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch receipt" });
   }
 });
 

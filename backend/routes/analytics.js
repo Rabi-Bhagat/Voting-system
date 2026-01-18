@@ -1,208 +1,338 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const Voter = require("../models/Voter");
-const Candidate = require("../models/Candidate");
-const Party = require("../models/Party");
-const Constituency = require("../models/Constituency");
-const VotingAnalytics = require("../models/VotingAnalytics");
+const Voter = require('../models/Voter');
+const Candidate = require('../models/Candidate');
+const Party = require('../models/Party');
+const Constituency = require('../models/Constituency');
+const Election = require('../models/Election');
 
-// GET /analytics/dashboard - Get overall voting statistics
-router.get("/dashboard", async (req, res) => {
+// Get dashboard overview statistics
+router.get('/dashboard', async (req, res) => {
   try {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    // Basic counts
     const totalVoters = await Voter.countDocuments();
-    const totalVotesCast = await Voter.countDocuments({ has_voted: true });
-    const voterTurnout = totalVoters > 0 ? ((totalVotesCast / totalVoters) * 100).toFixed(2) : 0;
-
-    const totalConstituencies = await Constituency.countDocuments();
-    const totalParties = await Party.countDocuments();
+    const verifiedVoters = await Voter.countDocuments({ is_verified: true });
     const totalCandidates = await Candidate.countDocuments();
+    const approvedCandidates = await Candidate.countDocuments({ approved: true });
+    const totalParties = await Party.countDocuments();
+    const totalConstituencies = await Constituency.countDocuments();
+    
+    // Voting statistics
+    const votedCount = await Voter.countDocuments({ has_voted: true });
+    const turnoutPercentage = verifiedVoters > 0 ? ((votedCount / verifiedVoters) * 100).toFixed(2) : 0;
+    
+    // Today's statistics
+    const votesToday = await Voter.countDocuments({
+      has_voted: true,
+      vote_timestamp: { $gte: today }
+    });
+    
+    // Active election
+    let activeElection = null;
+    try {
+      activeElection = await Election.getCurrentElection();
+    } catch (e) {
+      // Election model may not have data yet
+    }
+    
+    res.json({
+      overview: {
+        total_voters: totalVoters,
+        verified_voters: verifiedVoters,
+        total_candidates: totalCandidates,
+        approved_candidates: approvedCandidates,
+        total_parties: totalParties,
+        total_constituencies: totalConstituencies
+      },
+      voting: {
+        votes_cast: votedCount,
+        votes_remaining: verifiedVoters - votedCount,
+        turnout_percentage: parseFloat(turnoutPercentage),
+        votes_today: votesToday
+      },
+      active_election: activeElection ? {
+        id: activeElection.election_id,
+        title: activeElection.title,
+        start_date: activeElection.start_date,
+        end_date: activeElection.end_date,
+        status: activeElection.status
+      } : null
+    });
+  } catch (error) {
+    console.error('Dashboard stats error:', error);
+    res.status(500).json({ error: 'Failed to fetch dashboard statistics' });
+  }
+});
 
-    const genderStats = await Voter.aggregate([
+// Get real-time voting statistics
+router.get('/voting-stats', async (req, res) => {
+  try {
+    const totalEligible = await Voter.countDocuments({ is_verified: true });
+    const voted = await Voter.countDocuments({ has_voted: true });
+    
+    // Votes by constituency
+    const byConstituency = await Voter.aggregate([
+      { $match: { has_voted: true } },
       {
         $group: {
-          _id: "$gender",
+          _id: '$constituency',
+          votes: { $sum: 1 }
+        }
+      },
+      { $sort: { votes: -1 } }
+    ]);
+    
+    // Get constituency names
+    const constituencies = await Constituency.find();
+    const constituencyMap = {};
+    constituencies.forEach(c => {
+      constituencyMap[c.constituency_id] = c.name;
+    });
+    
+    const votesByConstituency = byConstituency.map(item => ({
+      constituency_id: item._id,
+      constituency_name: constituencyMap[item._id] || item._id,
+      votes: item.votes
+    }));
+    
+    res.json({
+      total_eligible: totalEligible,
+      votes_cast: voted,
+      votes_remaining: totalEligible - voted,
+      turnout_percentage: totalEligible > 0 ? ((voted / totalEligible) * 100).toFixed(2) : 0,
+      by_constituency: votesByConstituency,
+      last_updated: new Date()
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch voting statistics' });
+  }
+});
+
+// Get votes over time (for charts)
+router.get('/votes-timeline', async (req, res) => {
+  try {
+    const { interval = 'hour' } = req.query;
+    
+    let groupFormat;
+    switch (interval) {
+      case 'minute':
+        groupFormat = { 
+          year: { $year: '$vote_timestamp' },
+          month: { $month: '$vote_timestamp' },
+          day: { $dayOfMonth: '$vote_timestamp' },
+          hour: { $hour: '$vote_timestamp' },
+          minute: { $minute: '$vote_timestamp' }
+        };
+        break;
+      case 'day':
+        groupFormat = {
+          year: { $year: '$vote_timestamp' },
+          month: { $month: '$vote_timestamp' },
+          day: { $dayOfMonth: '$vote_timestamp' }
+        };
+        break;
+      default: // hour
+        groupFormat = {
+          year: { $year: '$vote_timestamp' },
+          month: { $month: '$vote_timestamp' },
+          day: { $dayOfMonth: '$vote_timestamp' },
+          hour: { $hour: '$vote_timestamp' }
+        };
+    }
+    
+    const timeline = await Voter.aggregate([
+      { $match: { has_voted: true, vote_timestamp: { $exists: true, $ne: null } } },
+      {
+        $group: {
+          _id: groupFormat,
           count: { $sum: 1 }
         }
-      }
+      },
+      { $sort: { '_id': 1 } }
     ]);
-
-    const ageStats = await Voter.aggregate([
-      {
-        $bucket: {
-          groupBy: "$age",
-          boundaries: [18, 25, 35, 45, 55, 65, 100],
-          default: "Unknown",
-          output: {
-            count: { $sum: 1 }
-          }
-        }
-      }
-    ]);
-
+    
     res.json({
-      totalVoters,
-      totalVotesCast,
-      voterTurnout: `${voterTurnout}%`,
-      totalConstituencies,
-      totalParties,
-      totalCandidates,
-      genderDistribution: genderStats,
-      ageDistribution: ageStats
+      interval,
+      data: timeline.map(item => ({
+        timestamp: item._id,
+        votes: item.count
+      }))
     });
-  } catch (err) {
-    console.error("Analytics error:", err);
-    res.status(500).json({ error: "Failed to fetch analytics" });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch timeline' });
   }
 });
 
-// GET /analytics/constituency/:constituencyId - Get constituency-specific analytics
-router.get("/constituency/:constituencyId", async (req, res) => {
+// Get candidate vote distribution
+router.get('/candidate-votes', async (req, res) => {
   try {
-    const { constituencyId } = req.params;
-
-    const totalVoters = await Voter.countDocuments({ constituency: constituencyId });
-    const totalVotesCast = await Voter.countDocuments({ 
-      constituency: constituencyId, 
-      has_voted: true 
-    });
-    const turnout = totalVoters > 0 ? ((totalVotesCast / totalVoters) * 100).toFixed(2) : 0;
-
-    const candidates = await Candidate.find({ constituency: constituencyId })
-      .populate("party_id", "name");
-
-    const candidateStats = candidates.map(c => ({
-      candidate_id: c.candidate_id,
-      name: c.name,
-      votes: c.votes,
-      percentage: totalVotesCast > 0 ? ((c.votes / totalVotesCast) * 100).toFixed(2) : 0
-    }));
-
-    const partyStats = await Candidate.aggregate([
-      { $match: { constituency: constituencyId } },
-      {
-        $group: {
-          _id: "$party_id",
-          totalVotes: { $sum: "$votes" }
-        }
-      },
-      {
-        $lookup: {
-          from: "parties",
-          localField: "_id",
-          foreignField: "party_id",
-          as: "partyInfo"
-        }
-      },
-      { $unwind: "$partyInfo" },
-      {
-        $project: {
-          party_id: "$_id",
-          party_name: "$partyInfo.name",
-          votes: "$totalVotes",
-          percentage: {
-            $cond: [
-              { $eq: [totalVotesCast, 0] },
-              0,
-              { $multiply: [{ $divide: ["$totalVotes", totalVotesCast] }, 100] }
-            ]
-          }
-        }
-      }
-    ]);
-
-    res.json({
-      constituency: constituencyId,
-      totalVoters,
-      totalVotesCast,
-      turnout: `${turnout}%`,
-      candidates: candidateStats,
-      parties: partyStats
-    });
-  } catch (err) {
-    console.error("Constituency analytics error:", err);
-    res.status(500).json({ error: "Failed to fetch constituency analytics" });
-  }
-});
-
-// GET /analytics/party/:partyId - Get party-specific analytics
-router.get("/party/:partyId", async (req, res) => {
-  try {
-    const { partyId } = req.params;
-
-    const party = await Party.findOne({ party_id: partyId });
-    if (!party) {
-      return res.status(404).json({ error: "Party not found" });
+    const { constituency } = req.query;
+    
+    let query = { approved: true };
+    if (constituency) {
+      query.constituency = constituency;
     }
-
-    const candidates = await Candidate.find({ party_id: partyId });
-    const totalVotes = candidates.reduce((sum, c) => c.votes + sum, 0);
-
-    const candidateStats = candidates.map(c => ({
-      candidate_id: c.candidate_id,
-      name: c.name,
-      constituency: c.constituency,
-      votes: c.votes
-    }));
-
-    const constituencyBreakdown = await Candidate.aggregate([
-      { $match: { party_id: partyId } },
-      {
-        $group: {
-          _id: "$constituency",
-          votes: { $sum: "$votes" }
-        }
-      },
-      {
-        $lookup: {
-          from: "constituencies",
-          localField: "_id",
-          foreignField: "constituency_id",
-          as: "constituencyInfo"
-        }
-      },
-      { $unwind: "$constituencyInfo" },
-      {
-        $project: {
-          constituency_id: "$_id",
-          constituency_name: "$constituencyInfo.name",
-          votes: 1
-        }
-      }
-    ]);
-
-    res.json({
-      party_id: partyId,
-      party_name: party.name,
-      totalVotes,
-      candidates: candidateStats,
-      constituencyBreakdown
+    
+    const candidates = await Candidate.find(query)
+      .select('candidate_id name party_id constituency votes')
+      .sort({ votes: -1 });
+    
+    // Get party names
+    const parties = await Party.find();
+    const partyMap = {};
+    parties.forEach(p => {
+      partyMap[p.party_id] = p.name;
     });
-  } catch (err) {
-    console.error("Party analytics error:", err);
-    res.status(500).json({ error: "Failed to fetch party analytics" });
+    
+    const totalVotes = candidates.reduce((sum, c) => sum + (c.votes || 0), 0);
+    
+    res.json({
+      total_votes: totalVotes,
+      candidates: candidates.map(c => ({
+        candidate_id: c.candidate_id,
+        name: c.name,
+        party: partyMap[c.party_id] || c.party_id,
+        constituency: c.constituency,
+        votes: c.votes || 0,
+        percentage: totalVotes > 0 ? ((c.votes || 0) / totalVotes * 100).toFixed(2) : 0
+      }))
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch candidate votes' });
   }
 });
 
-// GET /analytics/live-updates - Get real-time voting updates
-router.get("/live-updates", async (req, res) => {
+// Get party-wise vote distribution
+router.get('/party-votes', async (req, res) => {
   try {
-    const recentVotes = await Voter.find({ has_voted: true })
-      .sort({ vote_timestamp: -1 })
-      .limit(10)
-      .select("voter_id voted_candidate_id vote_timestamp");
-
-    const totalVotesCast = await Voter.countDocuments({ has_voted: true });
-    const totalVoters = await Voter.countDocuments();
-
-    res.json({
-      totalVotesCast,
-      totalVoters,
-      turnout: totalVoters > 0 ? ((totalVotesCast / totalVoters) * 100).toFixed(2) : 0,
-      recentVotes
+    const partyVotes = await Candidate.aggregate([
+      { $match: { approved: true } },
+      {
+        $group: {
+          _id: '$party_id',
+          total_votes: { $sum: '$votes' },
+          candidate_count: { $sum: 1 }
+        }
+      },
+      { $sort: { total_votes: -1 } }
+    ]);
+    
+    // Get party details
+    const parties = await Party.find();
+    const partyMap = {};
+    parties.forEach(p => {
+      partyMap[p.party_id] = { name: p.name, symbol: p.symbol, color: p.color };
     });
-  } catch (err) {
-    console.error("Live updates error:", err);
-    res.status(500).json({ error: "Failed to fetch live updates" });
+    
+    const totalVotes = partyVotes.reduce((sum, p) => sum + p.total_votes, 0);
+    
+    res.json({
+      total_votes: totalVotes,
+      parties: partyVotes.map(p => ({
+        party_id: p._id,
+        name: partyMap[p._id]?.name || p._id,
+        symbol: partyMap[p._id]?.symbol || '',
+        color: partyMap[p._id]?.color || '#666',
+        votes: p.total_votes,
+        candidates: p.candidate_count,
+        percentage: totalVotes > 0 ? (p.total_votes / totalVotes * 100).toFixed(2) : 0
+      }))
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch party votes' });
+  }
+});
+
+// Get constituency-wise summary
+router.get('/constituency-summary', async (req, res) => {
+  try {
+    const constituencies = await Constituency.find();
+    const summary = [];
+    
+    for (const const_item of constituencies) {
+      const totalVoters = await Voter.countDocuments({ 
+        constituency: const_item.constituency_id,
+        is_verified: true 
+      });
+      const votedCount = await Voter.countDocuments({ 
+        constituency: const_item.constituency_id,
+        has_voted: true 
+      });
+      const candidateCount = await Candidate.countDocuments({ 
+        constituency: const_item.constituency_id,
+        approved: true 
+      });
+      
+      // Get leading candidate
+      const leadingCandidate = await Candidate.findOne({ 
+        constituency: const_item.constituency_id,
+        approved: true 
+      }).sort({ votes: -1 }).select('name party_id votes');
+      
+      summary.push({
+        constituency_id: const_item.constituency_id,
+        name: const_item.name,
+        total_voters: totalVoters,
+        votes_cast: votedCount,
+        turnout: totalVoters > 0 ? ((votedCount / totalVoters) * 100).toFixed(2) : 0,
+        candidates: candidateCount,
+        leading: leadingCandidate ? {
+          name: leadingCandidate.name,
+          party: leadingCandidate.party_id,
+          votes: leadingCandidate.votes || 0
+        } : null
+      });
+    }
+    
+    res.json(summary.sort((a, b) => parseFloat(b.turnout) - parseFloat(a.turnout)));
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch constituency summary' });
+  }
+});
+
+// Get voter demographics
+router.get('/voter-demographics', async (req, res) => {
+  try {
+    // By gender
+    const byGender = await Voter.aggregate([
+      { $group: { _id: '$gender', count: { $sum: 1 } } }
+    ]);
+    
+    // By age groups
+    const voters = await Voter.find({ age: { $exists: true } }).select('age');
+    const ageGroups = {
+      '18-25': 0,
+      '26-35': 0,
+      '36-45': 0,
+      '46-55': 0,
+      '56-65': 0,
+      '65+': 0
+    };
+    
+    voters.forEach(v => {
+      if (v.age >= 18 && v.age <= 25) ageGroups['18-25']++;
+      else if (v.age <= 35) ageGroups['26-35']++;
+      else if (v.age <= 45) ageGroups['36-45']++;
+      else if (v.age <= 55) ageGroups['46-55']++;
+      else if (v.age <= 65) ageGroups['56-65']++;
+      else ageGroups['65+']++;
+    });
+    
+    // Voting by verification status
+    const byVerification = await Voter.aggregate([
+      { $group: { _id: '$is_verified', count: { $sum: 1 } } }
+    ]);
+    
+    res.json({
+      by_gender: byGender,
+      by_age_group: Object.entries(ageGroups).map(([group, count]) => ({ group, count })),
+      by_verification: byVerification
+    });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch demographics' });
   }
 });
 
