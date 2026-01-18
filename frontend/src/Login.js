@@ -17,11 +17,6 @@ function Login() {
     e.preventDefault();
     setError("");
 
-<<<<<<< HEAD
-    try {
-      // const res = await axios.post("http://localhost:5000/login", { ...formData, role });
-      const res = await axios.post(`${API_BASE}/login`, { ...formData, role }); 
-=======
     // Validate required fields based on role
     if (role === "voter" && (!formData.voter_id || !formData.first_name || !formData.last_name || !formData.password)) {
       setError("Please fill all required fields");
@@ -35,7 +30,10 @@ function Login() {
       setError("Please fill all required fields");
       return;
     }
-
+    if (role === "constituency" && (!formData.constituency_id || !formData.password)) {
+      setError("Please fill all required fields");
+      return;
+    }
     if (role === "admin" && !formData.password) {
       setError("Please enter admin password");
       return;
@@ -51,22 +49,16 @@ function Login() {
       }
 
       const res = await axios.post(`${API_BASE}/login`, loginData); 
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
 
       if (res.data.success) {
         if (role === "voter" && res.data.voter) {
           localStorage.setItem("voterInfo", JSON.stringify(res.data.voter));
-<<<<<<< HEAD
-        } else if (role === "party" && res.data.party) {
-          localStorage.setItem("partyInfo", JSON.stringify(res.data.party));
-        } else if (role === "constituency" && res.data.constituency) {
-          localStorage.setItem("constituencyInfo", JSON.stringify(res.data.constituency));
-=======
         } else if (role === "candidate" && res.data.candidate) {
           localStorage.setItem("candidateInfo", JSON.stringify(res.data.candidate));
         } else if (role === "party" && res.data.party) {
           localStorage.setItem("partyInfo", JSON.stringify(res.data.party));
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
+        } else if (role === "constituency" && res.data.constituency) {
+          localStorage.setItem("constituencyInfo", JSON.stringify(res.data.constituency));
         } else if (role === "admin" && res.data.admin) {
           localStorage.setItem("adminInfo", JSON.stringify(res.data.admin));
         }
@@ -74,10 +66,7 @@ function Login() {
         window.location.href = res.data.redirect;
       }
     } catch (err) {
-<<<<<<< HEAD
-=======
       console.error("Login error:", err);
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
       setError(err.response?.data?.error || "Login failed");
     }
   };
@@ -85,22 +74,14 @@ function Login() {
   return (
     <div className="container">
       <div className="login-card">
-<<<<<<< HEAD
-        <h1 className="text-center mb-4">VOTING SYSTEM</h1>
-=======
         <h1 className="text-center mb-4">ONLINE VOTING SYSTEM</h1>
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
         <h4 className="text-center mb-4">SIGN IN TO CONTINUE</h4>
 
         {/* Role Switcher */}
         {role !== "admin" && (
           <div className="role-container">
             <ul className="nav nav-pills mb-3">
-<<<<<<< HEAD
-              {["voter", "party", "constituency"].map(r => (
-=======
-              {["voter", "candidate", "party"].map(r => (
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
+              {["voter", "candidate", "party", "constituency"].map(r => (
                 <li className="nav-item" key={r}>
                   <button
                     className={`nav-link ${role === r ? "active" : ""}`}
@@ -123,11 +104,6 @@ function Login() {
           <form onSubmit={handleSubmit}>
             {role === "voter" && (
               <>
-<<<<<<< HEAD
-                <input name="voter_id" placeholder="Voter ID" required onChange={handleChange} />
-                <input name="first_name" placeholder="First Name" required onChange={handleChange} />
-                <input name="last_name" placeholder="Last Name" required onChange={handleChange} />
-=======
                 <label className="input-label">Voter ID</label>
                 <input 
                   name="voter_id" 
@@ -167,31 +143,10 @@ function Login() {
                   onChange={handleChange}
                   value={formData.candidate_id || ""}
                 />
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
               </>
             )}
 
             {role === "party" && (
-<<<<<<< HEAD
-              <input name="party_id" placeholder="Party ID" required onChange={handleChange} />
-            )}
-
-            {role === "constituency" && (
-              <input name="constituency_id" placeholder="Constituency ID" required onChange={handleChange} />
-            )}
-
-            {role === "admin" && (
-              <p className="text-muted text-center mb-2">Enter Admin Password</p>
-            )}
-
-            <input
-              className='admin-password1'
-              name="password"
-              type="password"
-              placeholder="Password"
-              required
-              onChange={handleChange}
-=======
               <>
                 <label className="input-label">Party ID</label>
                 <input 
@@ -204,7 +159,18 @@ function Login() {
               </>
             )}
 
-
+            {role === "constituency" && (
+              <>
+                <label className="input-label">Constituency ID</label>
+                <input 
+                  name="constituency_id" 
+                  placeholder="Enter Constituency ID" 
+                  required 
+                  onChange={handleChange}
+                  value={formData.constituency_id || ""}
+                />
+              </>
+            )}
 
             {role === "admin" && (
               <>
@@ -234,26 +200,16 @@ function Login() {
               required
               onChange={handleChange}
               value={formData.password || ""}
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
             />
 
             <button
               type="submit"
-<<<<<<< HEAD
-              className="btn btn-primary mr-70 w-20 mt-2 px-3 py-2 text-sm w-50 mx-auto d-block"
-            >
-              Login
-            </button>
-
-            {error && <div className="alert alert-danger mt-3">{error}</div>}
-=======
               className="btn btn-primary login-button"
             >
               {role === "admin" ? "Login as Admin" : `Login as ${role.charAt(0).toUpperCase() + role.slice(1)}`}
             </button>
 
             {error && <div className="alert alert-danger mt-3">❌ {error}</div>}
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
           </form>
         </div>
 
@@ -261,8 +217,6 @@ function Login() {
         <div className="button-group mt-3">
           {role !== "admin" ? (
             <>
-<<<<<<< HEAD
-=======
               <div className="register-link text-center mb-3">
                 <p style={{ color: '#666', marginBottom: '10px' }}>Don't have an account?</p>
                 <button
@@ -282,7 +236,6 @@ function Login() {
                   📝 Register Here
                 </button>
               </div>
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
               <div className="admin-btn">
                 <button
                   onClick={() => {
@@ -292,20 +245,12 @@ function Login() {
                   }}
                   className="btn"
                 >
-<<<<<<< HEAD
-                  Admin Login
-=======
                   🔐 Admin Login
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
                 </button>
               </div>
               <div className="view-results-btn">
                 <button onClick={() => window.location.href = "/results"} className="btn">
-<<<<<<< HEAD
-                  View Results
-=======
                   📊 View Results
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
                 </button>
               </div>
             </>
@@ -319,11 +264,7 @@ function Login() {
                 }}
                 className="btn btn-secondary"
               >
-<<<<<<< HEAD
-                Back to User Login
-=======
                 ← Back to User Login
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
               </button>
             </div>
           )}

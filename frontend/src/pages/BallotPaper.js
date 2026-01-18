@@ -10,7 +10,7 @@ const BallotPaper = () => {
   const [candidates, setCandidates] = useState([]);
   const [voter, setVoter] = useState(null);
   const [message, setMessage] = useState("");
-  const navigate = useNavigate(); // initialize navigation
+  const navigate = useNavigate();
 
   useEffect(() => {
     const stored = localStorage.getItem("voterInfo");
@@ -19,7 +19,6 @@ const BallotPaper = () => {
 
       const fetchBallotData = async () => {
         try {
-          // const res = await axios.get(`http://localhost:5000/voter/ballot/${voter_id}`);
           const res = await axios.get(`${API_BASE}/voter/ballot/${voter_id}`); 
           setCandidates(res.data.candidates);
           setVoter(res.data.voter);
@@ -40,7 +39,6 @@ const BallotPaper = () => {
     }
 
     try {
-      // const res = await axios.post("http://localhost:5000/voter/vote", {
       const res = await axios.post(`${API_BASE}/voter/vote`, { 
         voter_id: voter.voter_id,
         candidate_id,
@@ -75,15 +73,6 @@ const BallotPaper = () => {
               <Card.Body>
                 <Card.Title>{candidate.name}</Card.Title>
                 <Card.Text>Party: {candidate.party_name}</Card.Text>
-<<<<<<< HEAD
-                {voter?.has_voted ? (
-                  voter.voted_candidate_id === candidate.candidate_id ? (
-                    <Button variant="success" disabled>
-                      You voted for this candidate
-                    </Button>
-                  ) : (
-                    <Button variant="secondary" disabled>
-=======
                 <Button 
                   variant="info" 
                   size="sm" 
@@ -99,16 +88,11 @@ const BallotPaper = () => {
                     </Button>
                   ) : (
                     <Button variant="secondary" disabled className="w-100">
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
                       Vote
                     </Button>
                   )
                 ) : (
-<<<<<<< HEAD
-                  <Button onClick={() => handleVote(candidate.candidate_id)}>
-=======
                   <Button onClick={() => handleVote(candidate.candidate_id)} className="w-100">
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
                     Vote
                   </Button>
                 )}

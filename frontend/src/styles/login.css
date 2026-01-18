@@ -1,116 +1,3 @@
-<<<<<<< HEAD
-body {
-  background: radial-gradient(circle at center, #898c98, #203457, #3e4e66) !important;
-  color: #333;
-}
-
-.login-card input {
-  width: 100%;
-  margin-bottom: 15px;
-  padding: 12px;
-  border: 1px solid #cccccc;
-  border-radius: 8px;
-  transition: border-color 0.3s ease;
-}
-
-.login-card input:focus {
-  border-color: #195fa9;
-  outline: none;
-}
-
-.login-card h1 {
-  font-family: 'Helvetica Neue', Arial, sans-serif;
-  font-weight: 600;
-  font-size: 2.8rem;
-  color: #f5f7fa;
-  text-align: center;
-  margin-bottom: 1.5rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  border-bottom: 2px solid #4a90e2;
-  padding-bottom: 0.5rem;
-}
-
-.login-card h4 {
-  font-family: 'Helvetica Neue', Arial, sans-serif;
-  font-weight: 600;
-  font-size: 1.7rem;
-  color: #f5f7fa;
-  text-align: center;
-  margin-bottom: 1.5rem;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  padding-bottom: 0.5rem;
-}
-
-.login-card {
-  max-width: 500px;
-  margin: 50px auto;
-  padding: 30px;
-  border-radius: 15px;
-  background-color: #18203f;
-  box-shadow: 0 15px 30px rgba(70, 68, 68, 0.1);
-  animation: fadeIn 0.5s ease-in-out;
-}
-
-.login-card .nav-item {
-  width: 33%;
-  text-align: center;
-}
-
-.nav-pills .nav-link {
-  background-color: #435971;
-  color: #c3c7cf;
-  border-radius: 30px;
-  transition: background-color 0.3s ease;
-}
-
-.nav-pills .nav-link:hover,
-.nav-pills .nav-link.active {
-  background-color: #2b3f6b;
-  color: rgb(239, 241, 245);
-}
-
-.tab-content {
-  margin-top: 20px;
-}
-
-/* Shared button style */
-.btn {
-  background-color: #009dff;
-  color: white;
-  padding: 10px;
-  font-size: 1rem;
-  border: none;
-  border-radius: 5px;
-  text-decoration: none;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.btn:hover {
-  background-color: #91524b;
-}
-
-/* Align buttons in center with spacing */
-.button-group {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-  margin-top: 20px;
-}
-
-.alert-danger {
-  animation: slideIn 0.5s ease-in-out;
-}
-
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-    transform: translateY(-30px);
-  }
-  100% {
-=======
 /* Login Page - Modern & Responsive */
 * {
   margin: 0;
@@ -149,87 +36,11 @@ body {
   }
 
   to {
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-<<<<<<< HEAD
-@keyframes slideIn {
-  0% {
-    opacity: 0;
-    transform: translateX(-100%);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-/* Override default .btn styling for button-group buttons */
-.button-group .btn {
-  background-color: #e81f09;
-  color: white;
-  padding: 10px 24px;
-  font-size: 1rem;
-  border: none;
-  border-radius: 5px;
-  text-decoration: none;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-}
-
-.button-group .btn:hover {
-  background-color: #756a69;
-  color: rgb(66, 3, 3);
-}
-
-.role-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-right: 7%;
-}
-
-.text-center {
-  text-align: center;
-  margin-top: 1.5rem;
-  font-family: 'Helvetica Neue', Arial, sans-serif;
-}
-
-/* Button styling */
-.btn-secondary {
-  background-color: #6c757d;
-  color: white;
-  font-family: Georgia, serif;
-  font-size: 16px;
-  padding: 10px 20px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  margin-top: 1rem;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.btn-secondary:hover {
-  background-color: #5a6268;
-  transform: scale(1.03);
-}
-
-/* ✅ Spacing fix for admin "Back to User Login" */
-.admin-back-button {
-  margin-top: 0.02rem; /* reduced gap */
-}
-
-.admin-back-button .btn-secondary {
-  margin-top: 0.3rem; /* reduced gap above button */
-}
-
-.admin-password1{
-  margin-top: 0.2rem;;
-}
-=======
 .text-center {
   text-align: center;
 }
@@ -262,10 +73,12 @@ body {
   display: flex;
   gap: 10px;
   padding: 0;
+  flex-wrap: wrap;
 }
 
 .nav-item {
   flex: 1;
+  min-width: 80px;
 }
 
 .nav-link {
@@ -476,11 +289,14 @@ input:focus,
   }
 
   .nav {
-    flex-direction: column;
+    flex-wrap: wrap;
+  }
+
+  .nav-item {
+    flex: 1 1 45%;
   }
 
   .nav-link {
     padding: 12px;
   }
 }
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7

@@ -1,8 +1,10 @@
-<<<<<<< HEAD
-const express = require("express");
-const cors = require("cors");
+// server.js
 require("dotenv").config();
+
+const express = require("express");
 const mongoose = require("mongoose");
+const cors = require("cors");
+const path = require("path");
 
 const app = express();
 
@@ -11,63 +13,18 @@ const app = express();
 // ============================================
 
 // CORS configuration
-app.use(cors({
-  origin: process.env.FRONTEND_URL || "http://localhost:3000",
-  credentials: true,
-}));
+const FRONTEND_ORIGIN =
+  process.env.BASE_URL || process.env.FRONTEND_URL || "http://localhost:3000";
+
+app.use(
+  cors({
+    origin: FRONTEND_ORIGIN,
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// ============================================
-// GLOBAL MONGODB CONNECTION
-// ============================================
-
-const connectMongoDB = async () => {
-  try {
-    const mongoUri = process.env.MONGODB_URI;
-
-    if (!mongoUri) {
-      throw new Error("MONGODB_URI not found in environment variables");
-    }
-
-    console.log("🔄 Connecting to MongoDB Atlas...");
-
-    await mongoose.connect(mongoUri, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      maxPoolSize: 10,
-      serverSelectionTimeoutMS: 5000,
-    });
-
-    console.log("✅ MongoDB Atlas connected successfully!");
-    console.log(`📊 Database: voting_system`);
-    console.log(`🔐 User: rabibhagat`);
-    console.log(`🌐 Cluster: cluster0.grzsv45.mongodb.net`);
-
-    return mongoose.connection;
-  } catch (error) {
-    console.error("❌ MongoDB connection error:");
-    console.error(`   Error: ${error.message}`);
-    console.error(`   Type: ${error.name}`);
-
-    if (error.name === "MongooseServerSelectionError") {
-      console.error("   💡 Troubleshooting:");
-      console.error("      1. Check if your IP is whitelisted in MongoDB Atlas");
-      console.error("      2. Verify credentials: rabibhagat / 1r2a3b4i123");
-      console.error("      3. Check internet connection");
-      console.error("      4. Verify cluster URL is correct");
-    }
-
-    throw error;
-  }
-};
-
-// Connect to MongoDB on startup
-connectMongoDB().catch(err => {
-  console.error("Failed to connect to MongoDB. Exiting...");
-  process.exit(1);
-});
 
 // ============================================
 // ROUTES IMPORT
@@ -78,6 +35,7 @@ const authRoutes = require("./routes/auth");
 const partyRoutes = require("./routes/party");
 const constituencyRoutes = require("./routes/constituency");
 const candidateRoutes = require("./routes/candidateRoutes");
+const candidateProfileRoutes = require("./routes/candidate");
 const adminRoutes = require("./routes/admin");
 const analyticsRoutes = require("./routes/analytics");
 const passwordRecoveryRoutes = require("./routes/passwordRecovery");
@@ -93,6 +51,7 @@ app.use("/auth", authRoutes);
 app.use("/party", partyRoutes);
 app.use("/constituency", constituencyRoutes);
 app.use("/candidates", candidateRoutes);
+app.use("/candidate", candidateProfileRoutes);
 app.use("/admin", adminRoutes);
 app.use("/analytics", analyticsRoutes);
 app.use("/password-recovery", passwordRecoveryRoutes);
@@ -104,123 +63,9 @@ app.use("/", authRoutes);
 // SPECIAL ENDPOINTS
 // ============================================
 
-app.post("/logout", (req, res) => {
-  res.json({ success: true, message: "Logged out successfully" });
-});
-
-app.get("/health", (req, res) => {
-  const PORT = process.env.PORT || 5000;
-  const dbStatus = mongoose.connection.readyState === 1 ? "✅ Connected" : "❌ Disconnected";
-  
-  res.json({
-    status: "Backend is running",
-    port: PORT,
-    database: dbStatus,
-    timestamp: new Date().toISOString(),
-  });
-});
-
-app.get("/db-status", (req, res) => {
-  const states = {
-    0: "Disconnected",
-    1: "Connected",
-    2: "Connecting",
-    3: "Disconnecting",
-  };
-  
-  res.json({
-    connection: {
-      status: states[mongoose.connection.readyState],
-      readyState: mongoose.connection.readyState,
-      database: mongoose.connection.name,
-    },
-    environment: process.env.NODE_ENV,
-    timestamp: new Date().toISOString(),
-  });
-});
-
-// ============================================
-// ERROR HANDLING
-// ============================================
-
-app.use((req, res) => {
-  res.status(404).json({
-    error: "Not Found",
-    message: `Route ${req.method} ${req.path} not found`,
-  });
-});
-
-app.use((err, req, res, next) => {
-  console.error("❌ Error:", err);
-  res.status(err.status || 500).json({
-    error: err.message || "Internal server error",
-    timestamp: new Date().toISOString(),
-  });
-});
-
-// ============================================
-// SERVER STARTUP
-// ============================================
-
-const PORT = process.env.PORT || 5000;
-
-app.listen(PORT, () => {
-  console.log(`\n✅ Server running on port ${PORT}`);
-  console.log(`🌐 Frontend URL: ${process.env.FRONTEND_URL || "http://localhost:3000"}`);
-  console.log(`📊 Health Check: http://localhost:${PORT}/health`);
-  console.log(`🗄️  DB Status: http://localhost:${PORT}/db-status`);
-  console.log("\n✨ System ready for requests!\n");
-});
-
-// Handle graceful shutdown
-process.on("SIGINT", async () => {
-  console.log("\n\n🛑 Shutting down server...");
-=======
-// server.js
-require("dotenv").config(); // MUST be first
-
-const express = require("express");
-const mongoose = require("mongoose");
-const cors = require("cors");
-
-const app = express();
-
-// CORS config: prefer BASE_URL from your .env, fallback to http://localhost:3000
-const FRONTEND_ORIGIN =
-  process.env.BASE_URL || process.env.FRONTEND_URL || "http://localhost:3000";
-app.use(
-  cors({
-    origin: FRONTEND_ORIGIN,
-    credentials: true,
-  })
-);
-
-app.use(express.json());
-
-// Import routes (keep names same as in your repo)
-const voterRoutes = require("./routes/voter");
-const authRoutes = require("./routes/auth");
-const partyRoutes = require("./routes/party");
-
-const candidateRoutes = require("./routes/candidateRoutes");
-const candidateProfileRoutes = require("./routes/candidate");
-const adminRoutes = require("./routes/admin");
-
-// Mount routes
-app.use("/voter", voterRoutes);
-app.use("/party", partyRoutes);
-app.use("/candidates", candidateRoutes);
-app.use("/candidate", candidateProfileRoutes);
-app.use("/admin", adminRoutes);
-
-// Auth routes - includes /auth/login
-app.use("/auth", authRoutes);
-
-// Direct /login route that forwards to /auth/login
+// Direct /login route
 app.post("/login", async (req, res) => {
-  // Import auth logic directly
   const bcrypt = require("bcrypt");
-  const mongoose = require("mongoose");
   const { adminCredentials } = require("./config/admin");
   
   try {
@@ -346,16 +191,56 @@ app.post("/login", async (req, res) => {
 });
 
 // Logout endpoint
+app.post("/logout", (req, res) => {
+  res.json({ success: true, message: "Logged out successfully" });
+});
 
-// app.post("/logout", (req, res) => {
-//   res.json({ success: true });
-// });
+// Health check
+app.get("/health", (req, res) => {
+  const PORT = process.env.PORT || 5000;
+  const dbStatus = mongoose.connection.readyState === 1 ? "✅ Connected" : "❌ Disconnected";
+  
+  res.json({
+    status: "Backend is running",
+    port: PORT,
+    database: dbStatus,
+    timestamp: new Date().toISOString(),
+  });
+});
 
-// === DEBUG ROUTE - remove before final submission ===
+// Root route
+app.get("/", (req, res) => res.send("API running"));
+
+// DB Status check
+app.get("/db-status", (req, res) => {
+  const states = {
+    0: "Disconnected",
+    1: "Connected",
+    2: "Connecting",
+    3: "Disconnecting",
+  };
+  
+  res.json({
+    connection: {
+      status: states[mongoose.connection.readyState],
+      readyState: mongoose.connection.readyState,
+      database: mongoose.connection.name,
+    },
+    environment: process.env.NODE_ENV,
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// Serve test login page
+app.get("/test-login", (req, res) => {
+  res.sendFile(path.join(__dirname, "test-login.html"));
+});
+
+// Debug routes (for development)
 app.post("/debug-login", express.json(), async (req, res) => {
   try {
     const { voter_id, phone, first_name, last_name } = req.body || {};
-    const db = require("mongoose").connection.db;
+    const db = mongoose.connection.db;
     let user = null;
 
     if (voter_id) user = await db.collection("voters").findOne({ voter_id });
@@ -369,22 +254,11 @@ app.post("/debug-login", express.json(), async (req, res) => {
     return res.status(500).json({ error: err.message });
   }
 });
-// === end debug route ===
 
-// Health route
-app.get("/", (req, res) => res.send("API running"));
-
-// Serve test login page
-const path = require("path");
-app.get("/test-login", (req, res) => {
-  res.sendFile(path.join(__dirname, "test-login.html"));
-});
-
-// Temporary test route to verify DB seed (reads from 'candidates' collection)
+// Test routes for development
 app.get("/test-candidates", async (req, res) => {
   try {
     const db = mongoose.connection.db;
-    // if the collection doesn't exist it will return []
     const candidates = await db.collection("candidates").find().toArray();
     return res.json(candidates);
   } catch (err) {
@@ -393,59 +267,6 @@ app.get("/test-candidates", async (req, res) => {
   }
 });
 
-// Choose mongo URI: use MONGO_URI (from your .env). If not present, try LOCAL_MONGO_URI.
-const mongoUri =
-  process.env.MONGO_URI ||
-  process.env.MONGODB_URI ||
-  process.env.LOCAL_MONGO_URI ||
-  "";
-
-// Helpful debug output (first 60 chars only, to avoid printing secrets)
-console.log("DEBUG: FRONTEND_ORIGIN =", FRONTEND_ORIGIN);
-console.log("DEBUG: PORT =", process.env.PORT || 5000);
-console.log("DEBUG: MONGO_URI set?", !!mongoUri);
-if (mongoUri) {
-  console.log(
-    "DEBUG: MONGO_URI (start) =>",
-    mongoUri.slice(0, 60) + (mongoUri.length > 60 ? "..." : "")
-  );
-} else {
-  console.warn("WARN: No Mongo URI provided. Set MONGO_URI in your .env.");
-  process.exit(1);
-}
-
-// Connect to Mongo and then start server
-const PORT = process.env.PORT || 5000;
-mongoose
-  .connect(mongoUri)
-  .then(() => {
-    console.log("MongoDB connected successfully");
-    app.listen(PORT, () => {
-      console.log(`✅ Server running on port ${PORT}`);
-      console.log(`✅ API available at http://localhost:${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.error("❌ MongoDB connection failed:", err);
-    process.exit(1);
-  });
-
-// Gracefully handle app termination
-process.on("SIGINT", async () => {
-  console.log("SIGINT received — closing Mongo connection");
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
-  await mongoose.disconnect();
-  process.exit(0);
-});
-
-<<<<<<< HEAD
-module.exports = app;
-=======
-process.on("unhandledRejection", (reason) => {
-  console.error("Unhandled Rejection:", reason);
-});
-
-// Temporary test route to verify DB seed (reads from 'voters' collection)
 app.get("/test-voters", async (req, res) => {
   try {
     const db = mongoose.connection.db;
@@ -456,4 +277,83 @@ app.get("/test-voters", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
+
+// ============================================
+// ERROR HANDLING
+// ============================================
+
+app.use((req, res) => {
+  res.status(404).json({
+    error: "Not Found",
+    message: `Route ${req.method} ${req.path} not found`,
+  });
+});
+
+app.use((err, req, res, next) => {
+  console.error("❌ Error:", err);
+  res.status(err.status || 500).json({
+    error: err.message || "Internal server error",
+    timestamp: new Date().toISOString(),
+  });
+});
+
+// ============================================
+// DATABASE CONNECTION & SERVER STARTUP
+// ============================================
+
+const mongoUri =
+  process.env.MONGO_URI ||
+  process.env.MONGODB_URI ||
+  process.env.LOCAL_MONGO_URI ||
+  "";
+
+console.log("DEBUG: FRONTEND_ORIGIN =", FRONTEND_ORIGIN);
+console.log("DEBUG: PORT =", process.env.PORT || 5000);
+console.log("DEBUG: MONGO_URI set?", !!mongoUri);
+
+if (mongoUri) {
+  console.log(
+    "DEBUG: MONGO_URI (start) =>",
+    mongoUri.slice(0, 60) + (mongoUri.length > 60 ? "..." : "")
+  );
+} else {
+  console.warn("WARN: No Mongo URI provided. Set MONGO_URI in your .env.");
+  process.exit(1);
+}
+
+const PORT = process.env.PORT || 5000;
+
+mongoose
+  .connect(mongoUri, {
+    maxPoolSize: 10,
+    serverSelectionTimeoutMS: 5000,
+  })
+  .then(() => {
+    console.log("✅ MongoDB connected successfully");
+    console.log(`📊 Database: ${mongoose.connection.name}`);
+    
+    app.listen(PORT, () => {
+      console.log(`\n✅ Server running on port ${PORT}`);
+      console.log(`🌐 Frontend URL: ${FRONTEND_ORIGIN}`);
+      console.log(`📊 Health Check: http://localhost:${PORT}/health`);
+      console.log(`🗄️  DB Status: http://localhost:${PORT}/db-status`);
+      console.log("\n✨ System ready for requests!\n");
+    });
+  })
+  .catch((err) => {
+    console.error("❌ MongoDB connection failed:", err);
+    process.exit(1);
+  });
+
+// Graceful shutdown
+process.on("SIGINT", async () => {
+  console.log("\n🛑 Shutting down server...");
+  await mongoose.disconnect();
+  process.exit(0);
+});
+
+process.on("unhandledRejection", (reason) => {
+  console.error("Unhandled Rejection:", reason);
+});
+
+module.exports = app;

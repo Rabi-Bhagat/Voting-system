@@ -8,10 +8,7 @@ const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 function VoterDashboard() {
   const [voter, setVoter] = useState(null);
-<<<<<<< HEAD
-=======
   const [stats, setStats] = useState({ totalVoters: 0, votedCount: 0 });
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
   const navigate = useNavigate(); 
 
   useEffect(() => {
@@ -19,21 +16,6 @@ function VoterDashboard() {
     if (stored) {
       const { voter_id } = JSON.parse(stored);
 
-<<<<<<< HEAD
-      // axios.get(`http://localhost:5000/voter/${voter_id}`)
-      axios.get(`${API_BASE}/voter/${voter_id}`)
-        .then(res => setVoter(res.data))
-        .catch(() => setVoter(null));
-    }
-  }, []);
-
-  if (!voter) return <div>Loading voter info...</div>;
-
-  return (
-    <div className="container mt-4">
-      <nav className="navbar navbar-light justify-content-between">
-        <h1 className="navbar-title">Online Voting System</h1>
-=======
       axios.get(`${API_BASE}/voter/${voter_id}`)
         .then(res => setVoter(res.data))
         .catch(() => setVoter(null));
@@ -70,7 +52,6 @@ function VoterDashboard() {
           <span className="brand-icon">🗳️</span>
           <h1 className="navbar-title">Online Voting System</h1>
         </div>
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
         <button
           className="btn btn-danger"
           onClick={() => {
@@ -78,50 +59,11 @@ function VoterDashboard() {
             navigate("/"); 
           }}
         >
-<<<<<<< HEAD
-=======
           <span className="btn-icon">🚪</span>
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
           Logout
         </button>
       </nav>
 
-<<<<<<< HEAD
-      <h1 className="welcome-title mt-4">Welcome, {voter.first_name} {voter.last_name}!</h1>
-
-      <div className="profile-container d-flex mt-4 p-3 bg-white rounded shadow">
-        <img
-          src="https://cdn.jsdelivr.net/npm/bootstrap-icons/icons/person-circle.svg"
-          alt="Profile Icon"
-          style={{ width: 150, height: 150, marginLeft: 20 }}
-        />
-        <div className="ms-5">
-          <p><strong>Voter ID:</strong> {voter.voter_id}</p>
-          <p><strong>Name:</strong> {voter.first_name} {voter.last_name}</p>
-          <p>
-            <strong>Constituency:</strong>{" "}
-            {voter.constituency
-                ? `${voter.constituency.constituency_id} - ${voter.constituency.name}`
-                : "Not assigned"}
-          </p>
-          <p><strong>Address:</strong> {voter.address || ""}</p>
-          <p><strong>Phone:</strong> {voter.phone || ""}</p>
-          <button
-            className="btn btn-primary mt-2"
-            onClick={() => navigate("/edit-profile")} 
-          >
-            Edit Profile
-          </button>
-        </div>
-      </div>
-
-      <div className="center-button mt-4">
-        <button
-          className="btn btn-success"
-          onClick={() => navigate("/vote")}>
-          Vote Now
-        </button>
-=======
       <div className="dashboard-container">
         <div className="welcome-section">
           <div className="welcome-content">
@@ -195,7 +137,7 @@ function VoterDashboard() {
                   <div className="info-details">
                     <div className="info-label">Constituency</div>
                     <div className="info-value">
-                      {voter.constituency ? voter.constituency.name : "Not assigned"}
+                      {voter.constituency ? (voter.constituency.name || voter.constituency) : "Not assigned"}
                     </div>
                   </div>
                 </div>
@@ -274,7 +216,6 @@ function VoterDashboard() {
             </div>
           </div>
         </div>
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
       </div>
     </div>
   );

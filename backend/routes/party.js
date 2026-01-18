@@ -4,8 +4,7 @@ const Party = require("../models/Party");
 const Candidate = require("../models/Candidate");
 const Constituency = require("../models/Constituency");
 
-<<<<<<< HEAD
-//GET /party/profile/:id => Fetch party profile with detailed information
+// GET /party/profile/:id => Fetch party profile with detailed information
 router.get("/profile/:id", async (req, res) => {
   try {
     const party = await Party.findOne({ party_id: req.params.id });
@@ -17,7 +16,7 @@ router.get("/profile/:id", async (req, res) => {
     const candidates = await Candidate.find({ party_id: party.party_id });
     
     // Calculate party statistics
-    const totalVotes = candidates.reduce((sum, c) => sum + c.votes, 0);
+    const totalVotes = candidates.reduce((sum, c) => sum + (c.votes || 0), 0);
     const totalCandidates = candidates.length;
     
     // Get constituency breakdown
@@ -73,7 +72,7 @@ router.get("/profile/:id", async (req, res) => {
         candidate_id: c.candidate_id,
         name: c.name,
         constituency: c.constituency,
-        votes: c.votes
+        votes: c.votes || 0
       })),
       constituency_breakdown: constituencyBreakdown
     });
@@ -83,9 +82,7 @@ router.get("/profile/:id", async (req, res) => {
   }
 });
 
-=======
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
-//GET /party/:id => Fetch party details along with all its candidates
+// GET /party/:id => Fetch party details along with all its candidates
 router.get("/:id", async (req, res) => {
   try {
     const party = await Party.findOne({ party_id: req.params.id });
@@ -111,7 +108,7 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-//POST /party/edit-candidates => Create or update party details (name/password)
+// POST /party/edit-candidates => Create or update party details (name/password)
 router.post("/edit-candidates", async (req, res) => {
   const { party_id, name, password } = req.body;
 
@@ -139,7 +136,7 @@ router.post("/edit-candidates", async (req, res) => {
   }
 });
 
-//POST /party/add-candidate => Add a new candidate to a party (only if constituency is valid)
+// POST /party/add-candidate => Add a new candidate to a party (only if constituency is valid)
 router.post("/add-candidate", async (req, res) => {
   const { candidate_id, name, constituency, party_id } = req.body;
 
@@ -149,7 +146,12 @@ router.post("/add-candidate", async (req, res) => {
 
   try {
     // Validate constituency
-    const validConstituency = await Constituency.findOne({ name: constituency });
+    const validConstituency = await Constituency.findOne({ 
+      $or: [
+        { name: constituency },
+        { constituency_id: constituency }
+      ]
+    });
     if (!validConstituency) {
       return res.status(400).json({ error: "Invalid constituency" });
     }
@@ -163,8 +165,10 @@ router.post("/add-candidate", async (req, res) => {
     const newCandidate = new Candidate({
       candidate_id,
       name,
-      constituency,
-      party_id
+      constituency: validConstituency.constituency_id,
+      party_id,
+      votes: 0,
+      approved: false
     });
 
     await newCandidate.save();

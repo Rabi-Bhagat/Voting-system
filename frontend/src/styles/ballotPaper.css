@@ -1,141 +1,3 @@
-<<<<<<< HEAD
-/* -------------------------
-   General Page Styles
--------------------------- */
-body {
-  background-color: #121212;
-}
-
-.container {
-  padding-top: 30px;
-  padding-bottom: 30px;
-}
-
-h2 {
-  color: rgb(255, 255, 255);
-  font-weight: bold;
-}
-
-/* -------------------------
-   Card Styling
--------------------------- */
-.card {
-  background-color: #1f2a38;
-  color: white;
-  border: 1px solid #33475b;
-  border-radius: 12px;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-
-.edit-head {
-  font-family: Georgia, 'Times New Roman', Times, serif;
-  font-size: 40px;
-}
-
-.card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
-}
-
-.card-title {
-  font-size: 1.5rem;
-  font-weight: bold;
-  font-family: 'Times New Roman', Times, serif;
-  color: #ffd700;
-}
-
-.card-text {
-  color: #a09e9e;
-  font-size: 1rem;
-  font-family: 'Times New Roman', Times, serif;
-}
-
-/* -------------------------
-   Button Styling
--------------------------- */
-button.btn {
-  font-size: 1rem;
-  font-family: 'Georgia', Times, serif;
-  font-weight: 500;
-  padding: 10px 20px;
-  border-radius: 8px;
-  margin-top: 10px;
-}
-
-/* Save (Success) Button */
-button.btn-success {
-  background-color: #1fab40;
-  border: none;
-}
-
-button.btn-success:hover {
-  background-color: #177a32;
-}
-
-/* Disabled / Unselected Vote Button */
-button.btn-secondary {
-  background-color: #6c757d;
-  border: none;
-}
-
-button.btn-secondary:hover {
-  background-color: #5a6268;
-}
-
-/* NOTA (Warning) Button */
-button.btn-warning {
-  background-color: #ffc107;
-  border: none;
-  color: #000;
-}
-
-button.btn-warning:hover {
-  background-color: #e0a800;
-}
-
-/* Info Message Alert */
-.alert-info {
-  background-color: #343a40;
-  color: #f8f9fa;
-  border-color: #1d2124;
-}
-
-/* -------------------------
-   Back Button (Blue)
--------------------------- */
-.btn-outline-primary {
-  color: #000000 !important;
-  background-color: #0b7cf4 !important;
-  border: none !important;
-  font-weight: 500;
-  padding: 10px 20px;
-  border-radius: 8px;
-  transition: background-color 0.3s ease;
-}
-
-.btn-outline-primary:hover {
-  background-color: #0069d9 !important;
-  color: #ffffff !important;
-}
-
-/* -------------------------
-   Responsive Styles
--------------------------- */
-@media (max-width: 768px) {
-  .card-title {
-    font-size: 1.2rem;
-  }
-
-  .card-text {
-    font-size: 0.9rem;
-  }
-
-  button.btn {
-    width: 100%;
-  }
-}
-=======
 /* Ballot Paper - Modern & Responsive */
 * {
   margin: 0;
@@ -161,6 +23,14 @@ body {
 
 .mb-4 {
   margin-bottom: 2rem;
+}
+
+.mb-2 {
+  margin-bottom: 10px;
+}
+
+.w-100 {
+  width: 100%;
 }
 
 /* Header Section */
@@ -368,28 +238,7 @@ body {
   font-size: 13px;
 }
 
-.w-100 {
-  width: 100%;
-}
-
-.mb-2 {
-  margin-bottom: 10px;
-}
-
-/* NOTA Card */
-.card[style*="bg-light"] {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%) !important;
-  border: 2px dashed #667eea;
-}
-
 /* Responsive Design */
-@media (max-width: 1200px) {
-  .row {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px;
-  }
-}
-
 @media (max-width: 768px) {
   .container {
     padding: 15px;
@@ -415,18 +264,9 @@ body {
   .card-text {
     font-size: 14px;
   }
-
-  .btn {
-    padding: 10px 15px;
-    font-size: 13px;
-  }
 }
 
 @media (max-width: 480px) {
-  .container {
-    padding: 10px;
-  }
-
   .d-flex {
     flex-direction: column;
     align-items: stretch;
@@ -444,19 +284,5 @@ body {
 
   .row {
     grid-template-columns: 1fr;
-    gap: 15px;
-  }
-
-  .card-body {
-    padding: 15px;
-  }
-
-  .card-title {
-    font-size: 18px;
-  }
-
-  .card-text {
-    font-size: 13px;
   }
 }
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7

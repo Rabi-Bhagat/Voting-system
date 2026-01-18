@@ -4,7 +4,6 @@ const Voter = require("../models/Voter");
 const Candidate = require("../models/Candidate");
 const ElectionStatus = require("../models/ElectionStatus");
 
-<<<<<<< HEAD
 // GET /voter/profile/:voter_id - Get voter profile with detailed information
 router.get("/profile/:voter_id", async (req, res) => {
   try {
@@ -62,8 +61,6 @@ router.get("/profile/:voter_id", async (req, res) => {
   }
 });
 
-=======
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
 // Get voter by voter_id
 router.get("/:voter_id", async (req, res) => {
   try {
@@ -72,12 +69,9 @@ router.get("/:voter_id", async (req, res) => {
     const Constituency = require("../models/Constituency");
     if (voter) {
       const constituency = await Constituency.findOne({ constituency_id: voter.constituency });
-<<<<<<< HEAD
       // Update last login
       voter.last_login = new Date();
       await voter.save();
-=======
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
       return res.json({ ...voter.toObject(), constituency });
     }
 
@@ -88,7 +82,6 @@ router.get("/:voter_id", async (req, res) => {
   }
 });
 
-<<<<<<< HEAD
 // Get voter voting history
 router.get("/history/:voter_id", async (req, res) => {
   try {
@@ -119,8 +112,6 @@ router.get("/history/:voter_id", async (req, res) => {
   }
 });
 
-=======
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
 // Update voter by voter_id
 router.put("/:voter_id", async (req, res) => {
   try {
@@ -142,22 +133,19 @@ router.put("/:voter_id", async (req, res) => {
   }
 });
 
-<<<<<<< HEAD
 // Get candidates for voter's constituency (ballot)
-=======
-// Get all candidates (ballot)
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
 router.get("/ballot/:voterId", async (req, res) => {
     try {
         const voter = await Voter.findOne({ voter_id: req.params.voterId });
         if (!voter) return res.status(404).json({ error: "Voter not found." });
 
         const candidates = await Candidate.aggregate([
-<<<<<<< HEAD
-          { $match: { constituency: voter.constituency } },
-=======
-          { $match: { candidate_id: { $ne: "NOTA" } } }, // Exclude NOTA from initial list
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
+          { 
+            $match: { 
+              constituency: voter.constituency,
+              candidate_id: { $ne: "NOTA" }
+            } 
+          },
           {
             $lookup: {
               from: "parties",
@@ -166,7 +154,7 @@ router.get("/ballot/:voterId", async (req, res) => {
               as: "partyInfo"
             }
           },
-          { $unwind: "$partyInfo" },
+          { $unwind: { path: "$partyInfo", preserveNullAndEmptyArrays: true } },
           {
             $project: {
               candidate_id: 1,
@@ -199,22 +187,14 @@ router.post("/vote", async (req, res) => {
     if (candidate_id !== "NOTA") {
       const candidate = await Candidate.findOne({ candidate_id });
       if (!candidate) return res.status(404).json({ error: "Candidate not found." });
-<<<<<<< HEAD
       if (candidate.constituency !== voter.constituency) {
         return res.status(400).json({ error: "Invalid constituency." });
       }
-=======
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
 
       candidate.votes = (candidate.votes || 0) + 1;
       await candidate.save();
     } else {
-<<<<<<< HEAD
       const notaEntry = await Candidate.findOne({ candidate_id: "NOTA", constituency: voter.constituency });
-=======
-      // Handle NOTA vote
-      const notaEntry = await Candidate.findOne({ candidate_id: "NOTA" });
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
       if (notaEntry) {
         notaEntry.votes = (notaEntry.votes || 0) + 1;
         await notaEntry.save();
@@ -222,10 +202,7 @@ router.post("/vote", async (req, res) => {
         await Candidate.create({
           candidate_id: "NOTA",
           name: "None of the Above",
-<<<<<<< HEAD
           constituency: voter.constituency,
-=======
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
           votes: 1,
           party_id: null
         });
@@ -234,24 +211,17 @@ router.post("/vote", async (req, res) => {
 
     voter.has_voted = true;
     voter.voted_candidate_id = candidate_id;
-<<<<<<< HEAD
     voter.vote_timestamp = new Date();
-=======
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
     await voter.save();
 
     // Mark election as conducted
     await ElectionStatus.deleteMany({});
     await ElectionStatus.create({ conducted: true });
 
-<<<<<<< HEAD
     return res.json({ 
       message: "Vote cast successfully!",
       timestamp: voter.vote_timestamp
     });
-=======
-    return res.json({ message: "Vote cast successfully!" });
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
   } catch (err) {
     console.error("Vote error:", err);
     return res.status(500).json({ error: "Server error while voting." });

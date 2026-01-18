@@ -1,31 +1,8 @@
-<<<<<<< HEAD
-/* src/styles/modal.css */
-=======
 /* Modal - Modern & Attractive Design */
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
-<<<<<<< HEAD
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
-}
-
-.modal-box {
-  background-color: rgb(99, 139, 159);
-  padding: 2rem;
-  border-radius: 10px;
-  width: 400px;
-  max-width: 90%;
-  color: rgb(2, 18, 52);
-  font-family: Georgia, serif;
-=======
   right: 0;
   bottom: 0;
   background: rgba(0, 0, 0, 0.7);
@@ -42,7 +19,6 @@
   from {
     opacity: 0;
   }
-
   to {
     opacity: 1;
   }
@@ -66,7 +42,6 @@
     opacity: 0;
     transform: translateY(30px) scale(0.95);
   }
-
   to {
     opacity: 1;
     transform: translateY(0) scale(1);
@@ -102,24 +77,15 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
+}
+
+.modal-form {
+  display: flex;
+  flex-direction: column;
 }
 
 .modal-input {
   width: 100%;
-<<<<<<< HEAD
-  padding: 10px;
-  margin-top: 10px;
-  font-size: 1rem;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-}
-
-.modal-buttons {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 15px;
-=======
   padding: 14px 18px;
   margin-bottom: 18px;
   border: 2px solid #e2e8f0;
@@ -128,6 +94,7 @@
   font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   transition: all 0.3s ease;
   background: #f7fafc;
+  box-sizing: border-box;
 }
 
 .modal-input:focus {
@@ -149,7 +116,8 @@
 }
 
 /* Textarea specific styles */
-textarea.modal-input {
+textarea.modal-input,
+.modal-textarea {
   resize: vertical;
   min-height: 90px;
   font-family: inherit;
@@ -179,16 +147,13 @@ select.modal-input {
 }
 
 @keyframes shake {
-
   0%,
   100% {
     transform: translateX(0);
   }
-
   25% {
     transform: translateX(-10px);
   }
-
   75% {
     transform: translateX(10px);
   }
@@ -199,48 +164,10 @@ select.modal-input {
   display: flex;
   gap: 15px;
   margin-top: 30px;
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
 }
 
 .modal-submit-button,
 .modal-cancel-button {
-<<<<<<< HEAD
-  padding: 10px 20px;
-  font-size: 1rem;
-  border-radius: 5px;
-  border: none;
-  cursor: pointer;
-}
-
-.modal-submit-button {
-  background-color: #28a745;
-  color: white;
-}
-
-.modal-submit-button:hover {
-  background-color: #486f51;
-  color: rgb(255, 255, 255);
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.modal-cancel-button {
-  background-color: #dc3545;
-  color: white;
-}
-
-.modal-cancel-button:hover {
-  background-color: #a0555c;
-  color: white;
-  transition: background-color 0.3s ease, color 0.3s ease;
-}
-
-.modal-error-message {
-  color: rgb(75, 0, 0);
-  margin: 10px 0;
-  font-weight: bold;
-  text-align: center;
-}
-=======
   flex: 1;
   padding: 14px 28px;
   border: none;
@@ -383,4 +310,3 @@ select.modal-input {
     transform: rotate(360deg);
   }
 }
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7

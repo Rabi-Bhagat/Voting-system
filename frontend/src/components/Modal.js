@@ -1,13 +1,4 @@
 // src/components/Modal.js
-<<<<<<< HEAD
-import React from "react";
-import "../styles/modal.css";
-
-function Modal({ type, onClose, onSubmit, onChange, formData, loading, modalError }) {
-  const requiredFields = {
-    voter: ["voter_id", "first_name", "last_name", "password", "constituency"],
-    candidate: ["candidate_id", "name", "party_id", "constituency"],
-=======
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "../styles/modal.css";
@@ -19,8 +10,8 @@ function Modal({ type, onClose, onSubmit, onChange, formData, loading, modalErro
   const [constituencies, setConstituencies] = useState([]);
 
   useEffect(() => {
-    // Fetch parties and constituencies for candidate form
-    if (type === "candidate") {
+    // Fetch parties and constituencies for candidate and voter forms
+    if (type === "candidate" || type === "voter") {
       const fetchData = async () => {
         try {
           const [partiesRes, constRes] = await Promise.all([
@@ -38,17 +29,14 @@ function Modal({ type, onClose, onSubmit, onChange, formData, loading, modalErro
   }, [type]);
 
   const requiredFields = {
-    voter: ["voter_id", "first_name", "last_name", "password", "phone", "address"],
+    voter: ["voter_id", "first_name", "last_name", "password", "phone", "address", "constituency"],
     candidate: ["candidate_id", "name", "password", "party_id", "constituency", "age", "education", "experience", "background"],
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
     party: ["party_id", "name", "password"],
     constituency: ["constituency_id", "name", "password"]
   };
 
   const fields = requiredFields[type] || [];
 
-<<<<<<< HEAD
-=======
   const renderField = (field) => {
     // Render dropdown for party
     if (field === "party_id" && type === "candidate") {
@@ -73,7 +61,7 @@ function Modal({ type, onClose, onSubmit, onChange, formData, loading, modalErro
     }
 
     // Render dropdown for constituency
-    if (field === "constituency" && type === "candidate") {
+    if (field === "constituency") {
       return (
         <select
           key={field}
@@ -82,9 +70,8 @@ function Modal({ type, onClose, onSubmit, onChange, formData, loading, modalErro
           onChange={onChange}
           className="modal-input"
           disabled={loading}
-          required
         >
-          <option value="">Select Constituency</option>
+          <option value="">Select Constituency (Optional)</option>
           {constituencies.map(constituency => (
             <option key={constituency.constituency_id} value={constituency.constituency_id}>
               {constituency.name} ({constituency.constituency_id})
@@ -103,7 +90,7 @@ function Modal({ type, onClose, onSubmit, onChange, formData, loading, modalErro
           placeholder={field.replace(/_/g, " ").toUpperCase()}
           value={formData[field] || ""}
           onChange={onChange}
-          className="modal-input"
+          className="modal-input modal-textarea"
           disabled={loading}
           rows="3"
           required={field === "address" && type === "voter"}
@@ -157,32 +144,18 @@ function Modal({ type, onClose, onSubmit, onChange, formData, loading, modalErro
         onChange={onChange}
         className="modal-input"
         disabled={loading}
-        required={!["age", "education", "experience", "background"].includes(field)}
+        required={!["age", "education", "experience", "background", "constituency"].includes(field)}
       />
     );
   };
 
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
   return (
     <div className="modal-overlay">
       <div className="modal-box">
         <h2>Add {type.charAt(0).toUpperCase() + type.slice(1)}</h2>
-<<<<<<< HEAD
-        {fields.map((field) => (
-          <input
-            key={field}
-            type={field.toLowerCase().includes("password") ? "password" : "text"}
-            name={field}
-            placeholder={field.replace(/_/g, " ")}
-            value={formData[field] || ""}
-            onChange={onChange}
-            className="modal-input"
-            disabled={loading}
-          />
-        ))}
-=======
-        {fields.map(field => renderField(field))}
->>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
+        <div className="modal-form">
+          {fields.map(field => renderField(field))}
+        </div>
 
         {/* Show error message inside modal */}
         {modalError && <p className="modal-error-message">{modalError}</p>}
