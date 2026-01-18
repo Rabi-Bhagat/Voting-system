@@ -1,309 +1,159 @@
-import React from "react";
-import "../styles/components/profile-modal.css";
+import React from 'react';
+import '../styles/profile_modal.css';
 
 /**
  * ProfileModal Component
- * Displays detailed user profile with verification option
+ * Displays detailed user profile information in a modal
+ * 
+ * Props:
+ * - isOpen: Boolean indicating if modal is open
+ * - user: User object containing detailed information
+ * - userType: Type of user ('voters', 'candidates', 'parties')
+ * - onClose: Callback function when modal is closed
  */
-const ProfileModal = ({ profile, userType, onClose, onVerify, isVerifying }) => {
-  if (!profile) return null;
+const ProfileModal = ({ isOpen, user, userType, onClose }) => {
+  if (!isOpen || !user) {
+    return null;
+  }
 
-  const renderProfileDetails = () => {
+  /**
+   * Get detailed profile information based on user type
+   */
+  const getProfileDetails = () => {
     switch (userType) {
-      case "voter":
+      case 'voters':
         return (
-          <div className="profile-sections">
-            <section className="profile-section">
-              <h3>👤 Personal Details</h3>
-              <div className="detail-grid">
-                <div className="detail-item">
-                  <label>Voter ID:</label>
-                  <span>{profile.voter_id}</span>
-                </div>
-                <div className="detail-item">
-                  <label>Full Name:</label>
-                  <span>{profile.full_name}</span>
-                </div>
-                <div className="detail-item">
-                  <label>Email:</label>
-                  <span>{profile.email || "Not provided"}</span>
-                </div>
-                <div className="detail-item">
-                  <label>Gmail:</label>
-                  <span>{profile.gmail_id || "Not provided"}</span>
-                </div>
-                <div className="detail-item">
-                  <label>Phone:</label>
-                  <span>{profile.phone}</span>
-                </div>
-                <div className="detail-item">
-                  <label>Age:</label>
-                  <span>{profile.age}</span>
-                </div>
-                <div className="detail-item">
-                  <label>Gender:</label>
-                  <span>{profile.gender}</span>
-                </div>
-                <div className="detail-item">
-                  <label>Address:</label>
-                  <span>{profile.address}</span>
-                </div>
-              </div>
-            </section>
-
-            <section className="profile-section">
-              <h3>🗳️ Voting Information</h3>
-              <div className="detail-grid">
-                <div className="detail-item">
-                  <label>Constituency:</label>
-                  <span>{profile.constituency_name}</span>
-                </div>
-                <div className="detail-item">
-                  <label>Has Voted:</label>
-                  <span className={profile.has_voted ? "status-yes" : "status-no"}>
-                    {profile.has_voted ? "✅ Yes" : "❌ No"}
-                  </span>
-                </div>
-                {profile.has_voted && (
-                  <>
-                    <div className="detail-item">
-                      <label>Voted For:</label>
-                      <span>{profile.voted_candidate_id || "N/A"}</span>
-                    </div>
-                    <div className="detail-item">
-                      <label>Vote Time:</label>
-                      <span>{new Date(profile.vote_timestamp).toLocaleString()}</span>
-                    </div>
-                  </>
-                )}
-              </div>
-            </section>
-
-            <section className="profile-section">
-              <h3>✔️ Verification Status</h3>
-              <div className="detail-grid">
-                <div className="detail-item">
-                  <label>Verified:</label>
-                  <span className={profile.is_verified ? "status-verified" : "status-pending"}>
-                    {profile.is_verified ? "✅ Verified" : "⏳ Pending"}
-                  </span>
-                </div>
-                <div className="detail-item">
-                  <label>Status:</label>
-                  <span className={profile.is_active ? "status-active" : "status-inactive"}>
-                    {profile.is_active ? "🟢 Active" : "🔴 Inactive"}
-                  </span>
-                </div>
-              </div>
-            </section>
-
-            <section className="profile-section">
-              <h3>📅 Activity</h3>
-              <div className="detail-grid">
-                <div className="detail-item">
-                  <label>Registered:</label>
-                  <span>{new Date(profile.registration_date).toLocaleString()}</span>
-                </div>
-                <div className="detail-item">
-                  <label>Last Login:</label>
-                  <span>{profile.last_login ? new Date(profile.last_login).toLocaleString() : "Never"}</span>
-                </div>
-              </div>
-            </section>
+          <div className="profile-details">
+            <div className="detail-row">
+              <label>First Name:</label>
+              <span>{user.firstName || 'N/A'}</span>
+            </div>
+            <div className="detail-row">
+              <label>Last Name:</label>
+              <span>{user.lastName || 'N/A'}</span>
+            </div>
+            <div className="detail-row">
+              <label>Email:</label>
+              <span>{user.email || 'N/A'}</span>
+            </div>
+            <div className="detail-row">
+              <label>Gmail:</label>
+              <span>{user.gmail || 'N/A'}</span>
+            </div>
+            <div className="detail-row">
+              <label>Phone:</label>
+              <span>{user.phone || 'N/A'}</span>
+            </div>
+            <div className="detail-row">
+              <label>Constituency:</label>
+              <span>{user.constituency || 'N/A'}</span>
+            </div>
+            <div className="detail-row">
+              <label>Age:</label>
+              <span>{user.age || 'N/A'}</span>
+            </div>
+            <div className="detail-row">
+              <label>Gender:</label>
+              <span>{user.gender || 'N/A'}</span>
+            </div>
+            <div className="detail-row">
+              <label>Verification Status:</label>
+              <span className={user.verified ? 'status-verified' : 'status-pending'}>
+                {user.verified ? '✅ Verified' : '⏳ Pending'}
+              </span>
+            </div>
+            <div className="detail-row">
+              <label>Registration Date:</label>
+              <span>{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</span>
+            </div>
           </div>
         );
 
-      case "candidate":
+      case 'candidates':
         return (
-          <div className="profile-sections">
-            <section className="profile-section">
-              <h3>🎤 Candidate Details</h3>
-              <div className="detail-grid">
-                <div className="detail-item">
-                  <label>Candidate ID:</label>
-                  <span>{profile.candidate_id}</span>
-                </div>
-                <div className="detail-item">
-                  <label>Name:</label>
-                  <span>{profile.name}</span>
-                </div>
-                <div className="detail-item">
-                  <label>Email:</label>
-                  <span>{profile.email || "Not provided"}</span>
-                </div>
-                <div className="detail-item">
-                  <label>Gmail:</label>
-                  <span>{profile.gmail_id || "Not provided"}</span>
-                </div>
-                <div className="detail-item">
-                  <label>Age:</label>
-                  <span>{profile.age}</span>
-                </div>
-                <div className="detail-item">
-                  <label>Education:</label>
-                  <span>{profile.education}</span>
-                </div>
-                <div className="detail-item">
-                  <label>Experience:</label>
-                  <span>{profile.experience}</span>
-                </div>
-                <div className="detail-item">
-                  <label>Bio:</label>
-                  <span>{profile.bio}</span>
-                </div>
-              </div>
-            </section>
-
-            <section className="profile-section">
-              <h3>🏛️ Party & Constituency</h3>
-              <div className="detail-grid">
-                <div className="detail-item">
-                  <label>Party:</label>
-                  <span>{profile.party_name} {profile.party_symbol}</span>
-                </div>
-                <div className="detail-item">
-                  <label>Party Color:</label>
-                  <span>
-                    <div className="color-box" style={{ backgroundColor: profile.party_color }}></div>
-                    {profile.party_color}
-                  </span>
-                </div>
-                <div className="detail-item">
-                  <label>Constituency:</label>
-                  <span>{profile.constituency_name}</span>
-                </div>
-              </div>
-            </section>
-
-            <section className="profile-section">
-              <h3>🗳️ Voting Performance</h3>
-              <div className="detail-grid">
-                <div className="detail-item">
-                  <label>Total Votes:</label>
-                  <span className="votes-count">{profile.votes}</span>
-                </div>
-                <div className="detail-item">
-                  <label>Vote Percentage:</label>
-                  <span>{profile.vote_percentage}%</span>
-                </div>
-              </div>
-            </section>
-
-            <section className="profile-section">
-              <h3>✔️ Verification Status</h3>
-              <div className="detail-grid">
-                <div className="detail-item">
-                  <label>Verified:</label>
-                  <span className={profile.is_verified ? "status-verified" : "status-pending"}>
-                    {profile.is_verified ? "✅ Verified" : "⏳ Pending"}
-                  </span>
-                </div>
-                <div className="detail-item">
-                  <label>Status:</label>
-                  <span className={profile.is_active ? "status-active" : "status-inactive"}>
-                    {profile.is_active ? "🟢 Active" : "🔴 Inactive"}
-                  </span>
-                </div>
-              </div>
-            </section>
-
-            <section className="profile-section">
-              <h3>📅 Activity</h3>
-              <div className="detail-grid">
-                <div className="detail-item">
-                  <label>Registered:</label>
-                  <span>{new Date(profile.registration_date).toLocaleString()}</span>
-                </div>
-              </div>
-            </section>
+          <div className="profile-details">
+            <div className="detail-row">
+              <label>First Name:</label>
+              <span>{user.firstName || 'N/A'}</span>
+            </div>
+            <div className="detail-row">
+              <label>Last Name:</label>
+              <span>{user.lastName || 'N/A'}</span>
+            </div>
+            <div className="detail-row">
+              <label>Email:</label>
+              <span>{user.email || 'N/A'}</span>
+            </div>
+            <div className="detail-row">
+              <label>Phone:</label>
+              <span>{user.phone || 'N/A'}</span>
+            </div>
+            <div className="detail-row">
+              <label>Party:</label>
+              <span>{user.party || 'N/A'}</span>
+            </div>
+            <div className="detail-row">
+              <label>Constituency:</label>
+              <span>{user.constituency || 'N/A'}</span>
+            </div>
+            <div className="detail-row">
+              <label>Total Votes:</label>
+              <span className="votes-count">{user.votes || 0}</span>
+            </div>
+            <div className="detail-row">
+              <label>Bio:</label>
+              <span>{user.bio || 'No bio provided'}</span>
+            </div>
+            <div className="detail-row">
+              <label>Verification Status:</label>
+              <span className={user.verified ? 'status-verified' : 'status-pending'}>
+                {user.verified ? '✅ Verified' : '⏳ Pending'}
+              </span>
+            </div>
+            <div className="detail-row">
+              <label>Registration Date:</label>
+              <span>{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</span>
+            </div>
           </div>
         );
 
-      case "party":
+      case 'parties':
         return (
-          <div className="profile-sections">
-            <section className="profile-section">
-              <h3>🏛️ Party Details</h3>
-              <div className="detail-grid">
-                <div className="detail-item">
-                  <label>Party ID:</label>
-                  <span>{profile.party_id}</span>
-                </div>
-                <div className="detail-item">
-                  <label>Name:</label>
-                  <span>{profile.name}</span>
-                </div>
-                <div className="detail-item">
-                  <label>Email:</label>
-                  <span>{profile.email || "Not provided"}</span>
-                </div>
-                <div className="detail-item">
-                  <label>Gmail:</label>
-                  <span>{profile.gmail_id || "Not provided"}</span>
-                </div>
-                <div className="detail-item">
-                  <label>Symbol:</label>
-                  <span>{profile.symbol}</span>
-                </div>
-                <div className="detail-item">
-                  <label>Color:</label>
-                  <span>
-                    <div className="color-box" style={{ backgroundColor: profile.color }}></div>
-                    {profile.color}
-                  </span>
-                </div>
-                <div className="detail-item">
-                  <label>Founded Year:</label>
-                  <span>{profile.founded_year}</span>
-                </div>
-                <div className="detail-item">
-                  <label>Description:</label>
-                  <span>{profile.description}</span>
-                </div>
-              </div>
-            </section>
-
-            <section className="profile-section">
-              <h3>📊 Statistics</h3>
-              <div className="detail-grid">
-                <div className="detail-item">
-                  <label>Total Candidates:</label>
-                  <span className="stat-count">{profile.total_candidates}</span>
-                </div>
-                <div className="detail-item">
-                  <label>Total Votes:</label>
-                  <span className="stat-count">{profile.total_votes}</span>
-                </div>
-              </div>
-            </section>
-
-            <section className="profile-section">
-              <h3>✔️ Verification Status</h3>
-              <div className="detail-grid">
-                <div className="detail-item">
-                  <label>Verified:</label>
-                  <span className={profile.is_verified ? "status-verified" : "status-pending"}>
-                    {profile.is_verified ? "✅ Verified" : "⏳ Pending"}
-                  </span>
-                </div>
-                <div className="detail-item">
-                  <label>Status:</label>
-                  <span className={profile.is_active ? "status-active" : "status-inactive"}>
-                    {profile.is_active ? "🟢 Active" : "🔴 Inactive"}
-                  </span>
-                </div>
-              </div>
-            </section>
-
-            <section className="profile-section">
-              <h3>📅 Activity</h3>
-              <div className="detail-grid">
-                <div className="detail-item">
-                  <label>Registered:</label>
-                  <span>{new Date(profile.registration_date).toLocaleString()}</span>
-                </div>
-              </div>
-            </section>
+          <div className="profile-details">
+            <div className="detail-row">
+              <label>Party Name:</label>
+              <span>{user.partyName || 'N/A'}</span>
+            </div>
+            <div className="detail-row">
+              <label>Email:</label>
+              <span>{user.email || 'N/A'}</span>
+            </div>
+            <div className="detail-row">
+              <label>Phone:</label>
+              <span>{user.phone || 'N/A'}</span>
+            </div>
+            <div className="detail-row">
+              <label>Total Members:</label>
+              <span className="members-count">{user.members || 0}</span>
+            </div>
+            <div className="detail-row">
+              <label>Founded Year:</label>
+              <span>{user.foundedYear || 'N/A'}</span>
+            </div>
+            <div className="detail-row">
+              <label>Description:</label>
+              <span>{user.description || 'No description provided'}</span>
+            </div>
+            <div className="detail-row">
+              <label>Verification Status:</label>
+              <span className={user.verified ? 'status-verified' : 'status-pending'}>
+                {user.verified ? '✅ Verified' : '⏳ Pending'}
+              </span>
+            </div>
+            <div className="detail-row">
+              <label>Registration Date:</label>
+              <span>{user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</span>
+            </div>
           </div>
         );
 
@@ -313,28 +163,26 @@ const ProfileModal = ({ profile, userType, onClose, onVerify, isVerifying }) => 
   };
 
   return (
-    <div className="profile-modal-overlay" onClick={onClose}>
-      <div className="profile-modal" onClick={(e) => e.stopPropagation()}>
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        {/* Modal Header */}
         <div className="modal-header">
-          <h2>📋 Detailed Profile</h2>
-          <button className="close-btn" onClick={onClose}>✕</button>
+          <h2 className="modal-title">
+            {userType === 'parties' ? user.partyName : `${user.firstName} ${user.lastName}`}
+          </h2>
+          <button className="modal-close" onClick={onClose} title="Close modal">
+            ✕
+          </button>
         </div>
 
+        {/* Modal Body */}
         <div className="modal-body">
-          {renderProfileDetails()}
+          {getProfileDetails()}
         </div>
 
+        {/* Modal Footer */}
         <div className="modal-footer">
-          {!profile.is_verified && (
-            <button
-              className="btn btn-success btn-lg"
-              onClick={() => onVerify(profile, userType)}
-              disabled={isVerifying}
-            >
-              {isVerifying ? "⏳ Verifying..." : "✅ Verify This User"}
-            </button>
-          )}
-          <button className="btn btn-secondary btn-lg" onClick={onClose}>
+          <button className="btn btn-secondary" onClick={onClose}>
             Close
           </button>
         </div>

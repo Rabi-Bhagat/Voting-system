@@ -1,0 +1,141 @@
+/**
+ * ResultsPage Styles
+ */
+
+.container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2rem 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.resultsCard {
+    background: #fff;
+    border-radius: 12px;
+    padding: 2rem;
+    max-width: 1000px;
+    width: 100%;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.title {
+    font-size: 2.5rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #333;
+    border-bottom: 3px solid #667eea;
+    padding-bottom: 1rem;
+}
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.statCard {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.statCard h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.2rem;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+    padding-bottom: 0.5rem;
+}
+
+.statItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.statItem:last-child {
+    border-bottom: none;
+}
+
+.statItem span {
+    font-size: 0.95rem;
+    opacity: 0.9;
+}
+
+.statItem strong {
+    font-size: 1.3rem;
+    font-weight: 700;
+}
+
+.loading {
+    text-align: center;
+    padding: 2rem;
+    font-size: 1.2rem;
+    color: #fff;
+}
+
+.error {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    border: 1px solid #f5c6cb;
+}
+
+.backButton {
+    display: block;
+    margin: 0 auto;
+    padding: 0.75rem 2rem;
+    background: #667eea;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.backButton:hover {
+    background: #5568d3;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+@media (max-width: 768px) {
+    .resultsCard {
+        padding: 1.5rem;
+    }
+
+    .title {
+        font-size: 1.8rem;
+    }
+
+    .statsGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .statCard {
+        padding: 1rem;
+    }
+
+    .statCard h3 {
+        font-size: 1rem;
+    }
+
+    .statItem {
+        padding: 0.5rem 0;
+    }
+
+    .statItem strong {
+        font-size: 1.1rem;
+    }
+}
