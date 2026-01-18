@@ -1,12 +1,24 @@
 {
   "name": "backend",
   "version": "1.0.0",
+<<<<<<< HEAD
   "description": "Voting System Backend",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
     "test": "node server.js"
+=======
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "seed": "node seed.js",
+    "test-auth": "node test-auth.js",
+    "debug-login": "node debug-login.js",
+    "test-login": "node test-login-request.js",
+    "dev": "nodemon server.js"
+>>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
   },
   "keywords": [],
   "author": "",
@@ -18,7 +30,10 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.0",
     "express": "^5.1.0",
+<<<<<<< HEAD
     "mangodb": "^1.0.0",
+=======
+>>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
     "mongoose": "^8.15.0"
   }
 }

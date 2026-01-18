@@ -24,6 +24,7 @@ const VoterSchema = new mongoose.Schema({
   password: String,
   address: String,
   phone: String,
+<<<<<<< HEAD
   email: { type: String, default: null, sparse: true },
   gmail_id: { type: String, default: null, sparse: true },
   age: { type: Number, default: null },
@@ -47,6 +48,14 @@ const VoterSchema = new mongoose.Schema({
   created_at: { type: Date, default: Date.now },
   last_login: { type: Date, default: null },
   registration_date: { type: Date, default: Date.now }
+=======
+  constituency: String, // Optional, no validation
+  has_voted: { type: Boolean, default: false },
+  voted_candidate_id: { type: String, default: null },
+  verified: { type: Boolean, default: true }, // Admin can mark as official/verified
+  verified_by: { type: String, default: null }, // Admin username who verified
+  verified_at: { type: Date, default: null }, // When verified
+>>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
 });
 
 module.exports = mongoose.model("Voter", VoterSchema);

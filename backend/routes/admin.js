@@ -1,12 +1,17 @@
 //backend/routes/admin.js
 const express = require("express");
 const router = express.Router();
+<<<<<<< HEAD
+=======
+const bcrypt = require("bcrypt");
+>>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
 const Candidate = require("../models/Candidate");
 const Voter = require("../models/Voter");
 const Party = require("../models/Party");
 const Constituency = require("../models/Constituency");
 const ElectionStatus = require("../models/ElectionStatus");
 
+<<<<<<< HEAD
 // ============================================
 // VERIFICATION ENDPOINTS
 // ============================================
@@ -637,16 +642,23 @@ router.post("/add-constituency", async (req, res) => {
 // ELECTION MANAGEMENT ENDPOINTS
 // ============================================
 
+=======
+>>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
 // POST /admin/reset-votes
 router.post("/reset-votes", async (req, res) => {
   try {
     await Candidate.updateMany({}, { votes: 0 });
+<<<<<<< HEAD
     await Voter.updateMany({}, { has_voted: false, voted_candidate_id: null, vote_timestamp: null });
+=======
+    await Voter.updateMany({}, { has_voted: false, voted_candidate_id: null });
+>>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
 
     // Reset election status including resultsPublished flag
     await ElectionStatus.deleteMany({});
     await ElectionStatus.create({ conducted: false, resultsPublished: false });
 
+<<<<<<< HEAD
     res.json({ 
       success: true, 
       message: "Votes and voter statuses reset successfully" 
@@ -654,6 +666,12 @@ router.post("/reset-votes", async (req, res) => {
   } catch (err) {
     console.error("Error resetting votes:", err);
     res.status(500).json({ error: "Failed to reset votes", details: err.message });
+=======
+    res.json({ success: true, message: "Votes and voter statuses reset." });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to reset votes." });
+>>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
   }
 });
 
@@ -662,13 +680,18 @@ router.post("/publish-results", async (req, res) => {
   try {
     const status = await ElectionStatus.findOne();
     if (!status || !status.conducted) {
+<<<<<<< HEAD
       return res.status(400).json({ error: "No election has been conducted yet" });
+=======
+      return res.status(400).json({ error: "No election has been conducted." });
+>>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
     }
 
     // Mark results as published
     status.resultsPublished = true;
     await status.save();
 
+<<<<<<< HEAD
     res.json({ 
       success: true, 
       message: "Results published successfully" 
@@ -676,6 +699,75 @@ router.post("/publish-results", async (req, res) => {
   } catch (err) {
     console.error("Error publishing results:", err);
     res.status(500).json({ error: "Failed to publish results", details: err.message });
+=======
+    // Aggregate results with constituency name
+    const results = await Candidate.aggregate([
+      {
+        $group: {
+          _id: "$constituency",
+          maxVotes: { $max: "$votes" }
+        }
+      },
+      {
+        $lookup: {
+          from: "candidates",
+          let: { constituencyId: "$_id", maxVotes: "$maxVotes" },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $and: [
+                    { $eq: ["$constituency", "$$constituencyId"] },
+                    { $eq: ["$votes", "$$maxVotes"] }
+                  ]
+                }
+              }
+            }
+          ],
+          as: "winners"
+        }
+      },
+      { $unwind: "$winners" },
+      {
+        $lookup: {
+          from: "parties",
+          localField: "winners.party_id",
+          foreignField: "party_id",
+          as: "partyInfo"
+        }
+      },
+      { $unwind: "$partyInfo" },
+      {
+        $lookup: {
+          from: "constituencies",
+          localField: "_id",
+          foreignField: "constituency_id",
+          as: "constituencyInfo"
+        }
+      },
+      { $unwind: "$constituencyInfo" },
+      {
+        $project: {
+          _id: 0,
+          constituency: {
+            id: "$_id",
+            name: "$constituencyInfo.name"
+          },
+          winner: {
+            candidate_id: "$winners.candidate_id",
+            name: "$winners.name",
+            votes: "$winners.votes",
+            party_name: "$partyInfo.name"
+          }
+        }
+      }
+    ]);
+
+    res.json(results);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to publish results." });
+>>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
   }
 });
 
@@ -766,8 +858,13 @@ router.get("/results", async (req, res) => {
     
     res.json(results);
   } catch (err) {
+<<<<<<< HEAD
     console.error("Error fetching results:", err);
     res.status(500).json({ error: "Failed to fetch results", details: err.message });
+=======
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch results." });
+>>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
   }
 });
 
@@ -780,6 +877,7 @@ router.get("/election-status", async (req, res) => {
       resultsPublished: status?.resultsPublished || false
     });
   } catch (err) {
+<<<<<<< HEAD
     console.error("Error fetching election status:", err);
     res.status(500).json({ error: "Could not fetch election status", details: err.message });
   }
@@ -852,10 +950,105 @@ router.get("/view/voter/:voter_id", async (req, res) => {
 router.get("/view/candidate/:candidate_id", async (req, res) => {
   try {
     const candidate = await Candidate.findOne({ candidate_id: req.params.candidate_id });
+=======
+    res.status(500).json({ error: "Could not fetch election status." });
+  }
+});
+
+router.post("/add-voter", async (req, res) => {
+  const { voter_id, first_name, last_name, password, address, phone, constituency } = req.body;
+
+  if (!voter_id || !first_name || !last_name || !password) {
+    return res.status(400).json({ error: "Required fields missing" });
+  }
+
+  try {
+    const existing = await Voter.findOne({ voter_id });
+
+    if (existing) {
+      return res.status(409).json({ error: "Voter already exists" });
+    }
+
+    // Hash password before saving
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newVoter = new Voter({
+      voter_id,
+      first_name,
+      last_name,
+      password: hashedPassword,
+      address,
+      phone,
+      constituency: constituency || null,
+    });
+
+    await newVoter.save();
+
+    res.status(201).json({ success: true, message: "Voter added successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message || "Failed to add voter" });
+  }
+});
+
+
+router.post("/add-candidate", async (req, res) => {
+  const { candidate_id, name, password, party_id, constituency, background, education, experience, age } = req.body;
+
+  if (!candidate_id || !name || !party_id || !password) {
+    return res.status(400).json({ error: "Candidate ID, name, party ID, and password are required" });
+  }
+
+  try {
+    const existing = await Candidate.findOne({ candidate_id });
+
+    if (existing) {
+      return res.status(409).json({ error: "Candidate ID already exists" });
+    }
+
+    // Hash password before saving
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newCandidate = new Candidate({
+      candidate_id,
+      name,
+      password: hashedPassword,
+      party_id,
+      constituency: constituency || null,
+      background: background || "",
+      education: education || "",
+      experience: experience || "",
+      age: age || null,
+      approved: true, // Auto-approve when added by admin
+      votes: 0
+    });
+
+    await newCandidate.save();
+
+    res.status(201).json({ success: true, message: "Candidate added successfully. Awaiting approval." });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: err.message || "Failed to add candidate" });
+  }
+});
+
+// Approve candidate
+router.post("/approve-candidate", async (req, res) => {
+  const { candidate_id, admin_username } = req.body;
+
+  if (!candidate_id) {
+    return res.status(400).json({ error: "Candidate ID required" });
+  }
+
+  try {
+    const candidate = await Candidate.findOne({ candidate_id });
+
+>>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
     if (!candidate) {
       return res.status(404).json({ error: "Candidate not found" });
     }
 
+<<<<<<< HEAD
     const party = await Party.findOne({ party_id: candidate.party_id });
     const Constituency = require("../models/Constituency");
     const constituency = await Constituency.findOne({ constituency_id: candidate.constituency });
@@ -939,10 +1132,135 @@ router.get("/view/party/:party_id", async (req, res) => {
         $lookup: {
           from: "constituencies",
           localField: "_id",
+=======
+    candidate.approved = true;
+    candidate.approved_by = admin_username || "admin";
+    candidate.approved_at = new Date();
+    await candidate.save();
+
+    res.json({ success: true, message: "Candidate approved successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to approve candidate" });
+  }
+});
+
+// Reject/Remove candidate approval
+router.post("/reject-candidate", async (req, res) => {
+  const { candidate_id } = req.body;
+
+  if (!candidate_id) {
+    return res.status(400).json({ error: "Candidate ID required" });
+  }
+
+  try {
+    const candidate = await Candidate.findOne({ candidate_id });
+
+    if (!candidate) {
+      return res.status(404).json({ error: "Candidate not found" });
+    }
+
+    candidate.approved = false;
+    candidate.approved_by = null;
+    candidate.approved_at = null;
+    await candidate.save();
+
+    res.json({ success: true, message: "Candidate approval removed" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to reject candidate" });
+  }
+});
+
+// Get all candidates for admin approval
+router.get("/candidates-pending", async (req, res) => {
+  try {
+    const candidates = await Candidate.find({}).populate('party_id');
+    res.json(candidates);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch candidates" });
+  }
+});
+
+
+router.post("/add-party", async (req, res) => {
+  const { party_id, name, password } = req.body;
+
+  if (!party_id || !name || !password) {
+    return res.status(400).json({ error: "All fields are required" });
+  }
+
+  try {
+    const existing = await Party.findOne({ party_id, name, password });
+
+    if (existing) {
+      return res.status(409).json({ error: "Party with same details already exists" });
+    }
+
+    await Party.create({ party_id, name, password });
+    res.status(201).json({ success: true, message: "Party added successfully" });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to add party" });
+  }
+});
+
+// Get all constituencies (for registration dropdown)
+router.get("/constituencies", async (req, res) => {
+  try {
+    const constituencies = await Constituency.find({}, { constituency_id: 1, name: 1, _id: 0 });
+    res.json(constituencies);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch constituencies" });
+  }
+});
+
+// Get all parties (for registration dropdown)
+router.get("/parties", async (req, res) => {
+  try {
+    const parties = await Party.find({}, { party_id: 1, name: 1, _id: 0 });
+    res.json(parties);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch parties" });
+  }
+});
+
+// Get all voters for admin management
+router.get("/voters", async (req, res) => {
+  try {
+    const voters = await Voter.find({}, { password: 0 });
+    res.json(voters);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch voters" });
+  }
+});
+
+// Get all candidates with party info for admin management
+router.get("/candidates", async (req, res) => {
+  try {
+    const candidates = await Candidate.aggregate([
+      {
+        $lookup: {
+          from: "parties",
+          localField: "party_id",
+          foreignField: "party_id",
+          as: "party"
+        }
+      },
+      { $unwind: { path: "$party", preserveNullAndEmptyArrays: true } },
+      {
+        $lookup: {
+          from: "constituencies",
+          localField: "constituency",
+>>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
           foreignField: "constituency_id",
           as: "constituencyInfo"
         }
       },
+<<<<<<< HEAD
       {
         $unwind: {
           path: "$constituencyInfo",
@@ -954,10 +1272,27 @@ router.get("/view/party/:party_id", async (req, res) => {
           constituency_id: "$_id",
           constituency_name: "$constituencyInfo.name",
           candidates: 1,
+=======
+      { $unwind: { path: "$constituencyInfo", preserveNullAndEmptyArrays: true } },
+      {
+        $project: {
+          candidate_id: 1,
+          name: 1,
+          party_id: 1,
+          party_name: "$party.name",
+          constituency: 1,
+          constituency_name: "$constituencyInfo.name",
+          age: 1,
+          education: 1,
+          experience: 1,
+          background: 1,
+          approved: 1,
+>>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
           votes: 1
         }
       }
     ]);
+<<<<<<< HEAD
 
     res.json({
       profile: {
@@ -1087,14 +1422,87 @@ router.post("/cast-vote", async (req, res) => {
 
   if (!voter_id || !candidate_id) {
     return res.status(400).json({ error: "voter_id and candidate_id are required" });
+=======
+    res.json(candidates);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch candidates" });
+  }
+});
+
+// Get all parties with full details for admin management
+router.get("/all-parties", async (req, res) => {
+  try {
+    const parties = await Party.find({}, { password: 0 });
+    res.json(parties);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch parties" });
+  }
+});
+
+// Delete voter
+router.delete("/voter/:voter_id", async (req, res) => {
+  try {
+    const result = await Voter.deleteOne({ voter_id: req.params.voter_id });
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: "Voter not found" });
+    }
+    res.json({ success: true, message: "Voter deleted successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to delete voter" });
+  }
+});
+
+// Delete candidate
+router.delete("/candidate/:candidate_id", async (req, res) => {
+  try {
+    const result = await Candidate.deleteOne({ candidate_id: req.params.candidate_id });
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: "Candidate not found" });
+    }
+    res.json({ success: true, message: "Candidate deleted successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to delete candidate" });
+  }
+});
+
+// Delete party
+router.delete("/party/:party_id", async (req, res) => {
+  try {
+    const result = await Party.deleteOne({ party_id: req.params.party_id });
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: "Party not found" });
+    }
+    res.json({ success: true, message: "Party deleted successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to delete party" });
+  }
+});
+
+// Verify/Approve voter
+router.post("/verify-voter", async (req, res) => {
+  const { voter_id, verified, admin_username } = req.body;
+
+  if (!voter_id || verified === undefined) {
+    return res.status(400).json({ error: "Voter ID and verified status required" });
+>>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
   }
 
   try {
     const voter = await Voter.findOne({ voter_id });
+<<<<<<< HEAD
+=======
+
+>>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
     if (!voter) {
       return res.status(404).json({ error: "Voter not found" });
     }
 
+<<<<<<< HEAD
     if (voter.has_voted) {
       return res.status(400).json({ error: "This voter has already voted" });
     }
@@ -1159,6 +1567,79 @@ router.post("/cast-vote", async (req, res) => {
   } catch (err) {
     console.error("Error casting vote:", err);
     res.status(500).json({ error: "Failed to cast vote", details: err.message });
+=======
+    voter.verified = verified;
+    if (verified) {
+      voter.verified_by = admin_username || "admin";
+      voter.verified_at = new Date();
+    } else {
+      voter.verified_by = null;
+      voter.verified_at = null;
+    }
+    await voter.save();
+
+    res.json({ 
+      success: true, 
+      message: verified ? "Voter verified successfully" : "Voter verification removed" 
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to update voter verification" });
+  }
+});
+
+// Approve party
+router.post("/approve-party", async (req, res) => {
+  const { party_id, admin_username } = req.body;
+
+  if (!party_id) {
+    return res.status(400).json({ error: "Party ID required" });
+  }
+
+  try {
+    const party = await Party.findOne({ party_id });
+
+    if (!party) {
+      return res.status(404).json({ error: "Party not found" });
+    }
+
+    party.approved = true;
+    party.approved_by = admin_username || "admin";
+    party.approved_at = new Date();
+    await party.save();
+
+    res.json({ success: true, message: "Party approved successfully" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to approve party" });
+  }
+});
+
+// Reject party
+router.post("/reject-party", async (req, res) => {
+  const { party_id } = req.body;
+
+  if (!party_id) {
+    return res.status(400).json({ error: "Party ID required" });
+  }
+
+  try {
+    const party = await Party.findOne({ party_id });
+
+    if (!party) {
+      return res.status(404).json({ error: "Party not found" });
+    }
+
+    party.approved = false;
+    party.approved_by = null;
+    party.approved_at = null;
+    await party.save();
+
+    res.json({ success: true, message: "Party approval removed" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to reject party" });
+>>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
   }
 });
 

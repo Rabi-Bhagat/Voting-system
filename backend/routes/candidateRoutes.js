@@ -3,6 +3,7 @@ const router = express.Router();
 const Candidate = require("../models/Candidate");
 const Party = require("../models/Party");
 
+<<<<<<< HEAD
 // GET /candidates/profile/:candidate_id - Get candidate profile with detailed information
 router.get("/profile/:candidate_id", async (req, res) => {
   try {
@@ -61,6 +62,8 @@ router.get("/profile/:candidate_id", async (req, res) => {
   }
 });
 
+=======
+>>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
 // GET /candidates/:constituencyId
 router.get("/:constituencyId", async (req, res) => {
   const { constituencyId } = req.params;

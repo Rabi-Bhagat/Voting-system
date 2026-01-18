@@ -4,6 +4,7 @@ const Party = require("../models/Party");
 const Candidate = require("../models/Candidate");
 const Constituency = require("../models/Constituency");
 
+<<<<<<< HEAD
 //GET /party/profile/:id => Fetch party profile with detailed information
 router.get("/profile/:id", async (req, res) => {
   try {
@@ -82,6 +83,8 @@ router.get("/profile/:id", async (req, res) => {
   }
 });
 
+=======
+>>>>>>> de1eb099c1c79e86bfb60c7b38aab150f1945dd7
 //GET /party/:id => Fetch party details along with all its candidates
 router.get("/:id", async (req, res) => {
   try {
