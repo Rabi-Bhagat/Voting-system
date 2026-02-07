@@ -1,10 +1,11 @@
 // src/pages/AdminPage.js
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import Modal from "../components/Modal"; 
+import Modal from "../components/Modal";
 import "../styles/admin_page.css";
 
 // API base set using env var if present, else default to localhost
+//
 const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 function AdminPage() {
@@ -56,28 +57,37 @@ function AdminPage() {
     setMessage("");
     try {
       console.log("Fetching all users from:", API_BASE);
-      
+
       // Fetch voters
       const votersRes = await axios.get(`${API_BASE}/admin/voters`);
       console.log("Voters response:", votersRes.data);
-      
+
       // Fetch candidates
       const candidatesRes = await axios.get(`${API_BASE}/admin/candidates`);
       console.log("Candidates response:", candidatesRes.data);
-      
+
       // Fetch parties
       const partiesRes = await axios.get(`${API_BASE}/admin/all-parties`);
       console.log("Parties response:", partiesRes.data);
-      
+
       setVoters(votersRes.data || []);
       setCandidates(candidatesRes.data || []);
       setParties(partiesRes.data || []);
-      
-      console.log("State updated - Voters:", votersRes.data.length, "Candidates:", candidatesRes.data.length, "Parties:", partiesRes.data.length);
+
+      console.log(
+        "State updated - Voters:",
+        votersRes.data.length,
+        "Candidates:",
+        candidatesRes.data.length,
+        "Parties:",
+        partiesRes.data.length,
+      );
     } catch (err) {
       console.error("Failed to fetch users:", err);
       console.error("Error details:", err.response?.data || err.message);
-      setMessage(`❌ Failed to load user data: ${err.response?.data?.error || err.message}`);
+      setMessage(
+        `❌ Failed to load user data: ${err.response?.data?.error || err.message}`,
+      );
     } finally {
       setLoading(false);
     }
@@ -94,7 +104,10 @@ function AdminPage() {
     try {
       const adminInfo = JSON.parse(localStorage.getItem("adminInfo") || "{}");
       const admin_username = adminInfo.username || "admin";
-      await axios.post(`${API_BASE}/admin/approve-candidate`, { candidate_id, admin_username });
+      await axios.post(`${API_BASE}/admin/approve-candidate`, {
+        candidate_id,
+        admin_username,
+      });
       setMessage("✅ Candidate approved successfully!");
       fetchAllUsers();
     } catch (err) {
@@ -113,7 +126,8 @@ function AdminPage() {
   };
 
   const handleDeleteVoter = async (voter_id) => {
-    if (!window.confirm(`Are you sure you want to delete voter ${voter_id}?`)) return;
+    if (!window.confirm(`Are you sure you want to delete voter ${voter_id}?`))
+      return;
     try {
       await axios.delete(`${API_BASE}/admin/voter/${voter_id}`);
       setMessage("✅ Voter deleted successfully!");
@@ -124,7 +138,12 @@ function AdminPage() {
   };
 
   const handleDeleteCandidate = async (candidate_id) => {
-    if (!window.confirm(`Are you sure you want to delete candidate ${candidate_id}?`)) return;
+    if (
+      !window.confirm(
+        `Are you sure you want to delete candidate ${candidate_id}?`,
+      )
+    )
+      return;
     try {
       await axios.delete(`${API_BASE}/admin/candidate/${candidate_id}`);
       setMessage("✅ Candidate deleted successfully!");
@@ -135,7 +154,8 @@ function AdminPage() {
   };
 
   const handleDeleteParty = async (party_id) => {
-    if (!window.confirm(`Are you sure you want to delete party ${party_id}?`)) return;
+    if (!window.confirm(`Are you sure you want to delete party ${party_id}?`))
+      return;
     try {
       await axios.delete(`${API_BASE}/admin/party/${party_id}`);
       setMessage("✅ Party deleted successfully!");
@@ -149,8 +169,16 @@ function AdminPage() {
     try {
       const adminInfo = JSON.parse(localStorage.getItem("adminInfo") || "{}");
       const admin_username = adminInfo.username || "admin";
-      await axios.post(`${API_BASE}/admin/verify-voter`, { voter_id, verified, admin_username });
-      setMessage(verified ? "✅ Voter verified successfully!" : "✅ Voter verification removed!");
+      await axios.post(`${API_BASE}/admin/verify-voter`, {
+        voter_id,
+        verified,
+        admin_username,
+      });
+      setMessage(
+        verified
+          ? "✅ Voter verified successfully!"
+          : "✅ Voter verification removed!",
+      );
       fetchAllUsers();
     } catch (err) {
       setMessage("❌ Failed to update voter verification.");
@@ -161,7 +189,10 @@ function AdminPage() {
     try {
       const adminInfo = JSON.parse(localStorage.getItem("adminInfo") || "{}");
       const admin_username = adminInfo.username || "admin";
-      await axios.post(`${API_BASE}/admin/approve-party`, { party_id, admin_username });
+      await axios.post(`${API_BASE}/admin/approve-party`, {
+        party_id,
+        admin_username,
+      });
       setMessage("✅ Party approved successfully!");
       fetchAllUsers();
     } catch (err) {
@@ -201,22 +232,24 @@ function AdminPage() {
       voter: "add-voter",
       candidate: "add-candidate",
       party: "add-party",
-      constituency: "add-constituency"
+      constituency: "add-constituency",
     };
 
     const requiredFields = {
       voter: ["voter_id", "first_name", "last_name", "password"],
       candidate: ["candidate_id", "name", "password", "party_id"],
       party: ["party_id", "name", "password"],
-      constituency: ["constituency_id", "name", "password"]
+      constituency: ["constituency_id", "name", "password"],
     };
 
     const missingFields = requiredFields[modalType].filter(
-      (field) => !formData[field]
+      (field) => !formData[field],
     );
 
     if (missingFields.length) {
-      setModalError(`Please fill all fields. Missing: ${missingFields.join(", ")}`);
+      setModalError(
+        `Please fill all fields. Missing: ${missingFields.join(", ")}`,
+      );
       return;
     }
 
@@ -225,14 +258,19 @@ function AdminPage() {
     setModalError("");
     try {
       await axios.post(`${API_BASE}/admin/${endpoints[modalType]}`, formData);
-      setMessage(`✅ ${modalType.charAt(0).toUpperCase() + modalType.slice(1)} added successfully.`);
+      setMessage(
+        `✅ ${modalType.charAt(0).toUpperCase() + modalType.slice(1)} added successfully.`,
+      );
       handleModalClose();
       // Refresh data if management is shown
       if (showManagement) {
         fetchAllUsers();
       }
     } catch (err) {
-      const errorMsg = err.response?.data?.message || err.response?.data?.error || `Failed to add ${modalType}`;
+      const errorMsg =
+        err.response?.data?.message ||
+        err.response?.data?.error ||
+        `Failed to add ${modalType}`;
       setModalError(`❌ ${errorMsg}`);
     } finally {
       setLoading(false);
@@ -256,12 +294,16 @@ function AdminPage() {
         <div className="welcome-section">
           <div className="welcome-content">
             <h1 className="welcome-title">Admin Control Panel 🛡️</h1>
-            <p className="welcome-subtitle">Manage elections, voters, parties, and candidates</p>
+            <p className="welcome-subtitle">
+              Manage elections, voters, parties, and candidates
+            </p>
           </div>
         </div>
 
         {message && (
-          <div className={`alert ${message.includes('✅') ? 'alert-success' : 'alert-error'}`}>
+          <div
+            className={`alert ${message.includes("✅") ? "alert-success" : "alert-error"}`}
+          >
             {message}
           </div>
         )}
@@ -271,8 +313,14 @@ function AdminPage() {
             <div className="action-card action-danger">
               <div className="action-icon">🔄</div>
               <h3 className="action-title">Reset Votes</h3>
-              <p className="action-description">Clear all votes and restart the election</p>
-              <button onClick={resetVotes} disabled={loading} className="btn btn-action">
+              <p className="action-description">
+                Clear all votes and restart the election
+              </p>
+              <button
+                onClick={resetVotes}
+                disabled={loading}
+                className="btn btn-action"
+              >
                 {loading ? "Processing..." : "Reset All Votes"}
               </button>
             </div>
@@ -281,7 +329,11 @@ function AdminPage() {
               <div className="action-icon">📊</div>
               <h3 className="action-title">Publish Results</h3>
               <p className="action-description">Make election results public</p>
-              <button onClick={publishResults} disabled={loading} className="btn btn-action">
+              <button
+                onClick={publishResults}
+                disabled={loading}
+                className="btn btn-action"
+              >
                 {loading ? "Publishing..." : "Publish Results"}
               </button>
             </div>
@@ -289,8 +341,13 @@ function AdminPage() {
             <div className="action-card action-primary">
               <div className="action-icon">👥</div>
               <h3 className="action-title">Add Voter</h3>
-              <p className="action-description">Register a new voter in the system</p>
-              <button onClick={() => handleModalOpen("voter")} className="btn btn-action">
+              <p className="action-description">
+                Register a new voter in the system
+              </p>
+              <button
+                onClick={() => handleModalOpen("voter")}
+                className="btn btn-action"
+              >
                 Add Voter
               </button>
             </div>
@@ -298,8 +355,13 @@ function AdminPage() {
             <div className="action-card action-info">
               <div className="action-icon">🏛️</div>
               <h3 className="action-title">Add Party</h3>
-              <p className="action-description">Register a new political party</p>
-              <button onClick={() => handleModalOpen("party")} className="btn btn-action">
+              <p className="action-description">
+                Register a new political party
+              </p>
+              <button
+                onClick={() => handleModalOpen("party")}
+                className="btn btn-action"
+              >
                 Add Party
               </button>
             </div>
@@ -308,7 +370,10 @@ function AdminPage() {
               <div className="action-icon">🎯</div>
               <h3 className="action-title">Add Candidate</h3>
               <p className="action-description">Register a new candidate</p>
-              <button onClick={() => handleModalOpen("candidate")} className="btn btn-action">
+              <button
+                onClick={() => handleModalOpen("candidate")}
+                className="btn btn-action"
+              >
                 Add Candidate
               </button>
             </div>
@@ -316,8 +381,13 @@ function AdminPage() {
             <div className="action-card action-secondary">
               <div className="action-icon">🗺️</div>
               <h3 className="action-title">Add Constituency</h3>
-              <p className="action-description">Create a new voting constituency</p>
-              <button onClick={() => handleModalOpen("constituency")} className="btn btn-action">
+              <p className="action-description">
+                Create a new voting constituency
+              </p>
+              <button
+                onClick={() => handleModalOpen("constituency")}
+                className="btn btn-action"
+              >
                 Add Constituency
               </button>
             </div>
@@ -325,12 +395,14 @@ function AdminPage() {
             <div className="action-card action-manage">
               <div className="action-icon">⚙️</div>
               <h3 className="action-title">Manage Users</h3>
-              <p className="action-description">View and manage all voters, candidates, and parties</p>
-              <button 
+              <p className="action-description">
+                View and manage all voters, candidates, and parties
+              </p>
+              <button
                 onClick={() => {
                   setShowManagement(true);
                   fetchAllUsers();
-                }} 
+                }}
                 className="btn btn-action"
               >
                 Manage Users
@@ -341,8 +413,8 @@ function AdminPage() {
           <div className="management-section">
             <div className="management-header">
               <h2 className="management-title">User Management</h2>
-              <button 
-                onClick={() => setShowManagement(false)} 
+              <button
+                onClick={() => setShowManagement(false)}
                 className="btn btn-back-manage"
               >
                 ← Back to Dashboard
@@ -356,286 +428,386 @@ function AdminPage() {
               </div>
             ) : (
               <>
-            {/* Candidates Section */}
-            <div className="management-card">
-              <h3 className="section-title">
-                <span className="section-icon">🎯</span>
-                Candidates ({candidates.length})
-              </h3>
-              <div className="table-responsive">
-                <table className="management-table">
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Name</th>
-                      <th>Party ID</th>
-                      <th>Party Name</th>
-                      <th>Constituency ID</th>
-                      <th>Constituency Name</th>
-                      <th>Age</th>
-                      <th>Education</th>
-                      <th>Experience</th>
-                      <th>Background</th>
-                      <th>Status</th>
-                      <th>Approved By</th>
-                      <th>Approved At</th>
-                      <th>Votes</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {candidates.length === 0 ? (
-                      <tr>
-                        <td colSpan="15" className="empty-cell">No candidates found</td>
-                      </tr>
-                    ) : (
-                      candidates.map((candidate) => (
-                        <tr key={candidate.candidate_id}>
-                          <td className="id-cell">{candidate.candidate_id}</td>
-                          <td className="name-cell">{candidate.name}</td>
-                          <td className="id-cell">{candidate.party_id || "N/A"}</td>
-                          <td>{candidate.party_name || "N/A"}</td>
-                          <td className="id-cell">{candidate.constituency || "N/A"}</td>
-                          <td>{candidate.constituency_name || "N/A"}</td>
-                          <td>{candidate.age || "N/A"}</td>
-                          <td className="truncate-cell" title={candidate.education}>
-                            {candidate.education ? 
-                              (candidate.education.length > 40 ? 
-                                candidate.education.substring(0, 40) + "..." : 
-                                candidate.education) 
-                              : "N/A"}
-                          </td>
-                          <td className="truncate-cell" title={candidate.experience}>
-                            {candidate.experience ? 
-                              (candidate.experience.length > 40 ? 
-                                candidate.experience.substring(0, 40) + "..." : 
-                                candidate.experience) 
-                              : "N/A"}
-                          </td>
-                          <td className="truncate-cell" title={candidate.background}>
-                            {candidate.background ? 
-                              (candidate.background.length > 40 ? 
-                                candidate.background.substring(0, 40) + "..." : 
-                                candidate.background) 
-                              : "N/A"}
-                          </td>
-                          <td>
-                            <span className={`status-badge ${candidate.approved ? 'approved' : 'pending'}`}>
-                              {candidate.approved ? "✅ Approved" : "⏳ Pending"}
-                            </span>
-                          </td>
-                          <td className="admin-cell">{candidate.approved_by || "N/A"}</td>
-                          <td className="date-cell">
-                            {candidate.approved_at ? 
-                              new Date(candidate.approved_at).toLocaleDateString() + " " + 
-                              new Date(candidate.approved_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-                              : "N/A"}
-                          </td>
-                          <td className="votes-cell">{candidate.votes}</td>
-                          <td className="actions-cell">
-                            {!candidate.approved ? (
-                              <button 
-                                onClick={() => handleApproveCandidate(candidate.candidate_id)}
-                                className="btn-approve"
-                                title="Approve candidate"
-                              >
-                                ✓
-                              </button>
-                            ) : (
-                              <button 
-                                onClick={() => handleRejectCandidate(candidate.candidate_id)}
-                                className="btn-reject"
-                                title="Revoke approval"
-                              >
-                                ✗
-                              </button>
-                            )}
-                            <button 
-                              onClick={() => handleDeleteCandidate(candidate.candidate_id)}
-                              className="btn-delete"
-                              title="Delete candidate"
-                            >
-                              🗑️
-                            </button>
-                          </td>
+                {/* Candidates Section */}
+                <div className="management-card">
+                  <h3 className="section-title">
+                    <span className="section-icon">🎯</span>
+                    Candidates ({candidates.length})
+                  </h3>
+                  <div className="table-responsive">
+                    <table className="management-table">
+                      <thead>
+                        <tr>
+                          <th>ID</th>
+                          <th>Name</th>
+                          <th>Party ID</th>
+                          <th>Party Name</th>
+                          <th>Constituency ID</th>
+                          <th>Constituency Name</th>
+                          <th>Age</th>
+                          <th>Education</th>
+                          <th>Experience</th>
+                          <th>Background</th>
+                          <th>Status</th>
+                          <th>Approved By</th>
+                          <th>Approved At</th>
+                          <th>Votes</th>
+                          <th>Actions</th>
                         </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+                      </thead>
+                      <tbody>
+                        {candidates.length === 0 ? (
+                          <tr>
+                            <td colSpan="15" className="empty-cell">
+                              No candidates found
+                            </td>
+                          </tr>
+                        ) : (
+                          candidates.map((candidate) => (
+                            <tr key={candidate.candidate_id}>
+                              <td className="id-cell">
+                                {candidate.candidate_id}
+                              </td>
+                              <td className="name-cell">{candidate.name}</td>
+                              <td className="id-cell">
+                                {candidate.party_id || "N/A"}
+                              </td>
+                              <td>{candidate.party_name || "N/A"}</td>
+                              <td className="id-cell">
+                                {candidate.constituency || "N/A"}
+                              </td>
+                              <td>{candidate.constituency_name || "N/A"}</td>
+                              <td>{candidate.age || "N/A"}</td>
+                              <td
+                                className="truncate-cell"
+                                title={candidate.education}
+                              >
+                                {candidate.education
+                                  ? candidate.education.length > 40
+                                    ? candidate.education.substring(0, 40) +
+                                      "..."
+                                    : candidate.education
+                                  : "N/A"}
+                              </td>
+                              <td
+                                className="truncate-cell"
+                                title={candidate.experience}
+                              >
+                                {candidate.experience
+                                  ? candidate.experience.length > 40
+                                    ? candidate.experience.substring(0, 40) +
+                                      "..."
+                                    : candidate.experience
+                                  : "N/A"}
+                              </td>
+                              <td
+                                className="truncate-cell"
+                                title={candidate.background}
+                              >
+                                {candidate.background
+                                  ? candidate.background.length > 40
+                                    ? candidate.background.substring(0, 40) +
+                                      "..."
+                                    : candidate.background
+                                  : "N/A"}
+                              </td>
+                              <td>
+                                <span
+                                  className={`status-badge ${candidate.approved ? "approved" : "pending"}`}
+                                >
+                                  {candidate.approved
+                                    ? "✅ Approved"
+                                    : "⏳ Pending"}
+                                </span>
+                              </td>
+                              <td className="admin-cell">
+                                {candidate.approved_by || "N/A"}
+                              </td>
+                              <td className="date-cell">
+                                {candidate.approved_at
+                                  ? new Date(
+                                      candidate.approved_at,
+                                    ).toLocaleDateString() +
+                                    " " +
+                                    new Date(
+                                      candidate.approved_at,
+                                    ).toLocaleTimeString([], {
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    })
+                                  : "N/A"}
+                              </td>
+                              <td className="votes-cell">{candidate.votes}</td>
+                              <td className="actions-cell">
+                                {!candidate.approved ? (
+                                  <button
+                                    onClick={() =>
+                                      handleApproveCandidate(
+                                        candidate.candidate_id,
+                                      )
+                                    }
+                                    className="btn-approve"
+                                    title="Approve candidate"
+                                  >
+                                    ✓
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() =>
+                                      handleRejectCandidate(
+                                        candidate.candidate_id,
+                                      )
+                                    }
+                                    className="btn-reject"
+                                    title="Revoke approval"
+                                  >
+                                    ✗
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() =>
+                                    handleDeleteCandidate(
+                                      candidate.candidate_id,
+                                    )
+                                  }
+                                  className="btn-delete"
+                                  title="Delete candidate"
+                                >
+                                  🗑️
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
 
-            {/* Voters Section */}
-            <div className="management-card">
-              <h3 className="section-title">
-                <span className="section-icon">👥</span>
-                Voters ({voters.length})
-              </h3>
-              <div className="table-responsive">
-                <table className="management-table">
-                  <thead>
-                    <tr>
-                      <th>Voter ID</th>
-                      <th>First Name</th>
-                      <th>Last Name</th>
-                      <th>Phone</th>
-                      <th>Address</th>
-                      <th>Constituency ID</th>
-                      <th>Verified</th>
-                      <th>Verified By</th>
-                      <th>Verified At</th>
-                      <th>Has Voted</th>
-                      <th>Voted For</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {voters.length === 0 ? (
-                      <tr>
-                        <td colSpan="12" className="empty-cell">No voters found</td>
-                      </tr>
-                    ) : (
-                      voters.map((voter) => (
-                        <tr key={voter.voter_id}>
-                          <td className="id-cell">{voter.voter_id}</td>
-                          <td className="name-cell">{voter.first_name}</td>
-                          <td className="name-cell">{voter.last_name}</td>
-                          <td>{voter.phone || "N/A"}</td>
-                          <td className="truncate-cell" title={voter.address}>
-                            {voter.address ? 
-                              (voter.address.length > 30 ? 
-                                voter.address.substring(0, 30) + "..." : 
-                                voter.address) 
-                              : "N/A"}
-                          </td>
-                          <td className="id-cell">{voter.constituency || "Not assigned"}</td>
-                          <td>
-                            <span className={`status-badge ${voter.verified !== false || voter.is_verified ? 'verified' : 'unverified'}`}>
-                              {voter.verified !== false || voter.is_verified ? "✅ Official" : "⚠️ Unverified"}
-                            </span>
-                          </td>
-                          <td className="admin-cell">{voter.verified_by || "N/A"}</td>
-                          <td className="date-cell">
-                            {voter.verified_at ? 
-                              new Date(voter.verified_at).toLocaleDateString() + " " + 
-                              new Date(voter.verified_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-                              : "N/A"}
-                          </td>
-                          <td>
-                            <span className={`status-badge ${voter.has_voted ? 'voted' : 'not-voted'}`}>
-                              {voter.has_voted ? "✅ Yes" : "❌ No"}
-                            </span>
-                          </td>
-                          <td className="id-cell">{voter.voted_candidate_id || "N/A"}</td>
-                          <td className="actions-cell">
-                            {voter.verified !== false || voter.is_verified ? (
-                              <button 
-                                onClick={() => handleVerifyVoter(voter.voter_id, false)}
-                                className="btn-reject"
-                                title="Mark as unverified"
-                              >
-                                ✗
-                              </button>
-                            ) : (
-                              <button 
-                                onClick={() => handleVerifyVoter(voter.voter_id, true)}
-                                className="btn-approve"
-                                title="Mark as official"
-                              >
-                                ✓
-                              </button>
-                            )}
-                            <button 
-                              onClick={() => handleDeleteVoter(voter.voter_id)}
-                              className="btn-delete"
-                              title="Delete voter"
-                            >
-                              🗑️
-                            </button>
-                          </td>
+                {/* Voters Section */}
+                <div className="management-card">
+                  <h3 className="section-title">
+                    <span className="section-icon">👥</span>
+                    Voters ({voters.length})
+                  </h3>
+                  <div className="table-responsive">
+                    <table className="management-table">
+                      <thead>
+                        <tr>
+                          <th>Voter ID</th>
+                          <th>First Name</th>
+                          <th>Last Name</th>
+                          <th>Phone</th>
+                          <th>Address</th>
+                          <th>Constituency ID</th>
+                          <th>Verified</th>
+                          <th>Verified By</th>
+                          <th>Verified At</th>
+                          <th>Has Voted</th>
+                          <th>Voted For</th>
+                          <th>Actions</th>
                         </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+                      </thead>
+                      <tbody>
+                        {voters.length === 0 ? (
+                          <tr>
+                            <td colSpan="12" className="empty-cell">
+                              No voters found
+                            </td>
+                          </tr>
+                        ) : (
+                          voters.map((voter) => (
+                            <tr key={voter.voter_id}>
+                              <td className="id-cell">{voter.voter_id}</td>
+                              <td className="name-cell">{voter.first_name}</td>
+                              <td className="name-cell">{voter.last_name}</td>
+                              <td>{voter.phone || "N/A"}</td>
+                              <td
+                                className="truncate-cell"
+                                title={voter.address}
+                              >
+                                {voter.address
+                                  ? voter.address.length > 30
+                                    ? voter.address.substring(0, 30) + "..."
+                                    : voter.address
+                                  : "N/A"}
+                              </td>
+                              <td className="id-cell">
+                                {voter.constituency || "Not assigned"}
+                              </td>
+                              <td>
+                                <span
+                                  className={`status-badge ${voter.verified !== false || voter.is_verified ? "verified" : "unverified"}`}
+                                >
+                                  {voter.verified !== false || voter.is_verified
+                                    ? "✅ Official"
+                                    : "⚠️ Unverified"}
+                                </span>
+                              </td>
+                              <td className="admin-cell">
+                                {voter.verified_by || "N/A"}
+                              </td>
+                              <td className="date-cell">
+                                {voter.verified_at
+                                  ? new Date(
+                                      voter.verified_at,
+                                    ).toLocaleDateString() +
+                                    " " +
+                                    new Date(
+                                      voter.verified_at,
+                                    ).toLocaleTimeString([], {
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    })
+                                  : "N/A"}
+                              </td>
+                              <td>
+                                <span
+                                  className={`status-badge ${voter.has_voted ? "voted" : "not-voted"}`}
+                                >
+                                  {voter.has_voted ? "✅ Yes" : "❌ No"}
+                                </span>
+                              </td>
+                              <td className="id-cell">
+                                {voter.voted_candidate_id || "N/A"}
+                              </td>
+                              <td className="actions-cell">
+                                {voter.verified !== false ||
+                                voter.is_verified ? (
+                                  <button
+                                    onClick={() =>
+                                      handleVerifyVoter(voter.voter_id, false)
+                                    }
+                                    className="btn-reject"
+                                    title="Mark as unverified"
+                                  >
+                                    ✗
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() =>
+                                      handleVerifyVoter(voter.voter_id, true)
+                                    }
+                                    className="btn-approve"
+                                    title="Mark as official"
+                                  >
+                                    ✓
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() =>
+                                    handleDeleteVoter(voter.voter_id)
+                                  }
+                                  className="btn-delete"
+                                  title="Delete voter"
+                                >
+                                  🗑️
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
 
-            {/* Parties Section */}
-            <div className="management-card">
-              <h3 className="section-title">
-                <span className="section-icon">🏛️</span>
-                Parties ({parties.length})
-              </h3>
-              <div className="table-responsive">
-                <table className="management-table">
-                  <thead>
-                    <tr>
-                      <th>Party ID</th>
-                      <th>Party Name</th>
-                      <th>Status</th>
-                      <th>Approved By</th>
-                      <th>Approved At</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {parties.length === 0 ? (
-                      <tr>
-                        <td colSpan="6" className="empty-cell">No parties found</td>
-                      </tr>
-                    ) : (
-                      parties.map((party) => (
-                        <tr key={party.party_id}>
-                          <td className="id-cell">{party.party_id}</td>
-                          <td className="name-cell">{party.name}</td>
-                          <td>
-                            <span className={`status-badge ${party.approved !== false ? 'approved' : 'pending'}`}>
-                              {party.approved !== false ? "✅ Approved" : "⏳ Pending"}
-                            </span>
-                          </td>
-                          <td className="admin-cell">{party.approved_by || "N/A"}</td>
-                          <td className="date-cell">
-                            {party.approved_at ? 
-                              new Date(party.approved_at).toLocaleDateString() + " " + 
-                              new Date(party.approved_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
-                              : "N/A"}
-                          </td>
-                          <td className="actions-cell">
-                            {party.approved !== false ? (
-                              <button 
-                                onClick={() => handleRejectParty(party.party_id)}
-                                className="btn-reject"
-                                title="Revoke approval"
-                              >
-                                ✗
-                              </button>
-                            ) : (
-                              <button 
-                                onClick={() => handleApproveParty(party.party_id)}
-                                className="btn-approve"
-                                title="Approve party"
-                              >
-                                ✓
-                              </button>
-                            )}
-                            <button 
-                              onClick={() => handleDeleteParty(party.party_id)}
-                              className="btn-delete"
-                              title="Delete party"
-                            >
-                              🗑️
-                            </button>
-                          </td>
+                {/* Parties Section */}
+                <div className="management-card">
+                  <h3 className="section-title">
+                    <span className="section-icon">🏛️</span>
+                    Parties ({parties.length})
+                  </h3>
+                  <div className="table-responsive">
+                    <table className="management-table">
+                      <thead>
+                        <tr>
+                          <th>Party ID</th>
+                          <th>Party Name</th>
+                          <th>Status</th>
+                          <th>Approved By</th>
+                          <th>Approved At</th>
+                          <th>Actions</th>
                         </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            </>
+                      </thead>
+                      <tbody>
+                        {parties.length === 0 ? (
+                          <tr>
+                            <td colSpan="6" className="empty-cell">
+                              No parties found
+                            </td>
+                          </tr>
+                        ) : (
+                          parties.map((party) => (
+                            <tr key={party.party_id}>
+                              <td className="id-cell">{party.party_id}</td>
+                              <td className="name-cell">{party.name}</td>
+                              <td>
+                                <span
+                                  className={`status-badge ${party.approved !== false ? "approved" : "pending"}`}
+                                >
+                                  {party.approved !== false
+                                    ? "✅ Approved"
+                                    : "⏳ Pending"}
+                                </span>
+                              </td>
+                              <td className="admin-cell">
+                                {party.approved_by || "N/A"}
+                              </td>
+                              <td className="date-cell">
+                                {party.approved_at
+                                  ? new Date(
+                                      party.approved_at,
+                                    ).toLocaleDateString() +
+                                    " " +
+                                    new Date(
+                                      party.approved_at,
+                                    ).toLocaleTimeString([], {
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    })
+                                  : "N/A"}
+                              </td>
+                              <td className="actions-cell">
+                                {party.approved !== false ? (
+                                  <button
+                                    onClick={() =>
+                                      handleRejectParty(party.party_id)
+                                    }
+                                    className="btn-reject"
+                                    title="Revoke approval"
+                                  >
+                                    ✗
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() =>
+                                      handleApproveParty(party.party_id)
+                                    }
+                                    className="btn-approve"
+                                    title="Approve party"
+                                  >
+                                    ✓
+                                  </button>
+                                )}
+                                <button
+                                  onClick={() =>
+                                    handleDeleteParty(party.party_id)
+                                  }
+                                  className="btn-delete"
+                                  title="Delete party"
+                                >
+                                  🗑️
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </>
             )}
           </div>
         )}
