@@ -90,8 +90,18 @@ function Login() {
     }
   };
 
+  const handleMouseMove = (e) => {
+    const card = document.querySelector('.login-glass-card');
+    if (!card) return;
+    const rect = card.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    card.style.setProperty('--mouse-x', `${x}px`);
+    card.style.setProperty('--mouse-y', `${y}px`);
+  };
+
   return (
-    <div className="login-container">
+    <div className="login-container" onMouseMove={handleMouseMove}>
       <BiometricModal 
         isOpen={showBiometric} 
         onSuccess={processLogin} 
@@ -101,6 +111,9 @@ function Login() {
       
       {/* Visual Left Panel */}
       <div className="login-visual-panel">
+        <div className="glow-orb orb-1"></div>
+        <div className="glow-orb orb-2"></div>
+        <div className="glow-orb orb-3"></div>
         <div className="visual-content">
           <h1 className="brand-title">Secure. Fast.<br/>Transparent.</h1>
           <p className="brand-subtitle">
