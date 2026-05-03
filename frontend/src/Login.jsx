@@ -115,9 +115,9 @@ function Login() {
         <div className="glow-orb orb-2"></div>
         <div className="glow-orb orb-3"></div>
         <div className="visual-content">
-          <h1 className="brand-title">Secure. Fast.<br/>Transparent.</h1>
+          <h1 className="brand-title">National<br/>Election Portal.</h1>
           <p className="brand-subtitle">
-            Welcome to the next generation of digital democracy. Cast your vote securely using our state-of-the-art encrypted voting system.
+            Access your secure voting dashboard. Review candidates, track election status, and cast your official ballot with end-to-end encryption.
           </p>
         </div>
       </div>

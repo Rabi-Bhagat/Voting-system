@@ -111,9 +111,9 @@ function Register() {
         <div className="glow-orb orb-2"></div>
         <div className="glow-orb orb-3"></div>
         <div className="visual-content">
-          <h1 className="brand-title">Join the<br/>Future of Voting.</h1>
+          <h1 className="brand-title">Your Vote.<br/>Your Voice.</h1>
           <p className="brand-subtitle">
-            Create your account today and participate in secure, transparent, and digital elections. Your voice matters.
+            Register for the upcoming General Elections. Secure your democratic right to choose your representatives. Every ballot shapes our nation's future.
           </p>
         </div>
       </div>
