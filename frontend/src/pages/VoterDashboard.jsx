@@ -9,6 +9,7 @@ const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000";
 function VoterDashboard() {
   const [voter, setVoter] = useState(null);
   const [stats, setStats] = useState({ totalVoters: 0, votedCount: 0 });
+  const [currentTime, setCurrentTime] = useState(new Date());
   const navigate = useNavigate(); 
 
   useEffect(() => {
@@ -32,6 +33,13 @@ function VoterDashboard() {
         })
         .catch(err => console.log("Stats not available"));
     }
+
+    // Live clock timer
+    const timer = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000);
+
+    return () => clearInterval(timer);
   }, []);
 
   if (!voter) return (
@@ -51,6 +59,22 @@ function VoterDashboard() {
         <div className="navbar-brand">
           <span className="brand-icon">🗳️</span>
           <h1 className="navbar-title">Online Voting System</h1>
+        </div>
+        <div className="navbar-status" style={{ display: 'flex', alignItems: 'center', gap: '15px', color: '#fff' }}>
+          <div className="live-indicator" style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <span style={{ 
+              width: '10px', 
+              height: '10px', 
+              background: '#00ff88', 
+              borderRadius: '50%', 
+              boxShadow: '0 0 10px #00ff88',
+              animation: 'pulse 1.5s infinite' 
+            }}></span>
+            <span style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#00ff88' }}>SYSTEM LIVE</span>
+          </div>
+          <div className="live-clock" style={{ fontSize: '1.1rem', fontFamily: 'monospace', background: 'rgba(255,255,255,0.1)', padding: '5px 15px', borderRadius: '20px' }}>
+            {currentTime.toLocaleTimeString()}
+          </div>
         </div>
         <button
           className="btn btn-danger"

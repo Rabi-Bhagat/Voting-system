@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import BiometricModal from './components/BiometricModal';
 import './styles/login.css';
 
 const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000"; 
@@ -8,6 +9,8 @@ function Login() {
   const [role, setRole] = useState("voter");
   const [formData, setFormData] = useState({});
   const [error, setError] = useState("");
+  const [showBiometric, setShowBiometric] = useState(false);
+  const [pendingLoginData, setPendingLoginData] = useState(null);
 
   const handleChange = (e) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -48,7 +51,20 @@ function Login() {
         loginData.username = "admin";
       }
 
-      const res = await axios.post(`${API_BASE}/login`, loginData); 
+      // Instead of logging in immediately, show the biometric modal
+      setPendingLoginData(loginData);
+      setShowBiometric(true);
+      
+    } catch (err) {
+      console.error("Preparation error:", err);
+      setError("Failed to prepare login");
+    }
+  };
+
+  const processLogin = async () => {
+    try {
+      setShowBiometric(false);
+      const res = await axios.post(`${API_BASE}/login`, pendingLoginData); 
 
       if (res.data.success) {
         if (role === "voter" && res.data.voter) {
@@ -75,202 +91,228 @@ function Login() {
   };
 
   return (
-    <div className="container">
-      <div className="login-card">
-        <h1 className="text-center mb-4">ONLINE VOTING SYSTEM</h1>
-        <h4 className="text-center mb-4">SIGN IN TO CONTINUE</h4>
+    <div className="login-container">
+      <BiometricModal 
+        isOpen={showBiometric} 
+        onSuccess={processLogin} 
+        onCancel={() => setShowBiometric(false)} 
+        type="login" 
+      />
+      
+      {/* Visual Left Panel */}
+      <div className="login-visual-panel">
+        <div className="visual-content">
+          <h1 className="brand-title">Secure. Fast.<br/>Transparent.</h1>
+          <p className="brand-subtitle">
+            Welcome to the next generation of digital democracy. Cast your vote securely using our state-of-the-art encrypted voting system.
+          </p>
+        </div>
+      </div>
 
-        {/* Role Switcher */}
-        {role !== "admin" && (
-          <div className="role-container">
-            <ul className="nav nav-pills mb-3">
-              {["voter", "candidate", "party", "constituency"].map(r => (
-                <li className="nav-item" key={r}>
-                  <button
-                    className={`nav-link ${role === r ? "active" : ""}`}
-                    onClick={() => {
-                      setRole(r);
-                      setFormData({});
-                      setError("");
-                    }}
-                  >
-                    {r.charAt(0).toUpperCase() + r.slice(1)}
-                  </button>
-                </li>
-              ))}
-            </ul>
+      {/* Form Right Panel */}
+      <div className="login-form-panel">
+        <div className="login-glass-card">
+          <div className="form-header">
+            <h2>Welcome Back</h2>
+            <p>Sign in to your account to continue</p>
           </div>
-        )}
 
-        {/* Login Form */}
-        <div className="tab-content mt-4">
+          {/* Role Switcher */}
+          {role !== "admin" && (
+            <div className="role-pills">
+              {["voter", "candidate", "party", "constituency"].map(r => (
+                <button
+                  key={r}
+                  className={`role-pill ${role === r ? "active" : ""}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setRole(r);
+                    setFormData({});
+                    setError("");
+                  }}
+                  type="button"
+                >
+                  {r.charAt(0).toUpperCase() + r.slice(1)}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Login Form */}
           <form onSubmit={handleSubmit}>
             {role === "voter" && (
               <>
-                <label className="input-label">Voter ID</label>
-                <input 
-                  name="voter_id" 
-                  placeholder="Enter your Voter ID" 
-                  required 
-                  onChange={handleChange}
-                  value={formData.voter_id || ""}
-                />
+                <div className="input-group">
+                  <label className="input-label">Voter ID</label>
+                  <input 
+                    className="modern-input"
+                    name="voter_id" 
+                    placeholder="Enter your Voter ID" 
+                    required 
+                    onChange={handleChange}
+                    value={formData.voter_id || ""}
+                  />
+                </div>
                 
-                <label className="input-label">First Name</label>
-                <input 
-                  name="first_name" 
-                  placeholder="Enter your first name" 
-                  required 
-                  onChange={handleChange}
-                  value={formData.first_name || ""}
-                />
+                <div className="input-group">
+                  <label className="input-label">First Name</label>
+                  <input 
+                    className="modern-input"
+                    name="first_name" 
+                    placeholder="Enter your first name" 
+                    required 
+                    onChange={handleChange}
+                    value={formData.first_name || ""}
+                  />
+                </div>
                 
-                <label className="input-label">Last Name</label>
-                <input 
-                  name="last_name" 
-                  placeholder="Enter your last name" 
-                  required 
-                  onChange={handleChange}
-                  value={formData.last_name || ""}
-                />
+                <div className="input-group">
+                  <label className="input-label">Last Name</label>
+                  <input 
+                    className="modern-input"
+                    name="last_name" 
+                    placeholder="Enter your last name" 
+                    required 
+                    onChange={handleChange}
+                    value={formData.last_name || ""}
+                  />
+                </div>
               </>
             )}
 
             {role === "candidate" && (
-              <>
+              <div className="input-group">
                 <label className="input-label">Candidate ID</label>
                 <input 
+                  className="modern-input"
                   name="candidate_id" 
                   placeholder="Enter Candidate ID" 
                   required 
                   onChange={handleChange}
                   value={formData.candidate_id || ""}
                 />
-              </>
+              </div>
             )}
 
             {role === "party" && (
-              <>
+              <div className="input-group">
                 <label className="input-label">Party ID</label>
                 <input 
+                  className="modern-input"
                   name="party_id" 
                   placeholder="Enter Party ID" 
                   required 
                   onChange={handleChange}
                   value={formData.party_id || ""}
                 />
-              </>
+              </div>
             )}
 
             {role === "constituency" && (
-              <>
+              <div className="input-group">
                 <label className="input-label">Constituency ID</label>
                 <input 
+                  className="modern-input"
                   name="constituency_id" 
                   placeholder="Enter Constituency ID" 
                   required 
                   onChange={handleChange}
                   value={formData.constituency_id || ""}
                 />
-              </>
+              </div>
             )}
 
             {role === "admin" && (
               <>
-                <p className="admin-info" style={{ 
-                  background: '#f0f0f0', 
-                  padding: '10px', 
-                  borderRadius: '8px',
-                  marginBottom: '15px',
-                  textAlign: 'center'
-                }}>🔐 Admin Access</p>
-                <label className="input-label">Username</label>
-                <input 
-                  name="username" 
-                  placeholder="Enter admin username (default: admin)" 
-                  onChange={handleChange}
-                  value={formData.username !== undefined ? formData.username : "admin"}
-                />
+                <div className="admin-mode-banner">
+                  <span>🔐</span> Administrator Access
+                </div>
+                <div className="input-group">
+                  <label className="input-label">Username</label>
+                  <input 
+                    className="modern-input"
+                    name="username" 
+                    placeholder="Enter admin username (default: admin)" 
+                    onChange={handleChange}
+                    value={formData.username !== undefined ? formData.username : "admin"}
+                  />
+                </div>
               </>
             )}
 
-            <label className="input-label">Password</label>
-            <input
-              className='password-input'
-              name="password"
-              type="password"
-              placeholder="Enter your password"
-              required
-              onChange={handleChange}
-              value={formData.password || ""}
-            />
+            <div className="input-group">
+              <label className="input-label">Password</label>
+              <input
+                className="modern-input"
+                name="password"
+                type="password"
+                placeholder="Enter your password"
+                required
+                onChange={handleChange}
+                value={formData.password || ""}
+              />
+            </div>
 
-            <button
-              type="submit"
-              className="btn btn-primary login-button"
-            >
-              {role === "admin" ? "Login as Admin" : `Login as ${role.charAt(0).toUpperCase() + role.slice(1)}`}
+            <button type="submit" className="btn-primary">
+              {role === "admin" ? "Authenticate as Admin" : `Login as ${role.charAt(0).toUpperCase() + role.slice(1)}`}
             </button>
 
-            {error && <div className="alert alert-danger mt-3">❌ {error}</div>}
+            {error && <div className="alert alert-danger" style={{marginTop: '15px'}}>❌ {error}</div>}
           </form>
-        </div>
 
-        {/* Action Buttons */}
-        <div className="button-group mt-3">
-          {role !== "admin" ? (
-            <>
-              <div className="register-link text-center mb-3">
-                <p style={{ color: '#666', marginBottom: '10px' }}>Don't have an account?</p>
+          {/* Action Links */}
+          <div className="action-links">
+            {role !== "admin" ? (
+              <>
+                <div className="divider">New to the platform?</div>
                 <button
+                  type="button"
                   onClick={() => window.location.href = "/register"}
-                  className="btn btn-success"
-                  style={{ 
-                    padding: '10px 30px',
-                    background: '#28a745',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    cursor: 'pointer',
-                    fontWeight: '600',
-                    marginBottom: '15px'
-                  }}
+                  className="btn-outline"
                 >
-                  📝 Register Here
+                  Create an Account
                 </button>
-              </div>
-              <div className="admin-btn">
+                
+                <div className="divider">Other Options</div>
                 <button
+                  type="button"
                   onClick={() => {
                     setRole("admin");
                     setFormData({});
                     setError("");
                   }}
-                  className="btn"
+                  className="btn-outline"
+                  style={{borderColor: 'rgba(245, 158, 11, 0.3)', color: '#fbbf24'}}
                 >
-                  🔐 Admin Login
+                  🔐 Administrator Login
                 </button>
-              </div>
-              <div className="view-results-btn">
-                <button onClick={() => window.location.href = "/results"} className="btn">
-                  📊 View Results
+                
+                <button 
+                  type="button"
+                  onClick={() => window.location.href = "/results"} 
+                  className="btn-outline"
+                >
+                  📊 View Public Results
                 </button>
-              </div>
-            </>
-          ) : (
-            <div className="admin-back-button text-center">
-              <button
-                onClick={() => {
-                  setRole("voter");
-                  setFormData({});
-                  setError("");
-                }}
-                className="btn btn-secondary"
-              >
-                ← Back to User Login
-              </button>
-            </div>
-          )}
+              </>
+            ) : (
+              <>
+                <div className="divider">Not an administrator?</div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRole("voter");
+                    setFormData({});
+                    setError("");
+                  }}
+                  className="btn-outline"
+                >
+                  ← Return to Standard Login
+                </button>
+              </>
+            )}
+          </div>
+
         </div>
       </div>
     </div>

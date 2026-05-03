@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import Modal from '../components/Modal';
 import '../styles/admin_dashboard.css';
 
 const API_BASE = process.env.REACT_APP_API_URL || 'http://localhost:5000';
@@ -13,6 +14,12 @@ function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
   const [message, setMessage] = useState('');
+  
+  // Modal State
+  const [modalType, setModalType] = useState(null);
+  const [modalFormData, setModalFormData] = useState({});
+  const [modalError, setModalError] = useState('');
+  const [modalLoading, setModalLoading] = useState(false);
 
   useEffect(() => {
     fetchDashboardData();
@@ -71,6 +78,62 @@ function AdminDashboard() {
   const handleLogout = () => {
     localStorage.removeItem('adminToken');
     navigate('/');
+  };
+
+  const handleModalOpen = (type) => {
+    setModalType(type);
+    setModalFormData({});
+    setModalError('');
+  };
+
+  const handleModalClose = () => {
+    setModalType(null);
+    setModalFormData({});
+    setModalError('');
+  };
+
+  const handleModalInputChange = (e) => {
+    setModalFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
+  const handleModalSubmit = async () => {
+    const endpoints = {
+      voter: "add-voter",
+      candidate: "add-candidate",
+      party: "add-party",
+      constituency: "add-constituency",
+    };
+
+    const requiredFields = {
+      voter: ["voter_id", "first_name", "last_name", "password"],
+      candidate: ["candidate_id", "name", "password", "party_id"],
+      party: ["party_id", "name", "password"],
+      constituency: ["constituency_id", "name", "password"],
+    };
+
+    const missingFields = requiredFields[modalType].filter(
+      (field) => !modalFormData[field],
+    );
+
+    if (missingFields.length) {
+      setModalError(`Please fill all required fields: ${missingFields.join(", ")}`);
+      return;
+    }
+
+    setModalLoading(true);
+    setModalError("");
+    try {
+      await axios.post(`${API_BASE}/admin/${endpoints[modalType]}`, modalFormData);
+      setMessage(`✅ ${modalType.charAt(0).toUpperCase() + modalType.slice(1)} added successfully.`);
+      setTimeout(() => setMessage(''), 5000);
+      handleModalClose();
+      fetchDashboardData(); // Refresh stats
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || err.response?.data?.error || `Failed to add ${modalType}`;
+      setModalError(`❌ ${errorMsg}`);
+    } finally {
+      setModalLoading(false);
+    }
   };
 
   if (loading) {
@@ -191,17 +254,17 @@ function AdminDashboard() {
               <div className="section-card">
                 <h3>⚡ Quick Actions</h3>
                 <div className="quick-actions">
-                  <button className="action-btn" onClick={() => navigate('/admin')}>
-                    👥 Manage Voters
+                  <button className="action-btn" onClick={() => handleModalOpen('voter')}>
+                    ➕ Add Voter
                   </button>
-                  <button className="action-btn" onClick={() => navigate('/admin')}>
-                    🎯 Manage Candidates
+                  <button className="action-btn" onClick={() => handleModalOpen('candidate')}>
+                    ➕ Add Candidate
                   </button>
                   <button className="action-btn" onClick={() => setActiveTab('elections')}>
                     📅 Schedule Election
                   </button>
-                  <button className="action-btn" onClick={() => setActiveTab('audit')}>
-                    📋 View Audit Logs
+                  <button className="action-btn" onClick={() => navigate('/admin')}>
+                    👥 Manage Users
                   </button>
                 </div>
               </div>
@@ -281,6 +344,19 @@ function AdminDashboard() {
           <AuditLogsSection />
         )}
       </div>
+
+      {/* Global Modal for Adding Users/Entities */}
+      {modalType && (
+        <Modal
+          type={modalType}
+          onClose={handleModalClose}
+          onSubmit={handleModalSubmit}
+          onChange={handleModalInputChange}
+          formData={modalFormData}
+          loading={modalLoading}
+          modalError={modalError}
+        />
+      )}
     </div>
   );
 }
@@ -288,6 +364,7 @@ function AdminDashboard() {
 // Election Management Component
 function ElectionManagement() {
   const [elections, setElections] = useState([]);
+  const [availableConstituencies, setAvailableConstituencies] = useState([]);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [formData, setFormData] = useState({
     title: '',
@@ -300,6 +377,7 @@ function ElectionManagement() {
 
   useEffect(() => {
     fetchElections();
+    fetchConstituencies();
   }, []);
 
   const fetchElections = async () => {
@@ -311,8 +389,21 @@ function ElectionManagement() {
     }
   };
 
+  const fetchConstituencies = async () => {
+    try {
+      const res = await axios.get(`${API_BASE}/admin/constituencies`);
+      setAvailableConstituencies(res.data || []);
+    } catch (error) {
+      console.error('Error fetching constituencies:', error);
+    }
+  };
+
   const handleCreateElection = async (e) => {
     e.preventDefault();
+    if (formData.constituencies.length === 0) {
+      setMessage('Please select at least one constituency');
+      return;
+    }
     try {
       await axios.post(`${API_BASE}/election/create`, formData);
       setMessage('Election created successfully!');
@@ -376,6 +467,26 @@ function ElectionManagement() {
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Brief description of the election"
               />
+            </div>
+            <div className="form-group">
+              <label>Participating Constituencies *</label>
+              <div className="constituency-checkboxes" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '8px' }}>
+                {availableConstituencies.length > 0 ? availableConstituencies.map(c => (
+                  <label key={c.constituency_id} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#f0f4f8', padding: '8px 12px', borderRadius: '20px', cursor: 'pointer', border: '1px solid #e2e8f0', fontSize: '14px' }}>
+                    <input 
+                      type="checkbox" 
+                      checked={formData.constituencies.includes(c.constituency_id)}
+                      onChange={(e) => {
+                        const newConst = e.target.checked 
+                          ? [...formData.constituencies, c.constituency_id]
+                          : formData.constituencies.filter(id => id !== c.constituency_id);
+                        setFormData({ ...formData, constituencies: newConst });
+                      }}
+                    />
+                    {c.name}
+                  </label>
+                )) : <span style={{color: '#64748b', fontSize: '14px'}}>No constituencies found. Add some first!</span>}
+              </div>
             </div>
             <div className="form-row">
               <div className="form-group">

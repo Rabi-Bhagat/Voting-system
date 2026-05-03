@@ -44,8 +44,6 @@ const voteReceiptSchema = new mongoose.Schema({
 });
 
 // Indexes
-voteReceiptSchema.index({ verification_code: 1 });
-voteReceiptSchema.index({ receipt_id: 1 });
 voteReceiptSchema.index({ voter_id_hash: 1, election_id: 1 });
 
 // Generate unique receipt ID

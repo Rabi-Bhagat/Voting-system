@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Button, Container, Modal, Form } from "react-bootstrap";
 import { useNavigate } from "react-router-dom"; 
+import Confetti from 'react-confetti';
+import BiometricModal from '../components/BiometricModal';
 import '../styles/ballotPaper.css';
 
 const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000"; 
@@ -15,6 +17,8 @@ const BallotPaper = () => {
   const [showConfirm, setShowConfirm] = useState(false);
   const [selectedCandidate, setSelectedCandidate] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [showBiometric, setShowBiometric] = useState(false);
   
   const navigate = useNavigate();
 
@@ -65,14 +69,20 @@ const BallotPaper = () => {
 
   const confirmVote = async () => {
     if (!voter?.voter_id || !selectedCandidate) return;
+    
+    // Instead of voting immediately, hide confirm modal and show biometric modal
+    setShowConfirm(false);
+    setShowBiometric(true);
+  };
 
+  const processVote = async () => {
     try {
+      setShowBiometric(false);
       const res = await axios.post(`${API_BASE}/voter/vote`, { 
         voter_id: voter.voter_id,
         candidate_id: selectedCandidate.candidate_id,
       });
       
-      setShowConfirm(false);
       setMessage(res.data.message);
       
       setVoter({
@@ -81,18 +91,19 @@ const BallotPaper = () => {
         voted_candidate_id: selectedCandidate.candidate_id,
       });
       
+      // Trigger Confetti
+      setShowConfetti(true);
+      
       if (res.data.receipt) {
         setTimeout(() => {
           navigate('/vote-receipt', { 
             state: { receipt: res.data.receipt }
           });
-        }, 1500);
+        }, 3000); // Give them 3 seconds to enjoy the confetti
       }
     } catch (err) {
       console.error("Vote error:", err);
-      // Wait a moment before closing so user sees error if any? 
-      // Actually keeping modal open might be better if error, but for now just close and show toast
-      setShowConfirm(false); 
+      setShowBiometric(false); 
       setMessage(err.response?.data?.error || "Voting failed.");
     }
   };
@@ -110,6 +121,13 @@ const BallotPaper = () => {
 
   return (
     <div className="ballot-wrapper">
+      {showConfetti && <Confetti recycle={false} numberOfPieces={500} gravity={0.15} />}
+      <BiometricModal 
+        isOpen={showBiometric} 
+        onSuccess={processVote} 
+        onCancel={() => setShowBiometric(false)} 
+        type="vote submission" 
+      />
       <Container className="py-5">
         <div className="ballot-header">
           <div className="header-content">

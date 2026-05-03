@@ -93,218 +93,270 @@ function Register() {
   };
 
   return (
-    <div className="container">
-      <div className="register-card">
-        <h1 className="text-center mb-4">ONLINE VOTING SYSTEM</h1>
-        <h4 className="text-center mb-4">CREATE NEW ACCOUNT</h4>
-
-        {/* Role Switcher */}
-        <div className="role-container">
-          <ul className="nav nav-pills mb-3">
-            {["voter", "candidate"].map(r => (
-              <li className="nav-item" key={r}>
-                <button
-                  className={`nav-link ${role === r ? "active" : ""}`}
-                  onClick={() => {
-                    setRole(r);
-                    setFormData({});
-                    setError("");
-                    setSuccess("");
-                  }}
-                >
-                  {r.charAt(0).toUpperCase() + r.slice(1)}
-                </button>
-              </li>
-            ))}
-          </ul>
+    <div className="login-container">
+      
+      {/* Visual Left Panel */}
+      <div className="login-visual-panel">
+        <div className="visual-content">
+          <h1 className="brand-title">Join the<br/>Future of Voting.</h1>
+          <p className="brand-subtitle">
+            Create your account today and participate in secure, transparent, and digital elections. Your voice matters.
+          </p>
         </div>
+      </div>
 
-        {/* Registration Form */}
-        <div className="tab-content mt-4">
+      {/* Form Right Panel */}
+      <div className="login-form-panel">
+        <div className="login-glass-card">
+          <div className="form-header">
+            <h2>Create Account</h2>
+            <p>Register to get started</p>
+          </div>
+
+          {/* Role Switcher */}
+          <div className="role-pills">
+            {["voter", "candidate"].map(r => (
+              <button
+                key={r}
+                className={`role-pill ${role === r ? "active" : ""}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setRole(r);
+                  setFormData({});
+                  setError("");
+                  setSuccess("");
+                }}
+                type="button"
+              >
+                {r.charAt(0).toUpperCase() + r.slice(1)}
+              </button>
+            ))}
+          </div>
+
+          {/* Registration Form */}
           <form onSubmit={handleSubmit}>
             {role === "voter" && (
               <>
-                <label className="input-label">Voter ID *</label>
-                <input 
-                  name="voter_id" 
-                  placeholder="Enter unique Voter ID" 
-                  required 
-                  onChange={handleChange}
-                  value={formData.voter_id || ""}
-                />
+                <div className="input-group">
+                  <label className="input-label">Voter ID *</label>
+                  <input 
+                    className="modern-input"
+                    name="voter_id" 
+                    placeholder="Enter unique Voter ID" 
+                    required 
+                    onChange={handleChange}
+                    value={formData.voter_id || ""}
+                  />
+                </div>
                 
-                <label className="input-label">First Name *</label>
-                <input 
-                  name="first_name" 
-                  placeholder="Enter your first name" 
-                  required 
-                  onChange={handleChange}
-                  value={formData.first_name || ""}
-                />
+                <div className="input-group">
+                  <label className="input-label">First Name *</label>
+                  <input 
+                    className="modern-input"
+                    name="first_name" 
+                    placeholder="Enter your first name" 
+                    required 
+                    onChange={handleChange}
+                    value={formData.first_name || ""}
+                  />
+                </div>
                 
-                <label className="input-label">Last Name *</label>
-                <input 
-                  name="last_name" 
-                  placeholder="Enter your last name" 
-                  required 
-                  onChange={handleChange}
-                  value={formData.last_name || ""}
-                />
+                <div className="input-group">
+                  <label className="input-label">Last Name *</label>
+                  <input 
+                    className="modern-input"
+                    name="last_name" 
+                    placeholder="Enter your last name" 
+                    required 
+                    onChange={handleChange}
+                    value={formData.last_name || ""}
+                  />
+                </div>
 
-                <label className="input-label">Phone Number *</label>
-                <input 
-                  name="phone" 
-                  type="tel"
-                  placeholder="Enter your phone number" 
-                  required 
-                  onChange={handleChange}
-                  value={formData.phone || ""}
-                />
+                <div className="input-group">
+                  <label className="input-label">Phone Number *</label>
+                  <input 
+                    className="modern-input"
+                    name="phone" 
+                    type="tel"
+                    placeholder="Enter your phone number" 
+                    required 
+                    onChange={handleChange}
+                    value={formData.phone || ""}
+                  />
+                </div>
 
-                <label className="input-label">Address *</label>
-                <textarea 
-                  name="address" 
-                  placeholder="Enter your address" 
-                  required 
-                  onChange={handleChange}
-                  value={formData.address || ""}
-                  rows="3"
-                />
+                <div className="input-group">
+                  <label className="input-label">Address *</label>
+                  <textarea 
+                    className="modern-input"
+                    name="address" 
+                    placeholder="Enter your address" 
+                    required 
+                    onChange={handleChange}
+                    value={formData.address || ""}
+                  />
+                </div>
               </>
             )}
 
             {role === "candidate" && (
               <>
-                <label className="input-label">Candidate ID *</label>
-                <input 
-                  name="candidate_id" 
-                  placeholder="Enter unique Candidate ID" 
-                  required 
-                  onChange={handleChange}
-                  value={formData.candidate_id || ""}
-                />
+                <div className="input-group">
+                  <label className="input-label">Candidate ID *</label>
+                  <input 
+                    className="modern-input"
+                    name="candidate_id" 
+                    placeholder="Enter unique Candidate ID" 
+                    required 
+                    onChange={handleChange}
+                    value={formData.candidate_id || ""}
+                  />
+                </div>
 
-                <label className="input-label">Full Name *</label>
-                <input 
-                  name="name" 
-                  placeholder="Enter your full name" 
-                  required 
-                  onChange={handleChange}
-                  value={formData.name || ""}
-                />
+                <div className="input-group">
+                  <label className="input-label">Full Name *</label>
+                  <input 
+                    className="modern-input"
+                    name="name" 
+                    placeholder="Enter your full name" 
+                    required 
+                    onChange={handleChange}
+                    value={formData.name || ""}
+                  />
+                </div>
 
-                <label className="input-label">Party *</label>
-                <select 
-                  name="party_id" 
-                  required 
-                  onChange={handleChange}
-                  value={formData.party_id || ""}
-                >
-                  <option value="">Select Party</option>
-                  {parties.map(p => (
-                    <option key={p.party_id} value={p.party_id}>
-                      {p.name}
-                    </option>
-                  ))}
-                </select>
+                <div className="input-group">
+                  <label className="input-label">Party *</label>
+                  <select 
+                    className="modern-input"
+                    name="party_id" 
+                    required 
+                    onChange={handleChange}
+                    value={formData.party_id || ""}
+                  >
+                    <option value="">Select Party</option>
+                    {parties.map(p => (
+                      <option key={p.party_id} value={p.party_id}>
+                        {p.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-                <label className="input-label">Constituency *</label>
-                <select 
-                  name="constituency" 
-                  required 
-                  onChange={handleChange}
-                  value={formData.constituency || ""}
-                >
-                  <option value="">Select Constituency</option>
-                  {constituencies.map(c => (
-                    <option key={c.constituency_id} value={c.constituency_id}>
-                      {c.name}
-                    </option>
-                  ))}
-                </select>
+                <div className="input-group">
+                  <label className="input-label">Constituency *</label>
+                  <select 
+                    className="modern-input"
+                    name="constituency" 
+                    required 
+                    onChange={handleChange}
+                    value={formData.constituency || ""}
+                  >
+                    <option value="">Select Constituency</option>
+                    {constituencies.map(c => (
+                      <option key={c.constituency_id} value={c.constituency_id}>
+                        {c.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-                <label className="input-label">Age</label>
-                <input 
-                  name="age" 
-                  type="number"
-                  placeholder="Enter your age" 
-                  onChange={handleChange}
-                  value={formData.age || ""}
-                  min="18"
-                />
+                <div className="input-group">
+                  <label className="input-label">Age</label>
+                  <input 
+                    className="modern-input"
+                    name="age" 
+                    type="number"
+                    placeholder="Enter your age" 
+                    onChange={handleChange}
+                    value={formData.age || ""}
+                    min="18"
+                  />
+                </div>
 
-                <label className="input-label">Education</label>
-                <input 
-                  name="education" 
-                  placeholder="Enter your education background" 
-                  onChange={handleChange}
-                  value={formData.education || ""}
-                />
+                <div className="input-group">
+                  <label className="input-label">Education</label>
+                  <input 
+                    className="modern-input"
+                    name="education" 
+                    placeholder="Enter your education background" 
+                    onChange={handleChange}
+                    value={formData.education || ""}
+                  />
+                </div>
 
-                <label className="input-label">Experience</label>
-                <textarea 
-                  name="experience" 
-                  placeholder="Enter your political experience" 
-                  onChange={handleChange}
-                  value={formData.experience || ""}
-                  rows="3"
-                />
+                <div className="input-group">
+                  <label className="input-label">Experience</label>
+                  <textarea 
+                    className="modern-input"
+                    name="experience" 
+                    placeholder="Enter your political experience" 
+                    onChange={handleChange}
+                    value={formData.experience || ""}
+                  />
+                </div>
 
-                <label className="input-label">Background</label>
-                <textarea 
-                  name="background" 
-                  placeholder="Enter your background information" 
-                  onChange={handleChange}
-                  value={formData.background || ""}
-                  rows="3"
-                />
+                <div className="input-group">
+                  <label className="input-label">Background</label>
+                  <textarea 
+                    className="modern-input"
+                    name="background" 
+                    placeholder="Enter your background information" 
+                    onChange={handleChange}
+                    value={formData.background || ""}
+                  />
+                </div>
               </>
             )}
 
-            <label className="input-label">Password *</label>
-            <input
-              name="password"
-              type="password"
-              placeholder="Create a strong password"
-              required
-              onChange={handleChange}
-              value={formData.password || ""}
-              minLength="6"
-            />
+            <div className="input-group">
+              <label className="input-label">Password *</label>
+              <input
+                className="modern-input"
+                name="password"
+                type="password"
+                placeholder="Create a strong password"
+                required
+                onChange={handleChange}
+                value={formData.password || ""}
+                minLength="6"
+              />
+            </div>
 
-            <label className="input-label">Confirm Password *</label>
-            <input
-              name="confirm_password"
-              type="password"
-              placeholder="Re-enter your password"
-              required
-              onChange={handleChange}
-              value={formData.confirm_password || ""}
-            />
+            <div className="input-group">
+              <label className="input-label">Confirm Password *</label>
+              <input
+                className="modern-input"
+                name="confirm_password"
+                type="password"
+                placeholder="Re-enter your password"
+                required
+                onChange={handleChange}
+                value={formData.confirm_password || ""}
+              />
+            </div>
 
-            <button
-              type="submit"
-              className="btn btn-primary register-button"
-            >
+            <button type="submit" className="btn-primary">
               Register as {role.charAt(0).toUpperCase() + role.slice(1)}
             </button>
 
-            {error && <div className="alert alert-danger mt-3">❌ {error}</div>}
-            {success && <div className="alert alert-success mt-3">✅ {success}</div>}
+            {error && <div className="alert alert-danger" style={{marginTop: '15px'}}>❌ {error}</div>}
+            {success && <div className="alert alert-success" style={{marginTop: '15px'}}>✅ {success}</div>}
           </form>
-        </div>
 
-        {/* Action Buttons */}
-        <div className="button-group mt-3">
-          <div className="text-center">
-            <p>Already have an account?</p>
+          {/* Action Links */}
+          <div className="action-links">
+            <div className="divider">Already have an account?</div>
             <button
+              type="button"
               onClick={() => window.location.href = "/"}
-              className="btn btn-secondary"
+              className="btn-outline"
             >
-              Login Here
+              Sign In Here
             </button>
           </div>
+
         </div>
       </div>
     </div>
