@@ -4,6 +4,7 @@
 
 require("dotenv").config();
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
 
 const Voter = require("./models/Voter");
 const Candidate = require("./models/Candidate");
@@ -43,16 +44,19 @@ const seedData = async () => {
     await ElectionStatus.deleteMany({});
     console.log("✅ Data cleared\n");
 
+    // Generate standard hashed password
+    const hashedPass123 = await bcrypt.hash("pass123", 10);
+
     // ============================================
     // SEED CONSTITUENCIES
     // ============================================
     console.log("📍 Adding constituencies...");
     const constituencies = [
-      { constituency_id: "C001", name: "North District", password: "pass123" },
-      { constituency_id: "C002", name: "South District", password: "pass123" },
-      { constituency_id: "C003", name: "East District", password: "pass123" },
-      { constituency_id: "C004", name: "West District", password: "pass123" },
-      { constituency_id: "C005", name: "Central District", password: "pass123" }
+      { constituency_id: "C001", name: "North District", password: hashedPass123 },
+      { constituency_id: "C002", name: "South District", password: hashedPass123 },
+      { constituency_id: "C003", name: "East District", password: hashedPass123 },
+      { constituency_id: "C004", name: "West District", password: hashedPass123 },
+      { constituency_id: "C005", name: "Central District", password: hashedPass123 }
     ];
 
     await Constituency.insertMany(constituencies);
@@ -66,7 +70,7 @@ const seedData = async () => {
       {
         party_id: "P001",
         name: "Democratic Alliance",
-        password: "pass123",
+        password: hashedPass123,
         symbol: "🦁",
         color: "#FF6B6B",
         description: "Progressive and inclusive party",
@@ -75,7 +79,7 @@ const seedData = async () => {
       {
         party_id: "P002",
         name: "National Unity Party",
-        password: "pass123",
+        password: hashedPass123,
         symbol: "🛡️",
         color: "#4ECDC4",
         description: "Unity and development focused",
@@ -84,7 +88,7 @@ const seedData = async () => {
       {
         party_id: "P003",
         name: "People's Movement",
-        password: "pass123",
+        password: hashedPass123,
         symbol: "✊",
         color: "#FFE66D",
         description: "Grassroots and community driven",
@@ -93,7 +97,7 @@ const seedData = async () => {
       {
         party_id: "P004",
         name: "Future Forward",
-        password: "pass123",
+        password: hashedPass123,
         symbol: "🚀",
         color: "#95E1D3",
         description: "Innovation and progress",
@@ -285,7 +289,10 @@ const seedData = async () => {
       }
     ];
 
-    await Candidate.insertMany(candidates);
+    // Map over candidates to add the hashed password since it's not defined in the array
+    const hashedCandidates = candidates.map(c => ({...c, password: hashedPass123, approved: true}));
+
+    await Candidate.insertMany(hashedCandidates);
     console.log(`✅ Added ${candidates.length} candidates\n`);
 
     // ============================================
@@ -311,7 +318,7 @@ const seedData = async () => {
           voter_id: `V${String(voterId).padStart(4, "0")}`,
           first_name: firstName,
           last_name: lastName,
-          password: "pass123",
+          password: hashedPass123,
           email: `voter${voterId}@example.com`,
           phone: `98${String(Math.floor(Math.random() * 100000000)).padStart(8, "0")}`,
           address: `Address ${voterId}, ${constituencies[c].name}`,

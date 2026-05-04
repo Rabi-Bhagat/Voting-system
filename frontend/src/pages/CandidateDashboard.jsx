@@ -111,8 +111,8 @@ function CandidateDashboard() {
               <div className="profile-main">
                 <div className="avatar-section">
                   <div className="avatar-wrapper">
-                    <div className="candidate-avatar">
-                      {candidate.name.charAt(0)}
+                    <div className="initials-avatar">
+                      {candidate.name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                     </div>
                     <div className="avatar-badge">
                       {candidate.approved ? "✓" : "⏳"}

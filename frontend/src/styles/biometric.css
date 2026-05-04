@@ -9,52 +9,156 @@
   justify-content: center;
   align-items: center;
   z-index: 9999;
-  backdrop-filter: blur(8px);
+  backdrop-filter: blur(12px);
 }
 
 .biometric-modal {
-  background: #111;
+  background: rgba(17, 17, 17, 0.95);
   padding: 40px;
-  border-radius: 20px;
-  border: 1px solid #333;
+  border-radius: 24px;
+  border: 1px solid rgba(0, 255, 136, 0.2);
   display: flex;
   flex-direction: column;
   align-items: center;
-  box-shadow: 0 0 40px rgba(0, 255, 136, 0.1);
-  width: 350px;
+  box-shadow: 0 0 50px rgba(0, 255, 136, 0.15), inset 0 0 20px rgba(0, 255, 136, 0.05);
+  width: 380px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
 }
 
+.biometric-modal::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle, rgba(0,255,136,0.05) 0%, transparent 60%);
+  animation: rotate 10s linear infinite;
+  pointer-events: none;
+}
+
+/* --- Face Scanner Styles --- */
+.camera-container {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  margin-bottom: 25px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid rgba(0, 255, 136, 0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #000;
+  box-shadow: 0 0 30px rgba(0, 255, 136, 0.2);
+  transition: all 0.5s ease;
+}
+
+.camera-container.success {
+  border-color: #00ff88;
+  box-shadow: 0 0 40px rgba(0, 255, 136, 0.5);
+  background: rgba(0, 255, 136, 0.1);
+}
+
+.webcam-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1); /* Mirror effect */
+}
+
+.face-overlay {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  pointer-events: none;
+}
+
+.corner {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border: 3px solid #00ff88;
+  border-radius: 4px;
+}
+
+.top-left { top: 0; left: 0; border-right: none; border-bottom: none; }
+.top-right { top: 0; right: 0; border-left: none; border-bottom: none; }
+.bottom-left { bottom: 0; left: 0; border-right: none; border-top: none; }
+.bottom-right { bottom: 0; right: 0; border-left: none; border-top: none; }
+
+.face-laser {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: #00ff88;
+  box-shadow: 0 0 15px #00ff88, 0 0 30px #00ff88;
+  animation: scanFace 2s ease-in-out infinite alternate;
+}
+
+.success-icon-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes scanFace {
+  0% { top: 0; opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { top: 100%; opacity: 0.5; }
+}
+
+@keyframes rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* --- Fingerprint Scanner Styles --- */
 .scanner-container {
   position: relative;
-  width: 150px;
-  height: 150px;
-  margin-bottom: 20px;
-  border-radius: 20px;
+  width: 160px;
+  height: 160px;
+  margin-bottom: 25px;
+  border-radius: 25px;
   overflow: hidden;
   display: flex;
   justify-content: center;
   align-items: center;
   border: 2px solid rgba(0, 255, 136, 0.2);
+  background: rgba(255, 255, 255, 0.02);
+  transition: all 0.4s ease;
 }
 
 .scanner-container.success {
   border-color: #00ff88;
-  box-shadow: 0 0 20px rgba(0, 255, 136, 0.4);
+  box-shadow: 0 0 30px rgba(0, 255, 136, 0.4);
+  background: rgba(0, 255, 136, 0.05);
 }
 
 .fingerprint-icon {
   color: #333;
-  width: 80px;
-  height: 80px;
-  transition: color 0.5s;
+  width: 90px;
+  height: 90px;
+  transition: all 0.5s;
 }
 
 .scanning .fingerprint-icon {
-  color: rgba(0, 255, 136, 0.3);
+  color: rgba(0, 255, 136, 0.4);
+  filter: drop-shadow(0 0 10px rgba(0, 255, 136, 0.5));
 }
 
 .success .fingerprint-icon {
   color: #00ff88;
+  filter: drop-shadow(0 0 15px rgba(0, 255, 136, 0.8));
 }
 
 .laser {
@@ -62,10 +166,10 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 2px;
+  height: 3px;
   background: #00ff88;
-  box-shadow: 0 0 10px #00ff88;
-  animation: scan 2s infinite ease-in-out alternate;
+  box-shadow: 0 0 15px #00ff88;
+  animation: scan 1.5s infinite ease-in-out alternate;
   display: none;
 }
 
@@ -76,54 +180,71 @@
 .success-mark {
   position: absolute;
   color: #00ff88;
-  animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
   display: none;
+  filter: drop-shadow(0 0 10px rgba(0,255,136,0.5));
 }
 
 .success .success-mark {
   display: block;
 }
 
+/* --- Text & Buttons --- */
 .status-text {
   color: #fff;
-  font-size: 1.2rem;
-  font-weight: 600;
-  margin-top: 10px;
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-top: 15px;
   letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
 .status-subtext {
-  color: #888;
-  font-size: 0.9rem;
-  margin-top: 5px;
+  color: #aaa;
+  font-size: 0.95rem;
+  margin-top: 8px;
+  font-weight: 300;
 }
 
 .success .status-text {
   color: #00ff88;
+  text-shadow: 0 0 10px rgba(0,255,136,0.3);
 }
 
+.cancel-btn {
+  border-radius: 30px !important;
+  padding: 8px 24px !important;
+  font-weight: 600 !important;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-size: 0.8rem !important;
+  margin-top: 20px;
+  border-color: rgba(220, 53, 69, 0.5) !important;
+  color: rgba(220, 53, 69, 0.8) !important;
+  transition: all 0.3s ease !important;
+}
+
+.cancel-btn:hover {
+  background: rgba(220, 53, 69, 0.1) !important;
+  border-color: #dc3545 !important;
+  color: #dc3545 !important;
+  box-shadow: 0 0 15px rgba(220, 53, 69, 0.3);
+}
+
+/* Animations */
 @keyframes scan {
-  0% {
-    top: 0;
-  }
-  100% {
-    top: 100%;
-  }
+  0% { top: 0; }
+  100% { top: 100%; }
 }
 
 @keyframes popIn {
-  0% {
-    transform: scale(0);
-    opacity: 0;
-  }
-  100% {
-    transform: scale(1);
-    opacity: 1;
-  }
+  0% { transform: scale(0); opacity: 0; }
+  70% { transform: scale(1.2); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 @keyframes pulse {
   0% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(1.2); }
+  50% { opacity: 0.8; transform: scale(1.1); }
   100% { opacity: 1; transform: scale(1); }
 }

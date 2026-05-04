@@ -15,6 +15,21 @@ import CandidateDashboard from "./pages/CandidateDashboard";
 import CandidateProfile from "./pages/CandidateProfile";
 import ConstituencyAdmin from "./pages/ConstituencyAdmin";
 import VoteReceipt from "./pages/VoteReceipt";
+import axios from "axios";
+
+// Setup global Axios interceptor for JWT
+axios.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 function App() {
   return (

@@ -142,11 +142,9 @@ function VoterDashboard() {
             <div className="profile-body">
               <div className="profile-avatar-section">
                 <div className="avatar-wrapper">
-                  <img
-                    src="https://cdn.jsdelivr.net/npm/bootstrap-icons/icons/person-circle.svg"
-                    alt="Profile"
-                    className="profile-avatar"
-                  />
+                  <div className="profile-avatar initials-avatar">
+                    {voter.first_name?.charAt(0)}{voter.last_name?.charAt(0)}
+                  </div>
                   <div className="avatar-badge">{voter.has_voted ? "✓" : "!"}</div>
                 </div>
                 <div className="avatar-info">

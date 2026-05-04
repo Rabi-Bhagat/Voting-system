@@ -153,6 +153,12 @@ function AdminDashboard() {
           <h1>Admin Dashboard</h1>
         </div>
         <div className="nav-actions">
+          <div className="admin-profile-compact" style={{ display: 'flex', alignItems: 'center', gap: '10px', marginRight: '15px' }}>
+            <div className="initials-avatar" style={{ width: '35px', height: '35px', fontSize: '0.9rem' }}>
+              AD
+            </div>
+            <span style={{ fontSize: '0.9rem', fontWeight: '500', color: 'var(--text-primary)' }}>Admin</span>
+          </div>
           <button className="btn btn-primary" onClick={() => navigate('/admin')}>
             Manage System
           </button>

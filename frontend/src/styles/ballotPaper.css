@@ -1,7 +1,10 @@
-/* Modern Ballot Paper Styles */
+/* Premium Dark Glassmorphic Ballot Paper Styles */
 .ballot-wrapper {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background-color: var(--bg-primary);
+  background-image: 
+      radial-gradient(circle at 15% 50%, rgba(0, 255, 136, 0.05), transparent 25%),
+      radial-gradient(circle at 85% 30%, rgba(0, 255, 136, 0.08), transparent 25%);
   padding-bottom: 50px;
 }
 
@@ -9,44 +12,57 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 30px;
-  background: white;
-  padding: 20px 30px;
-  border-radius: 15px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  margin-bottom: 40px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  padding: 25px 35px;
+  border-radius: 20px;
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
   flex-wrap: wrap;
-  gap: 15px;
+  gap: 20px;
 }
 
 .ballot-title {
-  font-size: 28px;
+  font-size: 32px;
   font-weight: 800;
-  color: #2c3e50;
+  color: var(--text-primary);
   margin: 0;
+  letter-spacing: -0.5px;
+  text-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
 }
 
 .ballot-subtitle {
   font-size: 16px;
-  color: #7f8c8d;
-  margin: 5px 0 0;
+  color: var(--text-secondary);
+  margin: 8px 0 0;
+}
+
+.ballot-subtitle strong {
+  color: var(--accent-primary);
+  font-weight: 600;
 }
 
 .btn-back {
-  background: transparent !important;
-  color: #2c3e50 !important;
-  border: 2px solid #2c3e50 !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: var(--text-primary) !important;
+  border: 1px solid var(--glass-border) !important;
   font-weight: 600 !important;
   transition: all 0.3s ease !important;
+  padding: 10px 20px !important;
+  border-radius: 12px !important;
 }
 
 .btn-back:hover {
-  background: #2c3e50 !important;
-  color: white !important;
+  background: rgba(255, 255, 255, 0.1) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
 /* Search Bar */
 .search-bar-container {
-  margin-bottom: 30px;
+  margin-bottom: 40px;
   max-width: 600px;
   margin-left: auto;
   margin-right: auto;
@@ -54,97 +70,125 @@
 
 .search-input {
   border-radius: 50px !important;
-  padding: 12px 25px !important;
-  border: 2px solid #e0e0e0 !important;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05) !important;
+  padding: 15px 30px !important;
+  background: rgba(10, 10, 15, 0.6) !important;
+  border: 1px solid var(--glass-border) !important;
+  color: var(--text-primary) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2), inset 0 0 10px rgba(255, 255, 255, 0.02) !important;
   transition: all 0.3s ease !important;
+  font-size: 16px !important;
+}
+
+.search-input::placeholder {
+  color: var(--text-muted) !important;
 }
 
 .search-input:focus {
-  border-color: #667eea !important;
-  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1) !important;
+  background: rgba(15, 15, 20, 0.8) !important;
+  border-color: var(--accent-primary) !important;
+  box-shadow: 0 0 0 4px rgba(0, 255, 136, 0.1), inset 0 0 10px rgba(0, 255, 136, 0.05) !important;
+  outline: none !important;
 }
 
 /* Candidates Grid */
 .candidates-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 25px;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 30px;
 }
 
 /* Candidate Card */
 .candidate-card {
-  background: white;
-  border-radius: 15px;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
-  transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 30px 20px 20px;
-  border: 1px solid transparent;
+  padding: 40px 25px 25px;
 }
 
 .candidate-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+  transform: translateY(-8px);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4), 0 0 20px rgba(0, 255, 136, 0.1);
+  border-color: rgba(0, 255, 136, 0.2);
 }
 
 .card-top-accent {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 6px;
-  background: linear-gradient(90deg, #667eea, #764ba2);
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--accent-primary), var(--info));
+  opacity: 0.8;
 }
 
 .candidate-avatar {
-  width: 80px;
-  height: 80px;
-  background: #f0f2f5;
-  color: #2c3e50;
+  width: 90px;
+  height: 90px;
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-primary);
+  border: 2px solid rgba(255, 255, 255, 0.1);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 32px;
+  font-size: 36px;
   font-weight: 700;
-  margin-bottom: 15px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2), inset 0 0 15px rgba(255, 255, 255, 0.02);
+  transition: all 0.3s ease;
+}
+
+.candidate-card:hover .candidate-avatar {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+  color: var(--accent-primary);
 }
 
 .candidate-info {
-  margin-bottom: 20px;
+  margin-bottom: 25px;
   width: 100%;
 }
 
 .candidate-name {
-  font-size: 20px;
+  font-size: 22px;
   font-weight: 700;
-  color: #2c3e50;
-  margin-bottom: 5px;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
 }
 
 .party-badge {
   display: inline-block;
-  background: #e1f5fe;
-  color: #0288d1;
-  padding: 4px 12px;
+  background: rgba(30, 144, 255, 0.1);
+  color: var(--info);
+  border: 1px solid rgba(30, 144, 255, 0.2);
+  padding: 6px 16px;
   border-radius: 20px;
   font-size: 13px;
   font-weight: 600;
-  margin-bottom: 10px;
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .view-profile-link {
   font-size: 13px !important;
   text-decoration: none !important;
-  color: #667eea !important;
+  color: var(--text-secondary) !important;
   padding: 0 !important;
+  transition: color 0.3s ease !important;
+}
+
+.view-profile-link:hover {
+  color: var(--text-primary) !important;
+  text-decoration: underline !important;
 }
 
 .card-actions {
@@ -154,85 +198,136 @@
 
 .vote-btn {
   width: 100%;
-  padding: 12px;
+  padding: 14px;
   border: none;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  font-weight: 600;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  color: #000;
+  font-weight: 700;
   font-size: 16px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 15px rgba(118, 75, 162, 0.3);
+  transition: all 0.3s ease;
+  box-shadow: 0 5px 15px var(--accent-glow);
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .vote-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(118, 75, 162, 0.4);
+  box-shadow: 0 8px 25px rgba(0, 255, 136, 0.6);
 }
 
 .vote-btn:disabled {
-  background: #bdc3c7;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-muted);
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+  border: 1px solid var(--glass-border);
 }
 
 /* Voted State */
 .candidate-card.voted-for {
-  border: 2px solid #2ecc71;
-  background: #f0fff4;
+  border: 2px solid var(--success);
+  background: rgba(46, 213, 115, 0.05);
+  box-shadow: 0 0 30px rgba(46, 213, 115, 0.15);
 }
 
 .candidate-card.voted-for .card-top-accent {
-  background: #2ecc71;
+  background: var(--success);
+}
+
+.candidate-card.voted-for .candidate-avatar {
+  border-color: var(--success);
+  color: var(--success);
+  box-shadow: 0 0 20px rgba(46, 213, 115, 0.2);
 }
 
 .vote-btn.voted {
-  background: #2ecc71;
-  box-shadow: none;
+  background: var(--success);
+  box-shadow: 0 0 20px rgba(46, 213, 115, 0.3);
+  color: #000;
 }
 
 .candidate-card.disabled {
-  opacity: 0.6;
+  opacity: 0.5;
   pointer-events: none;
-  filter: grayscale(0.8);
+  filter: grayscale(0.5);
 }
 
 /* NOTA Styles */
 .nota-card .card-top-accent.nota {
-  background: #f1c40f;
+  background: linear-gradient(90deg, var(--warning), #ff7f50);
 }
 
 .nota-avatar {
-  background: #fff9c4;
+  border-color: rgba(255, 165, 2, 0.3);
+  color: var(--warning);
 }
 
 .nota-badge {
-  background: #fff9c4;
-  color: #fbc02d;
+  background: rgba(255, 165, 2, 0.1);
+  color: var(--warning);
+  border-color: rgba(255, 165, 2, 0.2);
 }
 
 .vote-btn.nota-btn {
-  background: linear-gradient(135deg, #fbc02d 0%, #f57f17 100%);
-  box-shadow: 0 4px 15px rgba(249, 168, 37, 0.3);
+  background: linear-gradient(135deg, var(--warning), #ff7f50);
+  box-shadow: 0 5px 15px rgba(255, 165, 2, 0.3);
 }
 
 .nota-desc {
-  font-size: 12px;
-  color: #95a5a6;
-  margin-top: 5px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 8px;
+  line-height: 1.4;
 }
 
 /* Modal Styles */
+.vote-confirm-modal .modal-content {
+  background: var(--bg-secondary);
+  border: 1px solid var(--glass-border);
+  border-radius: 20px;
+  color: var(--text-primary);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+}
+
+.vote-confirm-modal .modal-header {
+  border-bottom: 1px solid var(--glass-border);
+  padding: 20px 25px;
+}
+
+.vote-confirm-modal .modal-title {
+  font-weight: 700;
+}
+
+.vote-confirm-modal .btn-close {
+  filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+.vote-confirm-modal .modal-body {
+  padding: 30px 25px;
+}
+
+.vote-confirm-modal .modal-footer {
+  border-top: 1px solid var(--glass-border);
+  padding: 15px 25px;
+}
+
 .confirm-icon {
   font-size: 64px;
   margin-bottom: 20px;
+  animation: pulse 2s infinite;
 }
 
 .confirm-vote-btn {
-  background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%) !important;
+  background: linear-gradient(135deg, var(--success), #27ae60) !important;
   border: none !important;
+  color: #000 !important;
+  font-weight: 700 !important;
+  padding: 10px 25px !important;
+  border-radius: 10px !important;
+  box-shadow: 0 5px 15px rgba(46, 213, 115, 0.3) !important;
 }
 
 /* Loading State */
@@ -242,52 +337,35 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: #2c3e50;
+  background: var(--bg-primary);
 }
 
 /* Alert Box */
 .alert-box {
-  padding: 15px 20px;
-  border-radius: 10px;
-  margin-bottom: 25px;
-  font-weight: 500;
+  padding: 15px 25px;
+  border-radius: 12px;
+  margin-bottom: 30px;
+  font-weight: 600;
   text-align: center;
+  border: 1px solid transparent;
+  backdrop-filter: blur(10px);
 }
 
 .alert-box.error {
-  background: #ffebee;
-  color: #c62828;
-  border: 1px solid #ffcdd2;
+  background: rgba(255, 71, 87, 0.1);
+  color: #ff6b81;
+  border-color: rgba(255, 71, 87, 0.2);
 }
 
 .alert-box.success {
-  background: #e8f5e9;
-  color: #2e7d32;
-  border: 1px solid #c8e6c9;
+  background: rgba(46, 213, 115, 0.1);
+  color: var(--success);
+  border-color: rgba(46, 213, 115, 0.2);
 }
 
 /* Responsive */
 @media (max-width: 768px) {
-  .ballot-header {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .candidates-grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  }
-
-  .search-input {
-    width: 100%;
-  }
-}
-
-@media (max-width: 480px) {
-  .candidates-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .ballot-title {
-    font-size: 24px;
-  }
+  .ballot-header { flex-direction: column; text-align: center; }
+  .candidates-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+  .search-input { width: 100%; }
 }

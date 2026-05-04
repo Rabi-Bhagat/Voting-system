@@ -58,6 +58,7 @@ const constituencyRoutes = require("./routes/constituency");
 const candidateRoutes = require("./routes/candidateRoutes");
 const candidateProfileRoutes = require("./routes/candidate");
 const adminRoutes = require("./routes/admin");
+const authMiddleware = require("./middleware/auth");
 const analyticsRoutes = require("./routes/analytics");
 const passwordRecoveryRoutes = require("./routes/passwordRecovery");
 const adminManagementRoutes = require("./routes/adminManagement");
@@ -72,22 +73,22 @@ const notificationRoutes = require("./routes/notification");
 // ROUTE SETUP
 // ============================================
 
-app.use("/voter", voterRoutes);
+app.use("/voter", authMiddleware, voterRoutes);
 app.use("/auth", authRoutes);
-app.use("/party", partyRoutes);
-app.use("/constituency", constituencyRoutes);
-app.use("/candidates", candidateRoutes);
-app.use("/candidate", candidateProfileRoutes);
-app.use("/admin", adminRoutes);
-app.use("/analytics", analyticsRoutes);
+app.use("/party", authMiddleware, partyRoutes);
+app.use("/constituency", authMiddleware, constituencyRoutes);
+app.use("/candidates", candidateRoutes); // Public fetching might be okay, assuming UI doesn't pass token to list candidates
+app.use("/candidate", authMiddleware, candidateProfileRoutes);
+app.use("/admin", authMiddleware, adminRoutes);
+app.use("/analytics", authMiddleware, analyticsRoutes);
 app.use("/password-recovery", passwordRecoveryRoutes);
-app.use("/admin-management", adminManagementRoutes);
-app.use("/admin-dashboard", adminDashboardRoutes);
+app.use("/admin-management", authMiddleware, adminManagementRoutes);
+app.use("/admin-dashboard", authMiddleware, adminDashboardRoutes);
 
 // New feature routes
-app.use("/election", electionRoutes);
-app.use("/audit", auditRoutes);
-app.use("/notifications", notificationRoutes);
+app.use("/election", authMiddleware, electionRoutes);
+app.use("/audit", authMiddleware, auditRoutes);
+app.use("/notifications", authMiddleware, notificationRoutes);
 
 app.use("/", authRoutes);
 
@@ -95,132 +96,7 @@ app.use("/", authRoutes);
 // SPECIAL ENDPOINTS
 // ============================================
 
-// Direct /login route
-app.post("/login", async (req, res) => {
-  const bcrypt = require("bcrypt");
-  const { adminCredentials } = require("./config/admin");
-  
-  try {
-    const { voter_id, first_name, last_name, party_id, candidate_id, password, role, username } = req.body || {};
-    const resolvedRole = (role || "voter").toString().toLowerCase();
-
-    console.log("DEBUG /login body:", { voter_id, party_id, candidate_id, role: resolvedRole });
-
-    if (!password) {
-      return res.status(400).json({ error: "Password required" });
-    }
-
-    const db = mongoose.connection.db;
-    let user = null;
-    let redirect = "/";
-
-    if (resolvedRole === "voter") {
-      if (!voter_id || !first_name || !last_name) {
-        return res.status(400).json({ error: "Voter ID, first name, and last name required" });
-      }
-      user = await db.collection("voters").findOne({ 
-        voter_id: voter_id,
-        first_name: first_name,
-        last_name: last_name
-      });
-      
-      if (!user) {
-        return res.status(401).json({ error: "Invalid credentials" });
-      }
-      
-      const isPasswordValid = await bcrypt.compare(password, user.password);
-      if (!isPasswordValid) {
-        return res.status(401).json({ error: "Invalid credentials" });
-      }
-      
-      redirect = "/voter_dashboard";
-      const safeUser = { ...user };
-      delete safeUser.password;
-      
-      return res.json({ 
-        success: true, 
-        role: "voter", 
-        voter: safeUser,
-        redirect: redirect
-      });
-      
-    } else if (resolvedRole === "admin") {
-      const adminUsername = username || "admin";
-      
-      if (adminUsername === adminCredentials.username && password === adminCredentials.password) {
-        return res.json({ 
-          success: true, 
-          role: "admin", 
-          admin: { username: adminCredentials.username },
-          redirect: "/admin"
-        });
-      } else {
-        return res.status(401).json({ error: "Invalid admin credentials" });
-      }
-      
-    } else if (resolvedRole === "candidate") {
-      if (!candidate_id) {
-        return res.status(400).json({ error: "Candidate ID required" });
-      }
-      user = await db.collection("candidates").findOne({ candidate_id: candidate_id });
-      
-      if (!user) {
-        return res.status(401).json({ error: "Invalid credentials" });
-      }
-      
-      if (!user.approved) {
-        return res.status(403).json({ error: "Your account is pending admin approval" });
-      }
-      
-      const isPasswordValid = await bcrypt.compare(password, user.password);
-      if (!isPasswordValid) {
-        return res.status(401).json({ error: "Invalid credentials" });
-      }
-      
-      redirect = "/candidate_dashboard";
-      const safeUser = { ...user };
-      delete safeUser.password;
-      
-      return res.json({ 
-        success: true, 
-        role: "candidate", 
-        candidate: safeUser,
-        redirect: redirect
-      });
-      
-    } else if (resolvedRole === "party") {
-      if (!party_id) {
-        return res.status(400).json({ error: "Party ID required" });
-      }
-      user = await db.collection("parties").findOne({ party_id: party_id });
-      
-      if (!user) {
-        return res.status(401).json({ error: "Invalid credentials" });
-      }
-      
-      if (user.password !== password) {
-        return res.status(401).json({ error: "Invalid credentials" });
-      }
-      
-      redirect = "/party";
-      const safeUser = { ...user };
-      delete safeUser.password;
-      
-      return res.json({ 
-        success: true, 
-        role: "party", 
-        party: safeUser,
-        redirect: redirect
-      });
-    }
-    
-    return res.status(400).json({ error: "Invalid role" });
-    
-  } catch (err) {
-    console.error("Login error:", err);
-    return res.status(500).json({ error: "Server error" });
-  }
-});
+// Direct /login route removed - use /auth/login instead
 
 // Logout endpoint
 app.post("/logout", (req, res) => {

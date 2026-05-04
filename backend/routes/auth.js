@@ -2,11 +2,13 @@ const express = require("express");
 const router = express.Router();
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const Voter = require("../models/Voter");
 const Candidate = require("../models/Candidate");
 const Party = require("../models/Party");
 const Constituency = require("../models/Constituency");
 const { adminCredentials } = require("../config/admin");
+
 
 // Register Voter
 router.post("/register-voter", async (req, res) => {
@@ -149,25 +151,27 @@ router.post("/login", async (req, res) => {
       return res.status(400).json({ error: "Password required" });
     }
 
-    const db = mongoose.connection.db;
     let user = null;
     let redirect = "/";
+    let tokenPayload = { role: resolvedRole };
 
     if (resolvedRole === "voter") {
       if (!voter_id || !first_name || !last_name) {
         return res.status(400).json({ error: "Voter ID, first name, and last name required" });
       }
-      user = await db.collection("voters").findOne({ 
+      user = await Voter.findOne({ 
         voter_id: voter_id,
         first_name: first_name,
         last_name: last_name
       });
       redirect = "/voter_dashboard";
+      if (user) tokenPayload.id = user.voter_id;
+
     } else if (resolvedRole === "candidate") {
       if (!candidate_id) {
         return res.status(400).json({ error: "Candidate ID required" });
       }
-      user = await db.collection("candidates").findOne({ candidate_id: candidate_id });
+      user = await Candidate.findOne({ candidate_id: candidate_id });
       
       // Check if candidate is approved
       if (user && !user.approved) {
@@ -175,43 +179,36 @@ router.post("/login", async (req, res) => {
       }
       
       redirect = "/candidate_dashboard";
+      if (user) tokenPayload.id = user.candidate_id;
+
     } else if (resolvedRole === "party") {
       if (!party_id) {
         return res.status(400).json({ error: "Party ID required" });
       }
-      user = await db.collection("parties").findOne({ party_id: party_id });
+      user = await Party.findOne({ party_id: party_id });
       redirect = "/party";
+      if (user) tokenPayload.id = user.party_id;
+
     } else if (resolvedRole === "constituency") {
       if (!constituency_id) {
         return res.status(400).json({ error: "Constituency ID required" });
       }
-      const constituency = await Constituency.findOne({ constituency_id, password });
-      if (constituency) {
-        return res.json({
-          success: true,
-          redirect: "/constituency_admin",
-          constituency: {
-            constituency_id: constituency.constituency_id,
-            name: constituency.name
-          }
-        });
-      }
-      return res.status(401).json({ error: "Invalid Constituency credentials" });
+      user = await Constituency.findOne({ constituency_id: constituency_id });
+      redirect = "/constituency_admin";
+      if (user) tokenPayload.id = user.constituency_id;
+
     } else if (resolvedRole === "admin") {
-      // Admin authentication
       const username = req.body.username || req.body.admin_username || "admin";
-      
-      console.log("DEBUG admin login attempt:", { username, password, expected_user: adminCredentials.username, expected_pass: adminCredentials.password });
-      
       if (username === adminCredentials.username && password === adminCredentials.password) {
+        const token = jwt.sign({ role: "admin", id: username }, process.env.JWT_SECRET || 'premium_super_secret_key', { expiresIn: '1d' });
         return res.json({ 
           success: true, 
           role: "admin", 
           admin: { username: adminCredentials.username },
+          token,
           redirect: "/admin"
         });
       } else {
-        console.log("DEBUG admin login failed - credentials mismatch");
         return res.status(401).json({ error: "Invalid admin credentials" });
       }
     } else {
@@ -223,37 +220,34 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    // Verify password using bcrypt for voter and candidate
-    if (resolvedRole === "voter" || resolvedRole === "candidate") {
-      if (!user.password) {
-        console.log("DEBUG login: no password stored for user");
-        return res.status(401).json({ error: "Invalid credentials" });
-      }
-      
-      const isPasswordValid = await bcrypt.compare(password, user.password);
-      if (!isPasswordValid) {
-        console.log("DEBUG login: password mismatch (bcrypt)");
-        return res.status(401).json({ error: "Invalid credentials" });
-      }
-    } else if (resolvedRole === "party") {
-      // Party uses plain text password (for now)
-      if (user.password && user.password !== password) {
-        console.log("DEBUG login: party password mismatch");
-        return res.status(401).json({ error: "Invalid credentials" });
-      }
+    // Verify password using bcrypt for all DB roles
+    if (!user.password) {
+      console.log("DEBUG login: no password stored for user");
+      return res.status(401).json({ error: "Invalid credentials" });
+    }
+    
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      console.log("DEBUG login: password mismatch (bcrypt)");
+      return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    const safeUser = { ...user };
+    // Generate JWT token
+    const token = jwt.sign(tokenPayload, process.env.JWT_SECRET || 'premium_super_secret_key', { expiresIn: '1d' });
+
+    const safeUser = user.toObject();
     delete safeUser.password;
 
     const responseKey = resolvedRole === "voter" ? "voter" : 
                        resolvedRole === "candidate" ? "candidate" :
+                       resolvedRole === "constituency" ? "constituency" :
                        "party";
 
     return res.json({ 
       success: true, 
       role: resolvedRole, 
       [responseKey]: safeUser,
+      token,
       redirect: redirect
     });
   } catch (err) {

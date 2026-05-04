@@ -8,6 +8,9 @@ const AuditLog = require("../models/AuditLog");
 
 // GET /voter/profile/:voter_id - Get voter profile with detailed information
 router.get("/profile/:voter_id", async (req, res) => {
+  if (req.user.role !== "admin" && req.user.id !== req.params.voter_id) {
+    return res.status(403).json({ error: "Unauthorized access" });
+  }
   try {
     const voter = await Voter.findOne({ voter_id: req.params.voter_id });
     if (!voter) {
@@ -65,6 +68,9 @@ router.get("/profile/:voter_id", async (req, res) => {
 
 // Get voter by voter_id
 router.get("/:voter_id", async (req, res) => {
+  if (req.user.role !== "admin" && req.user.id !== req.params.voter_id) {
+    return res.status(403).json({ error: "Unauthorized access" });
+  }
   try {
     const voter = await Voter.findOne({ voter_id: req.params.voter_id });
 
@@ -86,6 +92,9 @@ router.get("/:voter_id", async (req, res) => {
 
 // Get voter voting history
 router.get("/history/:voter_id", async (req, res) => {
+  if (req.user.role !== "admin" && req.user.id !== req.params.voter_id) {
+    return res.status(403).json({ error: "Unauthorized access" });
+  }
   try {
     const voter = await Voter.findOne({ voter_id: req.params.voter_id });
     if (!voter) return res.status(404).json({ error: "Voter not found" });
@@ -116,6 +125,9 @@ router.get("/history/:voter_id", async (req, res) => {
 
 // Update voter by voter_id
 router.put("/:voter_id", async (req, res) => {
+  if (req.user.role !== "admin" && req.user.id !== req.params.voter_id) {
+    return res.status(403).json({ error: "Unauthorized access" });
+  }
   try {
     const voter = await Voter.findOne({ voter_id: req.params.voter_id });
     if (!voter) return res.status(404).json({ error: "Voter not found" });
@@ -137,6 +149,9 @@ router.put("/:voter_id", async (req, res) => {
 
 // Get candidates for voter's constituency (ballot)
 router.get("/ballot/:voterId", async (req, res) => {
+    if (req.user.role !== "admin" && req.user.id !== req.params.voterId) {
+      return res.status(403).json({ error: "Unauthorized access" });
+    }
     try {
         const voter = await Voter.findOne({ voter_id: req.params.voterId });
         if (!voter) return res.status(404).json({ error: "Voter not found." });
@@ -185,6 +200,11 @@ router.get("/ballot/:voterId", async (req, res) => {
 
 router.post("/vote", async (req, res) => {
   const { voter_id, candidate_id } = req.body;
+  
+  if (req.user.role !== "voter" || req.user.id !== voter_id) {
+    return res.status(403).json({ error: "Unauthorized to vote for this user" });
+  }
+
   console.log("Vote received:", req.body);
 
   try {
