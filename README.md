@@ -46,7 +46,7 @@ This is a premium-grade MERN stack application designed for national-level elect
 ## 📡 Core API Architecture (High-Level)
 
 ### 🔐 Authentication Flow
-- `POST /login` - Initial credential & role validation.
+- `POST /auth/login` - Centralized role validation and JWT generation (Corrected).
 - `POST /auth/otp/send-otp` - Generates and emails a 6-digit code.
 - `POST /auth/otp/verify-otp` - Validates OTP against MongoDB with TTL index.
 
@@ -57,8 +57,19 @@ This is a premium-grade MERN stack application designed for national-level elect
 
 ### ⚙️ Admin Flow
 - `POST /election/create` - Creates election with specific `candidates`, `parties`, and `constituencies`.
-- `POST /admin/add-candidate` - Onboards new candidates with background and education data.
+- `POST /admin/add-voter` - Secure onboarding of new voters with constituency assignment.
+- `PUT /admin/update-voter/:voter_id` - Manage and update voter profiles and district mapping.
 - `GET /analytics/dashboard` - Aggregates real-time turnout and distribution statistics.
+
+---
+
+## 🛠️ Recent Optimizations (May 2026)
+
+The following critical updates have been implemented to ensure a production-ready demonstration:
+*   **Session Persistence Fix**: Resolved an issue where the JWT token was not being saved for Administrators, ensuring the dashboard loads correctly upon login.
+*   **Data Integrity**: Added constituency selection to the Voter Registration flow, ensuring all new participants are correctly mapped to their districts.
+*   **Secure Session Termination**: Standardized logout logic across all 5 dashboard roles to properly clear JWT tokens and user information.
+*   **UI Resilience**: Added null-safe guards to the Ballot and Admin Management screens to prevent crashes during data lookups.
 
 ---
 
