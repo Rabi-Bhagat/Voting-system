@@ -360,6 +360,47 @@ router.post("/add-voter", async (req, res) => {
   }
 });
 
+// PUT /admin/update-voter/:voter_id - Update voter information
+router.put("/update-voter/:voter_id", async (req, res) => {
+  const { voter_id } = req.params;
+  const updates = req.body;
+
+  try {
+    const voter = await Voter.findOne({ voter_id });
+    if (!voter) {
+      return res.status(404).json({ error: "Voter not found" });
+    }
+
+    // List of allowed fields to update
+    const allowedUpdates = ["first_name", "last_name", "address", "phone", "email", "gmail_id", "age", "gender", "constituency", "is_verified", "is_active"];
+    
+    Object.keys(updates).forEach(key => {
+      if (allowedUpdates.includes(key)) {
+        voter[key] = updates[key];
+      }
+    });
+
+    if (updates.password) {
+      voter.password = await bcrypt.hash(updates.password, 10);
+    }
+
+    await voter.save();
+
+    res.json({ 
+      success: true, 
+      message: "Voter updated successfully",
+      voter: {
+        voter_id: voter.voter_id,
+        name: `${voter.first_name} ${voter.last_name}`,
+        constituency: voter.constituency
+      }
+    });
+  } catch (err) {
+    console.error("Error updating voter:", err);
+    res.status(500).json({ error: "Failed to update voter" });
+  }
+});
+
 // POST /admin/add-candidate - Add a new candidate
 router.post("/add-candidate", async (req, res) => {
   const { candidate_id, name, password, party_id, constituency, email, gmail_id, age, education, experience, bio, background } = req.body;
@@ -486,10 +527,12 @@ router.post("/add-party", async (req, res) => {
       });
     }
 
+    const hashedPartyPassword = await bcrypt.hash(password, 10);
+
     const newParty = new Party({
       party_id,
       name,
-      password,
+      password: hashedPartyPassword,
       email: email || null,
       gmail_id: gmail_id || null,
       symbol: symbol || null,
@@ -793,11 +836,18 @@ router.get("/election-status", async (req, res) => {
 // ADMIN MANAGEMENT ENDPOINTS
 // ============================================
 
-// Get all constituencies (for registration dropdown)
+// Get all constituencies with voter counts (for election setup)
 router.get("/constituencies", async (req, res) => {
   try {
-    const constituencies = await Constituency.find({}, { constituency_id: 1, name: 1, _id: 0 });
-    res.json(constituencies);
+    const constituencies = await Constituency.find({}, { constituency_id: 1, name: 1, _id: 0 }).lean();
+    
+    // Add voter count for each constituency
+    const constituenciesWithCount = await Promise.all(constituencies.map(async (c) => {
+      const voterCount = await Voter.countDocuments({ constituency: c.constituency_id });
+      return { ...c, voter_count: voterCount };
+    }));
+    
+    res.json(constituenciesWithCount);
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to fetch constituencies" });

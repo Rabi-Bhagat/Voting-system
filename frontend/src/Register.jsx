@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import BiometricModal from './components/BiometricModal';
+import OTPModal from './components/OTPModal';
 import './styles/register.css';
+import './styles/otp_modal.css';
 
 const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
@@ -11,6 +14,9 @@ function Register() {
   const [success, setSuccess] = useState("");
   const [constituencies, setConstituencies] = useState([]);
   const [parties, setParties] = useState([]);
+  const [showOTP, setShowOTP] = useState(false);
+  const [useOTP, setUseOTP] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
 
   useEffect(() => {
     // Fetch constituencies and parties for dropdowns
@@ -74,6 +80,25 @@ function Register() {
     }
 
     try {
+      if (useOTP) {
+        const email = formData.email || `${formData.voter_id || formData.candidate_id}@gmail.com`;
+        setUserEmail(email);
+        
+        await axios.post(`${API_BASE}/auth/otp/send-otp`, { email });
+        setShowOTP(true);
+        return;
+      }
+
+      await finalizeRegistration();
+    } catch (err) {
+      console.error("Registration initiation error:", err);
+      setError(err.response?.data?.error || "Failed to initiate registration");
+    }
+  };
+
+  const finalizeRegistration = async () => {
+    try {
+      setShowOTP(false);
       const endpoint = role === "voter" ? "/auth/register-voter" : "/auth/register-candidate";
       const res = await axios.post(`${API_BASE}${endpoint}`, formData);
 
@@ -87,7 +112,7 @@ function Register() {
         }, 2000);
       }
     } catch (err) {
-      console.error("Registration error:", err);
+      console.error("Final registration error:", err);
       setError(err.response?.data?.error || "Registration failed");
     }
   };
@@ -104,6 +129,13 @@ function Register() {
 
   return (
     <div className="login-container" onMouseMove={handleMouseMove}>
+      {showOTP && (
+        <OTPModal 
+          email={userEmail}
+          onVerify={finalizeRegistration}
+          onCancel={() => setShowOTP(false)}
+        />
+      )}
       
       {/* Visual Left Panel */}
       <div className="login-visual-panel">
@@ -209,6 +241,23 @@ function Register() {
                     onChange={handleChange}
                     value={formData.address || ""}
                   />
+                </div>
+                <div className="input-group">
+                  <label className="input-label">Constituency *</label>
+                  <select 
+                    className="modern-input"
+                    name="constituency" 
+                    required 
+                    onChange={handleChange}
+                    value={formData.constituency || ""}
+                  >
+                    <option value="">Select Constituency</option>
+                    {constituencies.map(c => (
+                      <option key={c.constituency_id} value={c.constituency_id}>
+                        {c.name} ({c.constituency_id})
+                      </option>
+                    ))}
+                  </select>
                 </div>
               </>
             )}
@@ -349,6 +398,34 @@ function Register() {
                 value={formData.confirm_password || ""}
               />
             </div>
+
+            {/* Premium OTP Toggle */}
+            <div className="premium-toggle-group">
+              <label className="premium-switch">
+                <input 
+                  type="checkbox" 
+                  checked={useOTP}
+                  onChange={(e) => setUseOTP(e.target.checked)}
+                />
+                <span className="slider round"></span>
+              </label>
+              <span className="toggle-label">Enable Premium Email OTP Verification</span>
+            </div>
+
+            {useOTP && (
+              <div className="input-group fade-in">
+                <label className="input-label">Verification Email *</label>
+                <input 
+                  className="modern-input"
+                  name="email"
+                  type="email"
+                  placeholder="Enter your Gmail for OTP"
+                  required={useOTP}
+                  onChange={handleChange}
+                  value={formData.email || ""}
+                />
+              </div>
+            )}
 
             <button type="submit" className="btn-primary">
               Register as {role.charAt(0).toUpperCase() + role.slice(1)}

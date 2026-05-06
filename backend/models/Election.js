@@ -18,6 +18,14 @@ const electionSchema = new mongoose.Schema({
     type: String,
     ref: 'Constituency'
   }],
+  candidates: [{
+    type: String,
+    ref: 'Candidate'
+  }],
+  parties: [{
+    type: String,
+    ref: 'Party'
+  }],
   start_date: {
     type: Date,
     required: true

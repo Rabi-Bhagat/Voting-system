@@ -66,29 +66,8 @@ router.get("/profile/:voter_id", async (req, res) => {
   }
 });
 
-// Get voter by voter_id
-router.get("/:voter_id", async (req, res) => {
-  if (req.user.role !== "admin" && req.user.id !== req.params.voter_id) {
-    return res.status(403).json({ error: "Unauthorized access" });
-  }
-  try {
-    const voter = await Voter.findOne({ voter_id: req.params.voter_id });
-
-    const Constituency = require("../models/Constituency");
-    if (voter) {
-      const constituency = await Constituency.findOne({ constituency_id: voter.constituency });
-      // Update last login
-      voter.last_login = new Date();
-      await voter.save();
-      return res.json({ ...voter.toObject(), constituency });
-    }
-
-    if (!voter) return res.status(404).json({ error: "Voter not found" });
-    res.json(voter);
-  } catch (err) {
-    res.status(500).json({ error: "Server error" });
-  }
-});
+// NOTE: /:voter_id MUST come AFTER all specific named routes like /history/:id, /election-status/:id, /ballot/:id
+// It is defined at the bottom of this file to avoid shadowing them.
 
 // Get voter voting history
 router.get("/history/:voter_id", async (req, res) => {
@@ -132,11 +111,12 @@ router.put("/:voter_id", async (req, res) => {
     const voter = await Voter.findOne({ voter_id: req.params.voter_id });
     if (!voter) return res.status(404).json({ error: "Voter not found" });
 
+    const bcrypt = require("bcrypt");
     const { address, phone, password } = req.body;
 
     if (address !== undefined) voter.address = address;
     if (phone !== undefined) voter.phone = phone;
-    if (password !== undefined) voter.password = password;
+    if (password !== undefined) voter.password = await bcrypt.hash(password, 10);
 
     await voter.save();
 
@@ -147,22 +127,73 @@ router.put("/:voter_id", async (req, res) => {
   }
 });
 
+// Get active election status for a specific voter
+router.get("/election-status/:voterId", async (req, res) => {
+    if (req.user.role !== "admin" && req.user.id !== req.params.voterId) {
+      return res.status(403).json({ error: "Unauthorized access" });
+    }
+    try {
+        const Election = require("../models/Election");
+        const activeElection = await Election.getCurrentElection();
+        
+        if (!activeElection) {
+            return res.json({ isActive: false, message: "No active election at the moment." });
+        }
+
+        const voter = await Voter.findOne({ voter_id: req.params.voterId });
+        if (!voter) return res.status(404).json({ error: "Voter not found." });
+
+        // Check if voter's constituency is in the election
+        const isParticipating = activeElection.constituencies.length === 0 || activeElection.constituencies.includes(voter.constituency);
+
+        res.json({
+            isActive: true,
+            isParticipating,
+            electionTitle: activeElection.title,
+            endDate: activeElection.end_date,
+            hasVoted: voter.has_voted,
+            constituency: voter.constituency
+        });
+    } catch (err) {
+        console.error("Election status check error:", err);
+        res.status(500).json({ error: "Failed to check election status." });
+    }
+});
+
 // Get candidates for voter's constituency (ballot)
 router.get("/ballot/:voterId", async (req, res) => {
     if (req.user.role !== "admin" && req.user.id !== req.params.voterId) {
       return res.status(403).json({ error: "Unauthorized access" });
     }
     try {
+        const Election = require("../models/Election");
+        const activeElection = await Election.getCurrentElection();
+        
+        if (!activeElection) {
+            return res.status(404).json({ error: "No active election found." });
+        }
+
         const voter = await Voter.findOne({ voter_id: req.params.voterId });
         if (!voter) return res.status(404).json({ error: "Voter not found." });
 
+        // Check if voter's constituency is in the election
+        if (activeElection.constituencies.length > 0 && !activeElection.constituencies.includes(voter.constituency)) {
+            return res.status(403).json({ error: "Your constituency is not participating in the current election." });
+        }
+
+        let candidateMatch = { 
+            constituency: voter.constituency,
+            candidate_id: { $ne: "NOTA" },
+            approved: true
+        };
+
+        // If election has specific candidates, filter by them
+        if (activeElection.candidates.length > 0) {
+            candidateMatch.candidate_id = { $in: activeElection.candidates };
+        }
+
         const candidates = await Candidate.aggregate([
-          { 
-            $match: { 
-              constituency: voter.constituency,
-              candidate_id: { $ne: "NOTA" }
-            } 
-          },
+          { $match: candidateMatch },
           {
             $lookup: {
               from: "parties",
@@ -190,7 +221,14 @@ router.get("/ballot/:voterId", async (req, res) => {
         const voterObj = voter.toObject();
         voterObj.constituency_name = constituencyData ? constituencyData.name : voter.constituency;
 
-        res.json({ voter: voterObj, candidates });
+        res.json({ 
+            voter: voterObj, 
+            candidates,
+            election: {
+                title: activeElection.title,
+                id: activeElection.election_id
+            }
+        });
     } catch (err) {
         console.error("Ballot fetch error:", err);
         res.status(500).json({ error: "Failed to fetch ballot data." });
@@ -205,9 +243,11 @@ router.post("/vote", async (req, res) => {
     return res.status(403).json({ error: "Unauthorized to vote for this user" });
   }
 
-  console.log("Vote received:", req.body);
-
   try {
+    const Election = require("../models/Election");
+    const activeElection = await Election.getCurrentElection();
+    if (!activeElection) return res.status(400).json({ error: "No active election currently." });
+
     const voter = await Voter.findOne({ voter_id });
     if (!voter) return res.status(404).json({ error: "Voter not found." });
     if (voter.has_voted) return res.status(400).json({ error: "You have already voted." });
@@ -241,10 +281,6 @@ router.post("/vote", async (req, res) => {
     voter.voted_candidate_id = candidate_id;
     voter.vote_timestamp = new Date();
     await voter.save();
-
-    // Mark election as conducted
-    await ElectionStatus.deleteMany({});
-    await ElectionStatus.create({ conducted: true });
 
     // Generate vote receipt
     let voteReceipt = null;
@@ -319,6 +355,31 @@ router.get("/receipt/:receipt_id", async (req, res) => {
     });
   } catch (err) {
     res.status(500).json({ error: "Failed to fetch receipt" });
+  }
+});
+
+
+// Get voter by voter_id (MUST be last to avoid shadowing specific routes above)
+router.get("/:voter_id", async (req, res) => {
+  if (req.user.role !== "admin" && req.user.id !== req.params.voter_id) {
+    return res.status(403).json({ error: "Unauthorized access" });
+  }
+  try {
+    const voter = await Voter.findOne({ voter_id: req.params.voter_id });
+
+    const Constituency = require("../models/Constituency");
+    if (voter) {
+      const constituency = await Constituency.findOne({ constituency_id: voter.constituency });
+      // Update last login
+      voter.last_login = new Date();
+      await voter.save();
+      return res.json({ ...voter.toObject(), constituency });
+    }
+
+    if (!voter) return res.status(404).json({ error: "Voter not found" });
+    res.json(voter);
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
   }
 });
 

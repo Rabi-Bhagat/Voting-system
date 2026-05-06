@@ -63,6 +63,7 @@ const analyticsRoutes = require("./routes/analytics");
 const passwordRecoveryRoutes = require("./routes/passwordRecovery");
 const adminManagementRoutes = require("./routes/adminManagement");
 const adminDashboardRoutes = require("./routes/adminDashboard");
+const otpRoutes = require("./routes/otp");
 
 // New feature routes
 const electionRoutes = require("./routes/election");
@@ -84,6 +85,7 @@ app.use("/analytics", authMiddleware, analyticsRoutes);
 app.use("/password-recovery", passwordRecoveryRoutes);
 app.use("/admin-management", authMiddleware, adminManagementRoutes);
 app.use("/admin-dashboard", authMiddleware, adminDashboardRoutes);
+app.use("/auth/otp", otpRoutes);
 
 // New feature routes
 app.use("/election", authMiddleware, electionRoutes);
@@ -118,6 +120,60 @@ app.get("/health", (req, res) => {
 
 // Root route
 app.get("/", (req, res) => res.send("API running"));
+
+// ============================================
+// PUBLIC (NO-AUTH) ENDPOINTS
+// ============================================
+
+// Public election status — used by ResultsPage (accessible without login)
+app.get("/public/election-status", async (req, res) => {
+  try {
+    const mongoose = require("mongoose");
+    const db = mongoose.connection.db;
+    const status = await db.collection("electionstatuses").findOne({});
+    res.json({
+      conducted: status?.conducted || false,
+      resultsPublished: status?.resultsPublished || false
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch election status" });
+  }
+});
+
+// Public results — used by ResultsPage (accessible without login)
+app.get("/public/results", async (req, res) => {
+  try {
+    const mongoose = require("mongoose");
+    const db = mongoose.connection.db;
+    const status = await db.collection("electionstatuses").findOne({});
+    if (!status || !status.resultsPublished) {
+      return res.json([]);
+    }
+    // Proxy to admin results via internal fetch
+    const Candidate = require("./models/Candidate");
+    const Constituency = require("./models/Constituency");
+    const constituencies = await Candidate.aggregate([{ $group: { _id: "$constituency" } }]);
+    const results = [];
+    for (const item of constituencies) {
+      const constituencyId = item._id;
+      const constituencyInfo = await Constituency.findOne({ constituency_id: constituencyId });
+      const candidates = await Candidate.aggregate([
+        { $match: { constituency: constituencyId } },
+        { $lookup: { from: "parties", localField: "party_id", foreignField: "party_id", as: "party" } },
+        { $unwind: { path: "$party", preserveNullAndEmptyArrays: true } },
+        { $project: { candidate_id: 1, name: 1, votes: 1, party_name: "$party.name", party_id: "$party.party_id" } }
+      ]);
+      const maxVotes = candidates.length > 0 ? Math.max(...candidates.map(c => c.votes)) : 0;
+      results.push({
+        constituency: { id: constituencyId, name: constituencyInfo?.name || "Unknown" },
+        candidates: candidates.map(c => ({ ...c, isWinner: maxVotes > 0 && c.votes === maxVotes }))
+      });
+    }
+    res.json(results);
+  } catch (err) {
+    res.status(500).json({ error: "Failed to fetch results" });
+  }
+});
 
 // DB Status check
 app.get("/db-status", (req, res) => {

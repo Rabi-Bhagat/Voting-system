@@ -31,10 +31,13 @@ function AdminDashboard() {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
+      const token = localStorage.getItem("token");
+      const headers = { headers: { Authorization: `Bearer ${token}` } };
+      
       const [dashResult, statsResult, logsResult] = await Promise.allSettled([
-        axios.get(`${API_BASE}/analytics/dashboard`),
-        axios.get(`${API_BASE}/analytics/voting-stats`),
-        axios.get(`${API_BASE}/audit/recent?limit=10`)
+        axios.get(`${API_BASE}/analytics/dashboard`, headers),
+        axios.get(`${API_BASE}/analytics/voting-stats`, headers),
+        axios.get(`${API_BASE}/audit/recent?limit=10`, headers)
       ]);
       
       if (dashResult.status === 'fulfilled') {
@@ -68,7 +71,10 @@ function AdminDashboard() {
 
   const fetchVotingStats = async () => {
     try {
-      const res = await axios.get(`${API_BASE}/analytics/voting-stats`);
+      const token = localStorage.getItem("token");
+      const res = await axios.get(`${API_BASE}/analytics/voting-stats`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setVotingStats(res.data);
     } catch (error) {
       console.error('Error refreshing stats:', error);
@@ -76,7 +82,8 @@ function AdminDashboard() {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminInfo');
+    localStorage.removeItem('token');
     navigate('/');
   };
 
@@ -123,7 +130,10 @@ function AdminDashboard() {
     setModalLoading(true);
     setModalError("");
     try {
-      await axios.post(`${API_BASE}/admin/${endpoints[modalType]}`, modalFormData);
+      const token = localStorage.getItem("token");
+      await axios.post(`${API_BASE}/admin/${endpoints[modalType]}`, modalFormData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setMessage(`✅ ${modalType.charAt(0).toUpperCase() + modalType.slice(1)} added successfully.`);
       setTimeout(() => setMessage(''), 5000);
       handleModalClose();
@@ -377,13 +387,19 @@ function ElectionManagement() {
     description: '',
     start_date: '',
     end_date: '',
-    constituencies: []
+    constituencies: [],
+    candidates: [],
+    parties: []
   });
+  const [availableCandidates, setAvailableCandidates] = useState([]);
+  const [availableParties, setAvailableParties] = useState([]);
   const [message, setMessage] = useState('');
 
   useEffect(() => {
     fetchElections();
     fetchConstituencies();
+    fetchCandidates();
+    fetchParties();
   }, []);
 
   const fetchElections = async () => {
@@ -404,6 +420,24 @@ function ElectionManagement() {
     }
   };
 
+  const fetchCandidates = async () => {
+    try {
+      const res = await axios.get(`${API_BASE}/admin/candidates`);
+      setAvailableCandidates(res.data?.filter(c => c.approved) || []);
+    } catch (error) {
+      console.error('Error fetching candidates:', error);
+    }
+  };
+
+  const fetchParties = async () => {
+    try {
+      const res = await axios.get(`${API_BASE}/admin/all-parties`);
+      setAvailableParties(res.data?.filter(p => p.approved) || []);
+    } catch (error) {
+      console.error('Error fetching parties:', error);
+    }
+  };
+
   const handleCreateElection = async (e) => {
     e.preventDefault();
     if (formData.constituencies.length === 0) {
@@ -415,7 +449,7 @@ function ElectionManagement() {
       setMessage('Election created successfully!');
       setShowCreateForm(false);
       fetchElections();
-      setFormData({ title: '', description: '', start_date: '', end_date: '', constituencies: [] });
+      setFormData({ title: '', description: '', start_date: '', end_date: '', constituencies: [], candidates: [], parties: [] });
     } catch (error) {
       setMessage(error.response?.data?.error || 'Failed to create election');
     }
@@ -475,7 +509,25 @@ function ElectionManagement() {
               />
             </div>
             <div className="form-group">
-              <label>Participating Constituencies *</label>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label>Participating Constituencies *</label>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button 
+                    type="button" 
+                    className="btn-tiny"
+                    onClick={() => setFormData({ ...formData, constituencies: availableConstituencies.map(c => c.constituency_id) })}
+                  >
+                    Select All
+                  </button>
+                  <button 
+                    type="button" 
+                    className="btn-tiny"
+                    onClick={() => setFormData({ ...formData, constituencies: [] })}
+                  >
+                    Clear All
+                  </button>
+                </div>
+              </div>
               <div className="constituency-checkboxes" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '8px' }}>
                 {availableConstituencies.length > 0 ? availableConstituencies.map(c => (
                   <label key={c.constituency_id} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: '#f0f4f8', padding: '8px 12px', borderRadius: '20px', cursor: 'pointer', border: '1px solid #e2e8f0', fontSize: '14px' }}>
@@ -489,9 +541,100 @@ function ElectionManagement() {
                         setFormData({ ...formData, constituencies: newConst });
                       }}
                     />
-                    {c.name}
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                      <span style={{ fontWeight: '600', color: '#2d3748' }}>{c.name}</span>
+                      <span style={{ fontSize: '10px', color: '#718096' }}>{c.voter_count || 0} Voters</span>
+                    </div>
                   </label>
                 )) : <span style={{color: '#64748b', fontSize: '14px'}}>No constituencies found. Add some first!</span>}
+              </div>
+              {formData.constituencies.length > 0 && (
+                <div style={{ marginTop: '12px', padding: '10px 15px', background: 'rgba(59, 130, 246, 0.05)', borderRadius: '12px', border: '1px solid rgba(59, 130, 246, 0.1)', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
+                   <span style={{ fontSize: '13px', color: '#1e40af', fontWeight: '600' }}>📊 Total Voters Enabled:</span>
+                   <span style={{ fontSize: '15px', color: '#1e3a8a', fontWeight: '800' }}>
+                     {availableConstituencies
+                       .filter(c => formData.constituencies.includes(c.constituency_id))
+                       .reduce((acc, curr) => acc + (curr.voter_count || 0), 0)}
+                   </span>
+                </div>
+              )}
+            </div>
+
+            <div className="form-group">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label>Select Participating Parties</label>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button 
+                    type="button" 
+                    className="btn-tiny"
+                    onClick={() => setFormData({ ...formData, parties: availableParties.map(p => p.party_id) })}
+                  >
+                    Select All
+                  </button>
+                  <button 
+                    type="button" 
+                    className="btn-tiny"
+                    onClick={() => setFormData({ ...formData, parties: [] })}
+                  >
+                    Clear All
+                  </button>
+                </div>
+              </div>
+              <div className="constituency-checkboxes" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '8px' }}>
+                {availableParties.map(p => (
+                  <label key={p.party_id} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(59, 130, 246, 0.1)', padding: '8px 12px', borderRadius: '20px', cursor: 'pointer', border: '1px solid rgba(59, 130, 246, 0.2)', fontSize: '14px' }}>
+                    <input 
+                      type="checkbox" 
+                      checked={formData.parties.includes(p.party_id)}
+                      onChange={(e) => {
+                        const newParties = e.target.checked 
+                          ? [...formData.parties, p.party_id]
+                          : formData.parties.filter(id => id !== p.party_id);
+                        setFormData({ ...formData, parties: newParties });
+                      }}
+                    />
+                    {p.name}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="form-group">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <label>Select Approved Candidates</label>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button 
+                    type="button" 
+                    className="btn-tiny"
+                    onClick={() => setFormData({ ...formData, candidates: availableCandidates.map(c => c.candidate_id) })}
+                  >
+                    Select All
+                  </button>
+                  <button 
+                    type="button" 
+                    className="btn-tiny"
+                    onClick={() => setFormData({ ...formData, candidates: [] })}
+                  >
+                    Clear All
+                  </button>
+                </div>
+              </div>
+              <div className="constituency-checkboxes" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginTop: '8px' }}>
+                {availableCandidates.map(c => (
+                  <label key={c.candidate_id} style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(0, 255, 136, 0.1)', padding: '8px 12px', borderRadius: '20px', cursor: 'pointer', border: '1px solid rgba(0, 255, 136, 0.2)', fontSize: '14px' }}>
+                    <input 
+                      type="checkbox" 
+                      checked={formData.candidates.includes(c.candidate_id)}
+                      onChange={(e) => {
+                        const newCandidates = e.target.checked 
+                          ? [...formData.candidates, c.candidate_id]
+                          : formData.candidates.filter(id => id !== c.candidate_id);
+                        setFormData({ ...formData, candidates: newCandidates });
+                      }}
+                    />
+                    {c.name}
+                  </label>
+                ))}
               </div>
             </div>
             <div className="form-row">

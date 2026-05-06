@@ -100,6 +100,25 @@
     box-shadow: 0 6px 20px rgba(30, 144, 255, 0.5);
 }
 
+.btn-tiny {
+    padding: 6px 12px;
+    border: 1px solid var(--glass-border);
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: all 0.2s ease;
+}
+
+.btn-tiny:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+    border-color: var(--accent-primary);
+}
+
 .btn-success {
     background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
     color: #000;

@@ -49,6 +49,7 @@ function ConstituencyAdmin() {
 
   const handleLogout = () => {
     localStorage.removeItem("constituencyInfo");
+    localStorage.removeItem("token");
     navigate("/");
   };
 

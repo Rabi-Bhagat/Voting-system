@@ -21,11 +21,11 @@ body {
 .navbar {
   background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(20px);
-  padding: 20px 40px;
+  padding: 15px 30px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -372,14 +372,71 @@ body {
   box-shadow: 0 15px 50px rgba(0, 0, 0, 0.1);
 }
 
+.management-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 25px;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.management-controls {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
+.search-box {
+  position: relative;
+  width: 260px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #a0aec0;
+  font-size: 13px;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 10px 15px 10px 40px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  font-size: 13px;
+  transition: all 0.2s ease;
+}
+
+.search-box input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  background: white;
+}
+
+.filter-select {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  font-size: 13px;
+  color: #4a5568;
+  cursor: pointer;
+  outline: none;
+}
+
 .section-title {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
   color: #2d3748;
-  margin-bottom: 25px;
+  margin-bottom: 20px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .section-icon {
@@ -401,14 +458,16 @@ body {
 }
 
 .management-table th {
-  padding: 16px 20px;
+  padding: 14px 16px;
   text-align: left;
-  font-size: 13px;
-  font-weight: 700;
-  color: #667eea;
+  font-size: 10px;
+  font-weight: 800;
+  color: #718096;
   text-transform: uppercase;
-  border-bottom: 2px solid #e2e8f0;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid #edf2f7;
   white-space: nowrap;
+  background: #f8fafc;
 }
 
 .management-table tbody tr {
@@ -421,9 +480,10 @@ body {
 }
 
 .management-table td {
-  padding: 16px 20px;
-  font-size: 15px;
+  padding: 12px 16px;
+  font-size: 13px;
   color: #4a5568;
+  vertical-align: middle;
 }
 
 .id-cell {
@@ -458,32 +518,67 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   cursor: help;
+  color: #718096;
+  font-size: 13px;
+}
+
+.constituency-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.const-id {
+  font-weight: 700;
+  color: #667eea;
+  font-size: 13px;
+}
+
+.const-name {
+  font-size: 11px;
+  color: #a0aec0;
+  font-weight: 600;
+}
+
+.phone-cell {
+  font-family: 'Roboto Mono', monospace;
+  font-size: 14px;
+  color: #4a5568;
 }
 
 .status-badge {
-  display: inline-block;
-  padding: 6px 14px;
-  border-radius: 50px;
-  font-size: 12px;
-  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 800;
+  white-space: nowrap;
 }
 
 .status-badge.approved,
 .status-badge.verified,
 .status-badge.voted {
-  background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+  background: #c6f6d5;
   color: #22543d;
+  box-shadow: 0 2px 8px rgba(56, 161, 105, 0.15);
+  border: 1px solid rgba(56, 161, 105, 0.2);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .status-badge.pending {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  background: #feebc8;
   color: #744210;
+  border: 1px solid rgba(237, 137, 54, 0.2);
 }
 
 .status-badge.not-voted,
 .status-badge.unverified {
-  background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e0 100%);
+  background: #edf2f7;
   color: #4a5568;
+  border: 1px solid rgba(160, 174, 192, 0.2);
 }
 
 .actions-cell {
@@ -494,30 +589,67 @@ body {
 
 .btn-approve,
 .btn-reject,
-.btn-delete {
-  padding: 8px 16px;
+.btn-delete,
+.btn-edit {
+  padding: 10px 18px;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
-  min-width: 40px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+}
+
+.btn-edit {
+  background: #ebf4ff;
+  color: #3182ce;
+  border: 1px solid rgba(49, 130, 206, 0.2);
+}
+
+.btn-edit:hover {
+  background: #3182ce;
+  color: white;
+  transform: translateY(-2px);
 }
 
 .btn-approve {
-  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+  background: #f0fff4;
+  color: #38a169;
+  border: 1px solid rgba(56, 161, 105, 0.2);
+}
+
+.btn-approve:hover {
+  background: #38a169;
   color: white;
+  transform: translateY(-2px);
 }
 
 .btn-reject {
-  background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+  background: #fffaf0;
+  color: #dd6b20;
+  border: 1px solid rgba(221, 107, 32, 0.2);
+}
+
+.btn-reject:hover {
+  background: #dd6b20;
   color: white;
+  transform: translateY(-2px);
 }
 
 .btn-delete {
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+  background: #fff5f5;
+  color: #e53e3e;
+  border: 1px solid rgba(229, 62, 62, 0.2);
+}
+
+.btn-delete:hover {
+  background: #e53e3e;
   color: white;
+  transform: translateY(-2px);
 }
 
 .empty-cell {

@@ -11,7 +11,7 @@ function Modal({ type, onClose, onSubmit, onChange, formData, loading, modalErro
 
   useEffect(() => {
     // Fetch parties and constituencies for candidate and voter forms
-    if (type === "candidate" || type === "voter") {
+    if (type === "candidate" || type === "voter" || type === "edit-voter") {
       const fetchData = async () => {
         try {
           const [partiesRes, constRes] = await Promise.all([
@@ -30,6 +30,7 @@ function Modal({ type, onClose, onSubmit, onChange, formData, loading, modalErro
 
   const requiredFields = {
     voter: ["voter_id", "first_name", "last_name", "password", "phone", "address", "constituency"],
+    "edit-voter": ["voter_id", "first_name", "last_name", "phone", "address", "constituency"],
     candidate: ["candidate_id", "name", "password", "party_id", "constituency", "age", "education", "experience", "background"],
     party: ["party_id", "name", "password"],
     constituency: ["constituency_id", "name", "password"]
@@ -143,7 +144,7 @@ function Modal({ type, onClose, onSubmit, onChange, formData, loading, modalErro
         value={formData[field] || ""}
         onChange={onChange}
         className="modal-input"
-        disabled={loading}
+        disabled={loading || (field === "voter_id" && type === "edit-voter")}
         required={!["age", "education", "experience", "background", "constituency"].includes(field)}
       />
     );
@@ -152,7 +153,7 @@ function Modal({ type, onClose, onSubmit, onChange, formData, loading, modalErro
   return (
     <div className="modal-overlay">
       <div className="modal-box">
-        <h2>Add {type.charAt(0).toUpperCase() + type.slice(1)}</h2>
+        <h2>{type.includes("edit") ? "Update" : "Add"} {type.replace("edit-", "").charAt(0).toUpperCase() + type.replace("edit-", "").slice(1)}</h2>
         <div className="modal-form">
           {fields.map(field => renderField(field))}
         </div>

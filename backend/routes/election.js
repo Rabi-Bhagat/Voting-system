@@ -49,7 +49,7 @@ router.get('/:id', async (req, res) => {
 // Create new election
 router.post('/create', async (req, res) => {
   try {
-    const { title, description, constituencies, start_date, end_date, settings } = req.body;
+    const { title, description, constituencies, candidates, parties, start_date, end_date, settings } = req.body;
     
     // Validate dates
     const startDate = new Date(start_date);
@@ -79,6 +79,8 @@ router.post('/create', async (req, res) => {
       title,
       description,
       constituencies: constituencies || [],
+      candidates: candidates || [],
+      parties: parties || [],
       start_date: startDate,
       end_date: endDate,
       status: startDate <= new Date() ? 'active' : 'scheduled',

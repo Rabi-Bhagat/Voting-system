@@ -19,6 +19,8 @@ function AdminPage() {
   const [voters, setVoters] = useState([]);
   const [candidates, setCandidates] = useState([]);
   const [parties, setParties] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [voterFilter, setVoterFilter] = useState("all");
 
   const resetVotes = async () => {
     setLoading(true);
@@ -50,6 +52,7 @@ function AdminPage() {
 
   const handleLogout = () => {
     localStorage.removeItem("adminInfo");
+    localStorage.removeItem("token");
     window.location.href = "/";
   };
 
@@ -124,6 +127,17 @@ function AdminPage() {
     } catch (err) {
       setMessage("❌ Failed to reject candidate.");
     }
+  };
+
+  const handleEditVoter = (voter) => {
+    setModalType("edit-voter");
+    setFormData({
+      ...voter,
+      // Ensure we don't send the hashed password back
+      password: "" 
+    });
+    setMessage("");
+    setModalError("");
   };
 
   const handleDeleteVoter = async (voter_id) => {
@@ -243,27 +257,32 @@ function AdminPage() {
       constituency: ["constituency_id", "name", "password"],
     };
 
-    const missingFields = requiredFields[modalType].filter(
-      (field) => !formData[field],
-    );
+    // For edit-voter, skip the requiredFields check (fields are pre-filled)
+    if (modalType !== "edit-voter") {
+      const missingFields = requiredFields[modalType]?.filter(
+        (field) => !formData[field],
+      ) || [];
 
-    if (missingFields.length) {
-      setModalError(
-        `Please fill all fields. Missing: ${missingFields.join(", ")}`,
-      );
-      return;
+      if (missingFields.length) {
+        setModalError(
+          `Please fill all fields. Missing: ${missingFields.join(", ")}`,
+        );
+        return;
+      }
     }
 
     setLoading(true);
     setMessage("");
     setModalError("");
     try {
-      await axios.post(`${API_BASE}/admin/${endpoints[modalType]}`, formData);
-      setMessage(
-        `✅ ${modalType.charAt(0).toUpperCase() + modalType.slice(1)} added successfully.`,
-      );
+      if (modalType === "edit-voter") {
+        await axios.put(`${API_BASE}/admin/update-voter/${formData.voter_id}`, formData);
+        setMessage("✅ Voter updated successfully.");
+      } else {
+        await axios.post(`${API_BASE}/admin/${endpoints[modalType]}`, formData);
+        setMessage(`✅ ${modalType.charAt(0).toUpperCase() + modalType.slice(1)} added successfully.`);
+      }
       handleModalClose();
-      // Refresh data if management is shown
       if (showManagement) {
         fetchAllUsers();
       }
@@ -587,10 +606,33 @@ function AdminPage() {
 
                 {/* Voters Section */}
                 <div className="management-card">
-                  <h3 className="section-title">
-                    <span className="section-icon">👥</span>
-                    Voters ({voters.length})
-                  </h3>
+                  <div className="management-card-header">
+                    <h3 className="section-title">
+                      <span className="section-icon">👥</span>
+                      Voters ({voters.length})
+                    </h3>
+                    <div className="management-controls">
+                      <div className="search-box">
+                        <span className="search-icon">🔍</span>
+                        <input 
+                          type="text" 
+                          placeholder="Search voter by ID or name..." 
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                        />
+                      </div>
+                      <select 
+                        className="filter-select"
+                        value={voterFilter}
+                        onChange={(e) => setVoterFilter(e.target.value)}
+                      >
+                        <option value="all">All Voters</option>
+                        <option value="verified">Verified Only</option>
+                        <option value="unverified">Unverified Only</option>
+                        <option value="voted">Voted Only</option>
+                      </select>
+                    </div>
+                  </div>
                   <div className="table-responsive">
                     <table className="management-table">
                       <thead>
@@ -617,32 +659,41 @@ function AdminPage() {
                             </td>
                           </tr>
                         ) : (
-                          voters.map((voter) => (
+                          voters
+                            .filter(v => {
+                              const matchesSearch = 
+                                v.voter_id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                v.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                                v.last_name?.toLowerCase().includes(searchTerm.toLowerCase());
+                              
+                              if (voterFilter === "verified") return matchesSearch && (v.verified || v.is_verified);
+                              if (voterFilter === "unverified") return matchesSearch && !(v.verified || v.is_verified);
+                              if (voterFilter === "voted") return matchesSearch && v.has_voted;
+                              return matchesSearch;
+                            })
+                            .map((voter) => (
                             <tr key={voter.voter_id}>
                               <td className="id-cell">{voter.voter_id}</td>
                               <td className="name-cell">{voter.first_name}</td>
                               <td className="name-cell">{voter.last_name}</td>
-                              <td>{voter.phone || "N/A"}</td>
+                              <td className="phone-cell">{voter.phone || "N/A"}</td>
                               <td
                                 className="truncate-cell"
                                 title={voter.address}
                               >
-                                {voter.address
-                                  ? voter.address.length > 30
-                                    ? voter.address.substring(0, 30) + "..."
-                                    : voter.address
-                                  : "N/A"}
+                                {voter.address || "N/A"}
                               </td>
-                              <td className="id-cell">
-                                {voter.constituency || "Not assigned"}
+                              <td className="constituency-cell">
+                                <span className="const-id">{voter.constituency || "N/A"}</span>
+                                {voter.constituency_name && <span className="const-name">{voter.constituency_name}</span>}
                               </td>
                               <td>
                                 <span
                                   className={`status-badge ${voter.verified !== false || voter.is_verified ? "verified" : "unverified"}`}
                                 >
                                   {voter.verified !== false || voter.is_verified
-                                    ? "✅ Official"
-                                    : "⚠️ Unverified"}
+                                    ? "✅ OFFICIAL"
+                                    : "⏳ PENDING"}
                                 </span>
                               </td>
                               <td className="admin-cell">
@@ -650,23 +701,14 @@ function AdminPage() {
                               </td>
                               <td className="date-cell">
                                 {voter.verified_at
-                                  ? new Date(
-                                      voter.verified_at,
-                                    ).toLocaleDateString() +
-                                    " " +
-                                    new Date(
-                                      voter.verified_at,
-                                    ).toLocaleTimeString([], {
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                    })
+                                  ? new Date(voter.verified_at).toLocaleDateString()
                                   : "N/A"}
                               </td>
                               <td>
                                 <span
                                   className={`status-badge ${voter.has_voted ? "voted" : "not-voted"}`}
                                 >
-                                  {voter.has_voted ? "✅ Yes" : "❌ No"}
+                                  {voter.has_voted ? "✅ YES" : "❌ NO"}
                                 </span>
                               </td>
                               <td className="id-cell">
@@ -695,6 +737,13 @@ function AdminPage() {
                                     ✓
                                   </button>
                                 )}
+                                <button
+                                  onClick={() => handleEditVoter(voter)}
+                                  className="btn-edit"
+                                  title="Edit voter details"
+                                >
+                                  ✏️
+                                </button>
                                 <button
                                   onClick={() =>
                                     handleDeleteVoter(voter.voter_id)

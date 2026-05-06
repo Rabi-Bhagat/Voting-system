@@ -32,6 +32,7 @@ function PartyPage() {
 
   const handleLogout = () => {
     localStorage.removeItem("partyInfo");
+    localStorage.removeItem("token");
     navigate("/");
   };
 

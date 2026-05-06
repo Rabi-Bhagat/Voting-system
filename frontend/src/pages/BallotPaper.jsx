@@ -36,19 +36,23 @@ const BallotPaper = () => {
     setFilteredCandidates(
       candidates.filter(c => 
         c.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-        c.party_name.toLowerCase().includes(searchTerm.toLowerCase())
+        (c.party_name || '').toLowerCase().includes(searchTerm.toLowerCase())
       )
     );
   }, [searchTerm, candidates]);
 
   const fetchBallotData = async (voter_id) => {
     try {
-      const res = await axios.get(`${API_BASE}/voter/ballot/${voter_id}`); 
+      const token = localStorage.getItem("token");
+      const res = await axios.get(`${API_BASE}/voter/ballot/${voter_id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      }); 
       setCandidates(res.data.candidates);
       setVoter(res.data.voter);
       setLoading(false);
     } catch (err) {
-      setMessage("Error fetching ballot data.");
+      const errorMsg = err.response?.data?.error || "Error fetching ballot data.";
+      setMessage(errorMsg);
       console.error("Fetch Error:", err);
       setLoading(false);
     }
@@ -78,9 +82,12 @@ const BallotPaper = () => {
   const processVote = async () => {
     try {
       setShowBiometric(false);
+      const token = localStorage.getItem("token");
       const res = await axios.post(`${API_BASE}/voter/vote`, { 
         voter_id: voter.voter_id,
         candidate_id: selectedCandidate.candidate_id,
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
       });
       
       setMessage(res.data.message);

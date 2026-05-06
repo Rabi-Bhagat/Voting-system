@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import BiometricModal from './components/BiometricModal';
+import OTPModal from './components/OTPModal';
 import './styles/login.css';
+import './styles/otp_modal.css';
 
 const API_BASE = process.env.REACT_APP_API_URL || "http://localhost:5000"; 
 
@@ -10,7 +12,10 @@ function Login() {
   const [formData, setFormData] = useState({});
   const [error, setError] = useState("");
   const [showBiometric, setShowBiometric] = useState(false);
+  const [showOTP, setShowOTP] = useState(false);
+  const [useOTP, setUseOTP] = useState(false);
   const [pendingLoginData, setPendingLoginData] = useState(null);
+  const [userEmail, setUserEmail] = useState("");
 
   const handleChange = (e) => {
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -64,7 +69,31 @@ function Login() {
   const processLogin = async () => {
     try {
       setShowBiometric(false);
-      const res = await axios.post(`${API_BASE}/login`, pendingLoginData); 
+      
+      // If OTP is enabled, trigger OTP flow before finalizing login
+      if (useOTP) {
+        // We need an email to send OTP. For voters, we might need to fetch it or ask for it.
+        // For this premium flow, we'll assume the user provides it or it's linked to their ID.
+        // Let's prompt for email if not present, or use a default for demo.
+        const email = formData.email || `${formData.voter_id || formData.candidate_id}@gmail.com`;
+        setUserEmail(email);
+        
+        await axios.post(`${API_BASE}/auth/otp/send-otp`, { email });
+        setShowOTP(true);
+        return;
+      }
+
+      await finalizeLogin();
+    } catch (err) {
+      console.error("Login initiation error:", err);
+      setError(err.response?.data?.error || "Failed to initiate login");
+    }
+  };
+
+  const finalizeLogin = async () => {
+    try {
+      setShowOTP(false);
+      const res = await axios.post(`${API_BASE}/auth/login`, pendingLoginData);
 
       if (res.data.success) {
         if (role === "voter" && res.data.voter) {
@@ -75,15 +104,17 @@ function Login() {
           localStorage.setItem("partyInfo", JSON.stringify(res.data.party));
         } else if (role === "constituency" && res.data.constituency) {
           localStorage.setItem("constituencyInfo", JSON.stringify(res.data.constituency));
-        } else if (role === "admin" && res.data.admin) {
-          localStorage.setItem("adminInfo", JSON.stringify(res.data.admin));
-          // Redirect admin to the new dashboard
-          window.location.href = "/admin-dashboard";
-          return;
         }
 
         if (res.data.token) {
           localStorage.setItem("token", res.data.token);
+        }
+
+        if (role === "admin" && res.data.admin) {
+          localStorage.setItem("adminInfo", JSON.stringify(res.data.admin));
+          // Redirect admin to the new dashboard
+          window.location.href = "/admin-dashboard";
+          return;
         }
 
         window.location.href = res.data.redirect;
@@ -112,6 +143,14 @@ function Login() {
         onCancel={() => setShowBiometric(false)} 
         type="login" 
       />
+
+      {showOTP && (
+        <OTPModal 
+          email={userEmail}
+          onVerify={finalizeLogin}
+          onCancel={() => setShowOTP(false)}
+        />
+      )}
       
       {/* Visual Left Panel */}
       <div className="login-visual-panel">
@@ -259,16 +298,44 @@ function Login() {
 
             <div className="input-group">
               <label className="input-label">Password</label>
-              <input
+              <input 
                 className="modern-input"
-                name="password"
+                name="password" 
                 type="password"
-                placeholder="Enter your password"
-                required
+                placeholder="Enter your password" 
+                required 
                 onChange={handleChange}
                 value={formData.password || ""}
               />
             </div>
+
+            {/* Premium OTP Toggle */}
+            <div className="premium-toggle-group">
+              <label className="premium-switch">
+                <input 
+                  type="checkbox" 
+                  checked={useOTP}
+                  onChange={(e) => setUseOTP(e.target.checked)}
+                />
+                <span className="slider round"></span>
+              </label>
+              <span className="toggle-label">Enable Premium Email OTP Verification</span>
+            </div>
+
+            {useOTP && (
+              <div className="input-group fade-in">
+                <label className="input-label">Verification Email</label>
+                <input 
+                  className="modern-input"
+                  name="email"
+                  type="email"
+                  placeholder="Enter your Gmail for OTP"
+                  required={useOTP}
+                  onChange={handleChange}
+                  value={formData.email || ""}
+                />
+              </div>
+            )}
 
             <button type="submit" className="btn-primary">
               {role === "admin" ? "Authenticate as Admin" : `Login as ${role.charAt(0).toUpperCase() + role.slice(1)}`}

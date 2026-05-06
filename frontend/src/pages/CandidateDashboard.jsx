@@ -15,14 +15,20 @@ function CandidateDashboard() {
     const stored = localStorage.getItem("candidateInfo");
     if (stored) {
       const { candidate_id } = JSON.parse(stored);
+      
+      const fetchData = () => {
+        axios.get(`${API_BASE}/candidate/${candidate_id}`)
+          .then(res => setCandidate(res.data))
+          .catch(() => setCandidate(null));
 
-      axios.get(`${API_BASE}/candidate/${candidate_id}`)
-        .then(res => setCandidate(res.data))
-        .catch(() => setCandidate(null));
+        axios.get(`${API_BASE}/candidate/voters/list`)
+          .then(res => setVoters(res.data))
+          .catch(err => console.error("Error fetching voters:", err));
+      };
 
-      axios.get(`${API_BASE}/candidate/voters/list`)
-        .then(res => setVoters(res.data))
-        .catch(err => console.error("Error fetching voters:", err));
+      fetchData();
+      const interval = setInterval(fetchData, 30000); // Auto-refresh every 30s
+      return () => clearInterval(interval);
     }
   }, []);
 
@@ -52,6 +58,7 @@ function CandidateDashboard() {
           className="btn btn-danger"
           onClick={() => {
             localStorage.removeItem("candidateInfo");
+            localStorage.removeItem("token");
             navigate("/");
           }}
         >

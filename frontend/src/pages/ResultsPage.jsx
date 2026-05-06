@@ -16,13 +16,28 @@ function ResultsPage() {
   useEffect(() => {
     async function fetchData() {
       try {
-        const statusRes = await axios.get(`${API_BASE}/admin/election-status`); 
+        // Use public endpoints — no auth token required for result viewing
+        const token = localStorage.getItem("token");
+        const headers = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
+
+        let statusRes, resultsRes;
+        try {
+          // Try authenticated route first (for logged-in users)
+          statusRes = await axios.get(`${API_BASE}/admin/election-status`, headers);
+        } catch {
+          // Fall back to public route for unauthenticated users
+          statusRes = await axios.get(`${API_BASE}/public/election-status`);
+        }
         setElectionConducted(statusRes.data.conducted);
         const resultsPublished = statusRes.data.resultsPublished;
 
         if (statusRes.data.conducted && resultsPublished) {
-          const res = await axios.get(`${API_BASE}/admin/results`);
-          setResults(res.data);
+          try {
+            resultsRes = await axios.get(`${API_BASE}/admin/results`, headers);
+          } catch {
+            resultsRes = await axios.get(`${API_BASE}/public/results`);
+          }
+          setResults(resultsRes.data);
         }
       } catch (err) {
         setError("⚠️ Failed to fetch results or status.");
